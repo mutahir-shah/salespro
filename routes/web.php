@@ -139,6 +139,7 @@ Route::get('clear', function () {
 Route::get('update-coupon', [CouponController::class, 'updateCoupon']);
 
 Route::controller(InstallController::class)->group(function () {
+    dd('ss');
     Route::get('install/step-1', 'installStep1')->name('install-step-1');
     Route::get('install/step-2', 'installStep2')->name('install-step-2');
     Route::get('install/step-3', 'installStep3')->name('install-step-3');
