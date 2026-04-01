@@ -6,7 +6,7 @@
     "license": "MIT",
 
     "require": {
-        "php": "^8.3",
+        "php": "^8.2",
         "ext-zip": "*",
         "automattic/woocommerce": "^3.1",
         "barryvdh/laravel-dompdf": "^3.0",
