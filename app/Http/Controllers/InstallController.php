@@ -19,7 +19,6 @@ class InstallController extends Controller
 
     public function installStep2()
     {
-        dd('ok');
         return view('install.step_2');
     }
     public function installStep3()
