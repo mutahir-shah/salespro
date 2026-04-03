@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Designation;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Auth;
 
 class DesignationController extends Controller
 {
@@ -15,7 +15,9 @@ class DesignationController extends Controller
     {
         $role = Role::find(Auth::user()->role_id);
         if($role->hasPermissionTo('department')) {
+            
             $lims_designation_all = Designation::where('is_active', true)->get();
+            dd($lims_designation_all);
             return view('backend.hrm.designation.index', compact('lims_designation_all'));
         }
         else
