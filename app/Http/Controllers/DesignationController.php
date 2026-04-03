@@ -16,7 +16,6 @@ class DesignationController extends Controller
         $role = Role::find(Auth::user()->role_id);
         if($role->hasPermissionTo('department')) {
             $lims_designation_all = Designation::active()->get(); 
-            dd($lims_designation_all);
             return view('backend.hrm.designation.index', compact('lims_designation_all'));
         }
         else
