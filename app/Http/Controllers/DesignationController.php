@@ -10,7 +10,7 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 class DesignationController extends Controller
-{
+{exit;
     public function index()
     {
         $role = Role::find(Auth::user()->role_id);
