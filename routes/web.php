@@ -133,7 +133,6 @@ Route::get('clear', function () {
     cache()->forget('permissions');
     cache()->forget('role_has_permissions');
     cache()->forget('role_has_permissions_list');
-    dd('cleared');
 });
 
 Route::get('update-coupon', [CouponController::class, 'updateCoupon']);
