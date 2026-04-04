@@ -1891,6 +1891,14 @@
         unhighlight: function (element, errorClass, validClass) {
             $(element).closest('div.form-group').removeClass('has-error').addClass('has-success');
             $(element).closest('div.form-group').find('.validation-msg').html('');
+        },
+        invalidHandler: function(event, validator) {
+            if (validator.errorList.length) {
+                var firstInvalid = validator.errorList[0].element;
+                if (firstInvalid && $(firstInvalid).is(':visible') && !$(firstInvalid).prop('disabled')) {
+                    $(firstInvalid).focus();
+                }
+            }
         }
     });
 
