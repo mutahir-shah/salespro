@@ -261,20 +261,14 @@ class ProductController extends Controller
 
             // Visible column (UI)
             $nestedData['name'] = '<div class="d-flex align-items-center">'.$nestedData['image'].'<span style="color:#111;margin:0 10px;">'.$product->name.'</span></div>';
-
             // Export-only column (hidden)
             $nestedData['image_path'] = url('images/product', $product_image);
-
             $nestedData['code'] = $product->code;
             $nestedData['brand'] = $product->brand->title ?? "N/A";
             $nestedData['category'] = $product->category->name ?? "N/A";
-
             // Quantity (respecting warehouse)
             if ($warehouse_id > 0 && $product->type == 'standard') {
-                $nestedData['qty'] = Product_Warehouse::where([
-                                        ['product_id', $product->id],
-                                        ['warehouse_id', $warehouse_id]
-                                    ])->sum('qty');
+                $nestedData['qty'] = Product_Warehouse::where([['product_id', $product->id],['warehouse_id', $warehouse_id]])->sum('qty');
             } elseif ($product->type == 'standard') {
                 $nestedData['qty'] = Product_Warehouse::where('product_id', $product->id)->sum('qty');
             } else {
@@ -463,6 +457,7 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+
         $this->validate($request, [
             'code' => [
                 'max:255',

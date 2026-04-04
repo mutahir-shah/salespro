@@ -16,9 +16,7 @@
 @endif
 
 @section('content')
-
 <x-success-message key="edit_message" />
-
 <section class="forms">
     <div class="container-fluid">
         <div class="row">
@@ -27,28 +25,13 @@
                     <div class="card-header d-flex align-items-center">
                         <h4>{{__('db.Update Product')}}</h4>
                     </div>
-
                     <x-error-message key="not_permitted" />
-
                     <div class="card-body">
                         <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
                         <form id="product-form">
                             <input type="hidden" name="id" value="{{$lims_product_data->id}}" />
                             <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>{{__('db.Product Type')}} * </label>
-                                        <div class="input-group">
-                                            <select name="type" required class="form-control selectpicker" id="type">
-                                                <option value="standard">Standard</option>
-                                                <option value="combo">Combo</option>
-                                                <option value="digital">Digital</option>
-                                                <option value="service">Service</option>
-                                            </select>
-                                            <input type="hidden" name="type_hidden" value="{{$lims_product_data->type}}">
-                                        </div>
-                                    </div>
-                                </div>
+                             
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>{{__('db.Product Name')}} * </label>
@@ -68,6 +51,20 @@
                                         <span class="validation-msg" id="code-error"></span>
                                     </div>
                                 </div>
+                                   <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{__('db.Product Type')}} * </label>
+                                        <div class="input-group">
+                                            <select name="type" required class="form-control selectpicker" id="type">
+                                              <option value="Bag">Bag</option>
+                                                <option value="Box">Box</option>
+                                                <option value="Taan">Taan</option>
+                                            </select>
+                                            <input type="hidden" name="type_hidden" value="{{$lims_product_data->type}}">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>{{__('db.Barcode Symbology')}} * </label>
@@ -93,7 +90,7 @@
                                         <span class="validation-msg"></span>
                                     </div>
                                 </div>
-                                <div id="combo" class="col-md-12 mb-1">
+                                <div id="combo" class="col-md-12 mb-1 d-none">
                                     <label>{{__('db.add_product')}}</label>
                                     <div class="search-box input-group mb-3">
                                         <button class="btn btn-secondary"><i class="fa fa-barcode"></i></button>
@@ -220,7 +217,7 @@
                                       </div>
                                     </div>
                                 </div>
-                                <div id="unit" class="col-md-12">
+                                <div id="unit" class="col-md-12 d-none">
                                     <div class="row ">
                                         <div class="col-md-4">
                                                 <label>{{__('db.Product Unit')}} * </label>
@@ -255,6 +252,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div id="cost" class="col-md-4 @if(Auth::user()->role_id > 2) d-none @endif">
                                     <div class="form-group">
                                         <label>{{__('db.Product Cost')}} * </label>
@@ -315,7 +313,7 @@
                                         <input type="number" name="alert_quantity" value="{{$lims_product_data->alert_quantity}}" class="form-control" step="any">
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group">
                                         <input type="hidden" name="tax" value="{{$lims_product_data->tax_id}}">
                                         <label>{{__('db.product')}} {{__('db.Tax')}} </label>
@@ -327,7 +325,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group">
                                         <input type="hidden" name="tax_method_id" value="{{$lims_product_data->tax_method}}">
                                         <label>{{__('db.Tax Method')}} </label>
@@ -339,7 +337,7 @@
                                 </div>
 
                                 <!-- Warranty and Guarantee [20-01-2025] -->
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group">
                                         <label>{{ __('db.Warranty') }}</label>
                                         <div class="d-flex justify-content-between">
@@ -353,7 +351,7 @@
                                     </div>
                                 </div>
                                 <!-- <div>{{ $lims_product_data->guarantee_type }}</div> -->
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group">
                                         <label>{{ __('db.Guarantee') }}</label>
                                         <div class="d-flex justify-content-between">
@@ -427,7 +425,7 @@
                                         </div>
                                     @endif
                                 @endforeach
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group mt-3">
                                         @if($lims_product_data->featured)
                                             <input type="checkbox" name="featured" value="1" checked>
@@ -438,7 +436,7 @@
                                         <p class="italic">{{__('db.Featured product will be displayed in POS')}}</p>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group mt-3">
                                         @if($lims_product_data->is_embeded)
                                             <input type="checkbox" name="is_embeded" value="1" checked>
@@ -491,7 +489,7 @@
                                         <textarea name="product_details" class="form-control" rows="5">{{str_replace('@', '"', $lims_product_data->product_details)}}</textarea>
                                     </div>
                                 </div>
-                                <div class="col-md-12 mt-2" id="diffPrice-option">
+                                <div class="col-md-12 mt-2 d-none" id="diffPrice-option">
                                     @if($lims_product_data->is_diffPrice)
                                         <h5><input name="is_diffPrice" type="checkbox" id="is-diffPrice" value="1" checked>&nbsp; {{__('db.This product has different price for different warehouse')}}</h5>
                                     @else
@@ -530,14 +528,14 @@
                                         </table>
                                     </div>
                                 </div>
-                                <div class="col-md-12 mt-3" id="batch-option">
+                                <div class="col-md-12 mt-3 d-none" id="batch-option">
                                     @if($lims_product_data->is_batch)
                                     <h5><input name="is_batch" type="checkbox" id="is-batch" value="1" checked>&nbsp; {{__('db.This product has batch and expired date')}}</h5>
                                     @else
                                     <h5><input name="is_batch" type="checkbox" id="is-batch" value="1">&nbsp; {{__('db.This product has batch and expired date')}}</h5>
                                     @endif
                                 </div>
-                                <div class="col-md-12 mt-3" id="imei-option">
+                                <div class="col-md-12 mt-3  d-none" id="imei-option">
                                     @if($lims_product_data->is_imei)
                                     <h5><input name="is_imei" type="checkbox" id="is-imei" value="1" checked>&nbsp; {{__('db.This product has IMEI or Serial numbers')}}</h5>
                                     @else
@@ -545,11 +543,11 @@
                                     @endif
                                 </div>
                                 @if($lims_product_data->is_variant)
-                                <div class="col-md-12 mt-3" id="variant-option">
+                                <div class="col-md-12 mt-3 d-none" id="variant-option">
                                     <h5 class="d-none"><input name="is_variant" type="checkbox" id="is-variant" value="1" checked>&nbsp; {{__('db.This product has variant')}}</h5>
                                 </div>
                                 @endif
-                                <div class="col-md-12" id="variant-section">
+                                <div class="col-md-12 d-none" id="variant-section">
                                     @if($lims_product_data->variant_option)
                                     <div id="variant-input-section">
                                         @foreach($lims_product_data->variant_option as $key => $variant_option)
@@ -616,11 +614,10 @@
                                         </table>
                                     </div>
                                 </div>
-                                <div class="col-md-12 mt-3">
+                                <div class="col-md-12 mt-3 d-none">
                                     <input type="hidden" name="promotion_hidden" value="{{$lims_product_data->promotion}}">
                                     <h5><input name="promotion" type="checkbox" id="promotion" value="1">&nbsp; {{__('db.Add Promotional Price')}}</h5>
                                 </div>
-
                                 <div class="col-md-12">
                                     <div class="row">
                                         <div class="col-md-4" id="promotion_price">   <label>{{__('db.Promotional Price')}}</label>

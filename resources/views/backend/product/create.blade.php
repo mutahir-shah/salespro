@@ -28,19 +28,7 @@
                         <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
                         <form id="product-form">
                             <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>{{__('db.Product Type')}} *</strong> </label>
-                                        <div class="input-group">
-                                            <select name="type" required class="form-control selectpicker" id="type">
-                                                <option value="standard">Standard</option>
-                                                <option value="combo">Combo</option>
-                                                <option value="digital">Digital</option>
-                                                <option value="service">Service</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
+                              
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>{{__('db.Product Name')}} *</strong> </label>
@@ -58,6 +46,18 @@
                                             </div>
                                         </div>
                                         <span class="validation-msg" id="code-error"></span>
+                                    </div>
+                                </div>
+                                  <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{__('db.Product Type')}} *</strong> </label>
+                                        <div class="input-group">
+                                            <select name="type" required class="form-control selectpicker" id="type">
+                                                <option value="Bag">Bag</option>
+                                                <option value="Box">Box</option>
+                                                <option value="Taan">Taan</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -148,13 +148,13 @@
                                       <span class="validation-msg"></span>
                                     </div>
                                 </div>
-                                <div id="unit" class="col-md-12">
+                                <div id="unit" class="col-md-12 d-none">
                                     <div class="row ">
                                         <div class="col-md-4 form-group">
                                                 <label>{{__('db.Product Unit')}} *</strong> </label>
                                                 <div class="input-group pos">
                                                   <select required class="form-control selectpicker" name="unit_id">
-                                                    <option value="" disabled selected>Select Product Unit...</option>
+                                                    <!-- <option value="" disabled selected>Select Product Unit...</option> -->
                                                     @foreach($lims_unit_list as $unit)
                                                         @if($unit->base_unit==null)
                                                             <option value="{{$unit->id}}">{{$unit->unit_name}}</option>
@@ -251,7 +251,7 @@
                                         <input type="number" name="alert_quantity" class="form-control" step="any">
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group">
                                         <label>{{__('db.Product Tax')}}</label>
                                         <div class="input-group pos">
@@ -267,7 +267,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group">
                                         <label>{{__('db.Tax Method')}}</strong> </label> <i class="dripicons-question" data-toggle="tooltip" title="{{__('db.Exclusive: Poduct price = Actual product price + Tax Inclusive: Actual product price = Product price - Tax')}}"></i>
                                         <select name="tax_method" class="form-control selectpicker">
@@ -278,7 +278,7 @@
                                 </div>
 
                                 <!-- Warranty and Guarantee [20-01-2025] -->
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group">
                                         <label>{{ __('db.Warranty') }}</label>
                                         <div class="d-flex justify-content-between">
@@ -291,7 +291,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group">
                                         <label>{{ __('db.Guarantee') }}</label>
                                         <div class="d-flex justify-content-between">
@@ -356,28 +356,28 @@
                                     </div>
                                 @endif
                             @endforeach
-                                <div id="featured" class="col-md-4">
+                                <div id="featured" class="col-md-4 d-none">
                                     <div class="form-group mt-3">
                                         <input type="checkbox" name="featured" value="1">&nbsp;
                                         <label>{{__('db.Featured')}}</label>
                                         <p class="italic">{{__('db.Featured product will be displayed in POS')}}</p>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-4 d-none">
                                     <div class="form-group mt-3">
                                         <input type="checkbox" name="is_embeded" value="1">&nbsp;
                                         <label>{{__('db.Embedded Barcode')}}</label>
                                         <p class="italic">{{__('db.Check this if this product will be used in weight scale machine')}}</p>
                                     </div>
                                 </div>
-                                <div id="stock-section" class="col-md-12">
+                                <div id="stock-section" class="col-md-12 d-none">
                                     <div class="form-group mt-3">
                                         <input type="checkbox" name="is_initial_stock" value="1">&nbsp;
                                         <label>{{__('db.Initial Stock')}}</label>
                                         <p class="italic">{{__('db.This feature will not work for product with variants and batches')}}</p>
                                     </div>
                                 </div>
-                                <div class="col-md-12" id="initial-stock-section">
+                                <div class="col-md-12 d-none" id="initial-stock-section">
                                     <div class="table-responsive ml-2">
                                         <table class="table table-hover">
                                             <thead>
@@ -413,10 +413,10 @@
                                         <textarea name="product_details" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
-                                <div class="col-md-12 mt-3" id="variant-option">
+                                <div class="col-md-12 mt-3product has variant" id="variant-option">
                                     <h5><input name="is_variant" type="checkbox" id="is-variant" value="1">&nbsp; {{__('db.This product has variant')}}</h5>
                                 </div>
-                                <div class="col-md-12" id="variant-section">
+                                <div class="col-md-12product has variant" id="variant-section">
                                     <div id="variant-input-section">
                                         <div class="row">
                                             <div class="col-md-4 form-group mt-2">
@@ -476,16 +476,16 @@
                                         </table>
                                     </div>
                                 </div>
-                                <div class="col-md-12 mt-3" id="batch-option">
+                                <div class="col-md-12 mt-3 d-none" id="batch-option">
                                     <h5><input name="is_batch" type="checkbox" id="is-batch" value="1">&nbsp; {{__('db.This product has batch and expired date')}}</h5>
                                 </div>
-                                <div class="col-md-12 mt-3" id="imei-option">
+                                <div class="col-md-12 mt-3 d-none" id="imei-option">
                                     <h5><input name="is_imei" type="checkbox" id="is-imei" value="1">&nbsp; {{__('db.This product has IMEI or Serial numbers')}}</h5>
                                 </div>
-                                <div class="col-md-12 mt-3">
+                                <div class="col-md-12 mt-3 d-none">
                                     <h5><input name="promotion" type="checkbox" id="promotion" value="1">&nbsp; {{__('db.Add Promotional Price')}}</h5>
                                 </div>
-                                <div class="col-md-12">
+                                <div class="col-md-12 d-none">
                                     <div class="row">
                                         <div class="col-md-4" id="promotion_price">
                                             <label>{{__('db.Promotional Price')}}</label>
@@ -516,25 +516,25 @@
                                     </div>
                                 </div>
                                 @if (\Schema::hasColumn('products', 'woocommerce_product_id'))
-                                <div class="col-md-12 mt-3">
+                                <div class="col-md-12 mt-3 d-none">
                                     <h5><input name="is_sync_disable" type="checkbox" id="is_sync_disable" value="1">&nbsp; {{__('db.Disable Woocommerce Sync')}}</h5>
                                 </div>
                                 @endif
 
                                 @if(in_array('ecommerce',explode(',',$general_setting->modules)) || in_array('restaurant',explode(',',$general_setting->modules)))
-                                <div class="col-md-12 mt-3">
+                                <div class="col-md-12 mt-3 d-none">
                                     <h5><input name="is_online" type="checkbox" id="is_online" value="1" checked>&nbsp; {{__('db.Sell Online')}}</h5>
                                 </div>
                                 @endif
 
                                 @if(in_array('restaurant',explode(',',$general_setting->modules)))
-                                <div class="col-md-12 mt-3">
+                                <div class="col-md-12 mt-3 d-none">
                                     <h5><input name="is_addon" type="checkbox" id="is_addon" value="1">&nbsp; {{__('db.This is topping')}} <i class="dripicons-question" data-toggle="tooltip" title="{{__('db.Check this if the item is a topping or extra or add-on only to be served with a main course')}}"></i></h5>
                                 </div>
                                 @endif
 
                                 @if(in_array('ecommerce',explode(',',$general_setting->modules)))
-                                <div class="col-md-12 mt-3">
+                                <div class="col-md-12 mt-3 d-none">
                                     <h5><input name="in_stock" type="checkbox" id="in_stock" value="1" checked>&nbsp; {{__('db.In Stock')}}</h5>
                                 </div>
                                 <!-- <div class="col-md-12 mt-3 track_inventory" style="display:none">
@@ -543,7 +543,7 @@
                                 @endif
                             </div>
                             @if(in_array('ecommerce',explode(',',$general_setting->modules)) || in_array('restaurant',explode(',',$general_setting->modules)))
-                            <div class="row">
+                            <div class="row  d-none">
                                 <div class="col-12 mt-3">
                                     <div class="form-group">
                                         <label>{{__('db.Product Tags')}}</strong> </label>
@@ -1358,8 +1358,18 @@
         }
     });
 
-    $('select[name="unit_id"]').on('change', function() {
+       $(document).ready(function(){
+          unitID = $('select[name="unit_id"]').val();
+        if(unitID) {
+            populate_category(unitID);
+        }else{
+            $('select[name="sale_unit_id"]').empty();
+            $('select[name="purchase_unit_id"]').empty();
+        }
 
+    });
+
+    $('select[name="unit_id"]').on('change', function() {
         unitID = $(this).val();
         if(unitID) {
             populate_category(unitID);
