@@ -463,11 +463,11 @@
                                     </li>
                                 @endif
                                 @if ($empty_database_permission_active)
-                                    <li>
+                                    <!-- <li>
                                         <a onclick="return confirm('Are you sure want to delete? If you do this all of your data will be lost.')"
                                             href="{{ route('setting.emptyDatabase') }}"><i
                                                 class="dripicons-stack"></i> {{ __('db.Empty Database') }}</a>
-                                    </li>
+                                    </li> -->
                                 @endif
                                 <li>
                                     <a href="{{ route('logout') }}"
