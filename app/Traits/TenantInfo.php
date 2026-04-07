@@ -4,7 +4,7 @@ namespace App\Traits;
 
 use App\Models\landlord\Tenant;
 use Illuminate\Support\Str;
-use DB;
+use Illuminate\Support\Facades\DB;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
