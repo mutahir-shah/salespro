@@ -810,8 +810,9 @@
     var lims_productcodeSearch = $('#lims_productcodeSearch');
 
     lims_productcodeSearch.autocomplete({
+        minLength: 4,
         source: function(request, response) {
-            var matcher = new RegExp(".?" + $.ui.autocomplete.escapeRegex(request.term), "i");
+            var matcher = new RegExp(".?" + $.ui.encodeURI.escapeRegex(request.term), "i");
             response($.grep(lims_product_code, function(item) {
                 return matcher.test(item);
             }));
