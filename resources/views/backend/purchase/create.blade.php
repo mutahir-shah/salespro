@@ -808,16 +808,16 @@
     ];
 
     var lims_productcodeSearch = $('#lims_productcodeSearch');
+
     lims_productcodeSearch.autocomplete({
-        minLength: 4,
         source: function(request, response) {
-            var matcher = new RegExp(".?" + $.ui.encodeURI.escapeRegex(request.term), "i");
+            var matcher = new RegExp(".?" + $.ui.autocomplete.escapeRegex(request.term), "i");
             response($.grep(lims_product_code, function(item) {
                 return matcher.test(item);
             }));
         },
         response: function(event, ui) {
-            if (ui.content.length == 1 && request.term.length >= 4) {
+            if (ui.content.length == 1  && request.term.length >= 4) {
                 var data = ui.content[0].value;
                 $(this).autocomplete( "close" );
                 productSearch(data);
