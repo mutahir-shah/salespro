@@ -808,7 +808,6 @@
     ];
 
     var lims_productcodeSearch = $('#lims_productcodeSearch');
-
     lims_productcodeSearch.autocomplete({
         minLength: 4,
         source: function(request, response) {
@@ -818,7 +817,7 @@
             }));
         },
         response: function(event, ui) {
-            if (ui.content.length == 1) {
+            if (ui.content.length == 1 && request.term.length >= 4) {
                 var data = ui.content[0].value;
                 $(this).autocomplete( "close" );
                 productSearch(data);
