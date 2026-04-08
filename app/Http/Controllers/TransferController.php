@@ -32,34 +32,36 @@ class TransferController extends Controller
     public function index(Request $request)
     {
         $role = Role::find(Auth::user()->role_id);
-        if ($role->hasPermissionTo('transfers-index')) {
+        if($role->hasPermissionTo('transfers-index')) {
             $permissions = Role::findByName($role->name)->permissions;
             foreach ($permissions as $permission)
                 $all_permission[] = $permission->name;
-            if (empty($all_permission))
+            if(empty($all_permission))
                 $all_permission[] = 'dummy text';
 
-            if ($request->input('from_warehouse_id'))
+            if($request->input('from_warehouse_id'))
                 $from_warehouse_id = $request->input('from_warehouse_id');
             else
                 $from_warehouse_id = 0;
 
-            if ($request->input('to_warehouse_id'))
+            if($request->input('to_warehouse_id'))
                 $to_warehouse_id = $request->input('to_warehouse_id');
             else
                 $to_warehouse_id = 0;
 
-            if ($request->input('starting_date')) {
+            if($request->input('starting_date')) {
                 $starting_date = $request->input('starting_date');
                 $ending_date = $request->input('ending_date');
-            } else {
-                $starting_date = date("Y-m-d", strtotime(date('Y-m-d', strtotime('-1 year', strtotime(date('Y-m-d'))))));
+            }
+            else {
+                $starting_date = date("Y-m-d", strtotime(date('Y-m-d', strtotime('-1 year', strtotime(date('Y-m-d') )))));
                 $ending_date = date("Y-m-d");
             }
 
             $lims_warehouse_list = Warehouse::select('name', 'id')->where('is_active', true)->get();
-            return view('backend.transfer.index', compact('starting_date', 'ending_date', 'from_warehouse_id', 'to_warehouse_id', 'all_permission', 'lims_warehouse_list'));
-        } else
+            return view('backend.transfer.index',compact('starting_date', 'ending_date', 'from_warehouse_id', 'to_warehouse_id', 'all_permission', 'lims_warehouse_list'));
+        }
+        else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
     }
 
@@ -91,7 +93,7 @@ class TransferController extends Controller
         $convert_to_string = '';
         foreach ($imeis as $key => $value) {
             $convert_to_string .= $value;
-            if (count($imeis) - 1 > $key) {
+            if (count($imeis)-1 > $key) {
                 $convert_to_string .= ',';
             }
         }
@@ -111,85 +113,92 @@ class TransferController extends Controller
 
         $from_warehouse_id = $request->input('from_warehouse_id');
         $to_warehouse_id = $request->input('to_warehouse_id');
-        $q = Transfer::whereDate('created_at', '>=', $request->input('starting_date'))
-            ->whereDate('created_at', '<=', $request->input('ending_date'));
-        if (Auth::user()->role_id > 2 && config('staff_access') == 'own')
+        $q = Transfer::whereDate('created_at', '>=' ,$request->input('starting_date'))
+                     ->whereDate('created_at', '<=' ,$request->input('ending_date'));
+        if(Auth::user()->role_id > 2 && config('staff_access') == 'own')
             $q = $q->where('user_id', Auth::id());
-        elseif (Auth::user()->role_id > 2 && config('staff_access') == 'warehouse')
+        elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse')
             $q = $q->where('from_warehouse_id', Auth::user()->warehouse_id)->orWhere('to_warehouse_id', Auth::user()->warehouse_id);
-        if ($from_warehouse_id)
+        if($from_warehouse_id)
             $q = $q->where('from_warehouse_id', $from_warehouse_id);
-        if ($to_warehouse_id)
+        if($to_warehouse_id)
             $q = $q->where('to_warehouse_id', $to_warehouse_id);
 
         $totalData = $q->count();
         $totalFiltered = $totalData;
 
-        if ($request->input('length') != -1)
+        if($request->input('length') != -1)
             $limit = $request->input('length');
         else
             $limit = $totalData;
         $start = $request->input('start');
-        $order = 'transfers.' . $columns[$request->input('order.0.column')];
+        $order = 'transfers.'.$columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
-        if (empty($request->input('search.value'))) {
+        if(empty($request->input('search.value'))) {
             $q = Transfer::with('fromWarehouse', 'toWarehouse', 'user')
-                ->whereDate('created_at', '>=', $request->input('starting_date'))
-                ->whereDate('created_at', '<=', $request->input('ending_date'))
+                ->whereDate('created_at', '>=' ,$request->input('starting_date'))
+                ->whereDate('created_at', '<=' ,$request->input('ending_date'))
                 ->offset($start)
                 ->limit($limit)
                 ->orderBy($order, $dir);
-            if (Auth::user()->role_id > 2 && config('staff_access') == 'own')
+            if(Auth::user()->role_id > 2 && config('staff_access') == 'own')
                 $q = $q->where('user_id', Auth::id());
-            elseif (Auth::user()->role_id > 2 && config('staff_access') == 'warehouse')
+            elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse')
                 $q = $q->where('from_warehouse_id', Auth::user()->warehouse_id)->orWhere('to_warehouse_id', Auth::user()->warehouse_id);
-            if ($from_warehouse_id)
+            if($from_warehouse_id)
                 $q = $q->where('from_warehouse_id', $from_warehouse_id);
-            if ($to_warehouse_id)
+            if($to_warehouse_id)
                 $q = $q->where('to_warehouse_id', $to_warehouse_id);
             $transfers = $q->get();
-        } else {
+        }
+
+        else
+        {
             $search = $request->input('search.value');
-            $q = Transfer::whereDate('transfers.created_at', '=', date('Y-m-d', strtotime(str_replace('/', '-', $search))))
+            $q = Transfer::whereDate('transfers.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
                 ->offset($start)
                 ->limit($limit)
-                ->orderBy($order, $dir);
-            if (Auth::user()->role_id > 2 && config('staff_access') == 'own') {
+                ->orderBy($order,$dir);
+            if(Auth::user()->role_id > 2 && config('staff_access') == 'own') {
                 $transfers =  $q->select('transfers.*')
-                    ->with('fromWarehouse', 'toWarehouse', 'user')
-                    ->where('transfers.user_id', Auth::id())
-                    ->orwhere([
-                        ['reference_no', 'LIKE', "%{$search}%"],
-                        ['user_id', Auth::id()]
-                    ])
-                    ->get();
+                                ->with('fromWarehouse', 'toWarehouse', 'user')
+                                ->where('transfers.user_id', Auth::id())
+                                ->orwhere([
+                                    ['reference_no', 'LIKE', "%{$search}%"],
+                                    ['user_id', Auth::id()]
+                                ])
+                                ->get();
                 $totalFiltered = $q->count();
-            } elseif (Auth::user()->role_id > 2 && config('staff_access') == 'warehouse') {
+            }
+            elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse') {
                 $transfers =  $q->select('transfers.*')
-                    ->with('fromWarehouse', 'toWarehouse', 'user')
-                    ->where('transfers.user_id', Auth::id())
-                    ->orwhere([
-                        ['reference_no', 'LIKE', "%{$search}%"],
-                        ['from_warehouse_id', Auth::user()->warehouse_id]
-                    ])
-                    ->orwhere([
-                        ['reference_no', 'LIKE', "%{$search}%"],
-                        ['to_warehouse_id', Auth::user()->warehouse_id]
-                    ])
-                    ->get();
+                                ->with('fromWarehouse', 'toWarehouse', 'user')
+                                ->where('transfers.user_id', Auth::id())
+                                ->orwhere([
+                                    ['reference_no', 'LIKE', "%{$search}%"],
+                                    ['from_warehouse_id', Auth::user()->warehouse_id]
+                                ])
+                                ->orwhere([
+                                    ['reference_no', 'LIKE', "%{$search}%"],
+                                    ['to_warehouse_id', Auth::user()->warehouse_id]
+                                ])
+                                ->get();
                 $totalFiltered = $q->count();
-            } else {
+            }
+            else {
                 $transfers =  $q->select('transfers.*')
-                    ->with('fromWarehouse', 'toWarehouse', 'user')
-                    ->orwhere('reference_no', 'LIKE', "%{$search}%")
-                    ->get();
+                                ->with('fromWarehouse', 'toWarehouse', 'user')
+                                ->orwhere('reference_no', 'LIKE', "%{$search}%")
+                                ->get();
 
                 $totalFiltered = $q->orwhere('transfers.reference_no', 'LIKE', "%{$search}%")->count();
             }
         }
         $data = array();
-        if (!empty($transfers)) {
-            foreach ($transfers as $key => $transfer) {
+        if(!empty($transfers))
+        {
+            foreach ($transfers as $key=>$transfer)
+            {
                 $nestedData['id'] = $transfer->id;
                 $nestedData['key'] = $key;
                 $nestedData['date'] = date(config('date_format'), strtotime($transfer->created_at->toDateString()));
@@ -199,22 +208,24 @@ class TransferController extends Controller
                 $nestedData['shipping_cost'] = number_format($transfer->shipping_cost, config('decimal'));
                 $nestedData['grand_total'] = number_format($transfer->grand_total, config('decimal'));
 
-                if ($transfer->is_sent == 1) {
-                    $nestedData['is_sent'] = '<div class="badge badge-success">' . __('db.Yes') . '</div>';
+                if($transfer->is_sent == 1) {
+                    $nestedData['is_sent'] = '<div class="badge badge-success">'.__('db.Yes').'</div>';
                     $status = __('db.Yes');
-                } else {
-                    $nestedData['is_sent'] = '<div class="badge badge-danger">' . __('db.No') . '</div>';
+                }else{
+                    $nestedData['is_sent'] = '<div class="badge badge-danger">'.__('db.No').'</div>';
                     $status = __('db.No');
                 }
 
-                if ($transfer->status == 1) {
-                    $nestedData['status'] = '<div class="badge badge-success">' . __('db.Completed') . '</div>';
+                if($transfer->status == 1) {
+                    $nestedData['status'] = '<div class="badge badge-success">'.__('db.Completed').'</div>';
                     $status = __('db.Completed');
-                } elseif ($transfer->status == 2) {
-                    $nestedData['status'] = '<div class="badge badge-danger">' . __('db.Pending') . '</div>';
+                }
+                elseif($transfer->status == 2) {
+                    $nestedData['status'] = '<div class="badge badge-danger">'.__('db.Pending').'</div>';
                     $status = __('db.Pending');
-                } elseif ($transfer->status == 3) {
-                    $nestedData['status'] = '<div class="badge badge-warning">' . __('db.Sent') . '</div>';
+                }
+                elseif($transfer->status == 3) {
+                    $nestedData['status'] = '<div class="badge badge-warning">'.__('db.Sent').'</div>';
                     $status = __('db.Sent');
                 }
 
@@ -229,15 +240,15 @@ class TransferController extends Controller
                             <button type="button" class="btn btn-link view"><i class="fa fa-eye"></i> ' . __('db.View') . '</button>
                         </li>';
 
-                if (in_array("transfers-edit", $request['all_permission'])) {
+                if(in_array("transfers-edit", $request['all_permission'])) {
                     $nestedData['options'] .= '<li>
-                        <a href="' . route('transfers.edit', $transfer->id) . '" class="btn btn-link"><i class="dripicons-document-edit"></i> ' . __('db.edit') . '</a>
+                        <a href="'.route('transfers.edit', $transfer->id).'" class="btn btn-link"><i class="dripicons-document-edit"></i> ' . __('db.edit') . '</a>
                     </li>';
                 }
 
                 if (auth()->user()->role_id < 3 && $transfer->status == 2) {
                     $nestedData['options'] .= '<li>
-                        <form action="' . route("transfers.changeStatus", $transfer->id) . '" method="POST" id="transfer-form" enctype="multipart/form-data">' . csrf_field() . '' . method_field("PUT") . '
+                        <form action="' . route("transfers.changeStatus", $transfer->id) . '" method="POST" id="transfer-form" enctype="multipart/form-data">'.csrf_field().'' . method_field("PUT") . '
                             <select name="status" type="hidden" class="form-control selectpicker d-none">
                                 <option value="1" selected>' . __('db.Completed') . '</option>
                             </select>
@@ -248,9 +259,9 @@ class TransferController extends Controller
                     </li>';
                 }
 
-                if (in_array("transfers-delete", $request['all_permission'])) {
+                if(in_array("transfers-delete", $request['all_permission'])) {
                     $nestedData['options'] .= '<li>
-                        <form action="' . route("transfers.destroy", $transfer->id) . '" method="POST">' . csrf_field() . '' . method_field("DELETE") . '
+                        <form action="' . route("transfers.destroy", $transfer->id) . '" method="POST">'.csrf_field().'' . method_field("DELETE") . '
                             <button type="submit" class="btn btn-link" onclick="return confirmDelete()">
                                 <i class="dripicons-trash"></i> ' . __("db.delete") . '
                             </button>
@@ -261,24 +272,7 @@ class TransferController extends Controller
                 $nestedData['options'] .= '</ul></div>';
                 // data for transfer details by one click
 
-                $nestedData['transfer'] = array(
-                    '[ "' . date(config('date_format'), strtotime($transfer->created_at->toDateString())) . '"',
-                    ' "' . $transfer->reference_no . '"',
-                    ' "' . $status . '"',
-                    ' "' . $transfer->id . '"',
-                    ' "' . $transfer->fromWarehouse->name . '"',
-                    ' "' . $transfer->fromWarehouse->phone . '"',
-                    ' "' . preg_replace('/\s+/S', " ", $transfer->fromWarehouse->address) . '"',
-                    ' "' . $transfer->toWarehouse->name . '"',
-                    ' "' . $transfer->toWarehouse->phone . '"',
-                    ' "' . preg_replace('/\s+/S', " ", $transfer->toWarehouse->address) . '"',
-                    ' "' . $transfer->total_tax . '"',
-                    ' "' . $transfer->total_cost . '"',
-                    ' "' . $transfer->shipping_cost . '"',
-                    ' "' . $transfer->grand_total . '"',
-                    ' "' . preg_replace('/[\n\r]/', "<br>", $transfer->note) . '"',
-                    ' "' . $transfer->user->name . '"',
-                    ' "' . $transfer->user->email . '"]'
+                $nestedData['transfer'] = array( '[ "'.date(config('date_format'), strtotime($transfer->created_at->toDateString())).'"', ' "'.$transfer->reference_no.'"', ' "'.$status.'"', ' "'.$transfer->id.'"', ' "'.$transfer->fromWarehouse->name.'"', ' "'.$transfer->fromWarehouse->phone.'"', ' "'.preg_replace('/\s+/S', " ", $transfer->fromWarehouse->address).'"', ' "'.$transfer->toWarehouse->name.'"', ' "'.$transfer->toWarehouse->phone.'"', ' "'.preg_replace('/\s+/S', " ", $transfer->toWarehouse->address).'"', ' "'.$transfer->total_tax.'"', ' "'.$transfer->total_cost.'"', ' "'.$transfer->shipping_cost.'"', ' "'.$transfer->grand_total.'"', ' "'.preg_replace('/[\n\r]/', "<br>", $transfer->note).'"', ' "'.$transfer->user->name.'"', ' "'.$transfer->user->email.'"]'
                 );
                 $data[] = $nestedData;
             }
@@ -295,10 +289,11 @@ class TransferController extends Controller
     public function create()
     {
         $role = Role::find(Auth::user()->role_id);
-        if ($role->hasPermissionTo('transfers-add')) {
+        if($role->hasPermissionTo('transfers-add')){
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
             return view('backend.transfer.create', compact('lims_warehouse_list'));
-        } else
+        }
+        else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
     }
 
@@ -307,13 +302,13 @@ class TransferController extends Controller
         $data = $request->except('document');
 
         $data['user_id'] = Auth::id();
-        $data['reference_no'] = 'tr-' . date("Ymd") . '-' . date("his");
-
+        $data['reference_no'] = 'tr-' . date("Ymd") . '-'. date("his");
+      
         if (isset($data['created_at'])) {
             $data['created_at'] = normalize_to_sql_datetime($data['created_at']);
         } else {
             $data['created_at'] = date('Y-m-d H:i:s');
-        }
+        }  
 
         $document = $request->document;
         if ($document) {
@@ -353,30 +348,32 @@ class TransferController extends Controller
 
             //get product data
             $lims_product_data = Product::select('is_variant')->find($id);
-            if ($lims_product_data->is_variant) {
+            if($lims_product_data->is_variant) {
                 $lims_product_variant_data = ProductVariant::select('variant_id')->FindExactProductWithCode($id, $product_code[$i])->first();
                 $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant($id, $lims_product_variant_data->variant_id, $data['from_warehouse_id'])->first();
                 $product_transfer['variant_id'] = $lims_product_variant_data->variant_id;
-            } elseif (isset($data['product_batch_id']) && $product_batch_id[$i]) {
+            }
+            elseif(isset($data['product_batch_id']) && $product_batch_id[$i]) {
                 $lims_product_warehouse_data = Product_Warehouse::where([
-                    ['product_batch_id', $product_batch_id[$i]],
-                    ['warehouse_id', $data['from_warehouse_id']]
+                    ['product_batch_id', $product_batch_id[$i] ],
+                    ['warehouse_id', $data['from_warehouse_id'] ]
                 ])->first();
                 $product_transfer['product_batch_id'] = $product_batch_id[$i];
-            } else {
+            }
+            else {
                 $lims_product_warehouse_data = Product_Warehouse::where([
                     ['product_id', $id],
-                    ['warehouse_id', $data['from_warehouse_id']],
-                ])->first();
+                    ['warehouse_id', $data['from_warehouse_id'] ],
+                    ])->first();
             }
 
-            if ($data['status'] != 2) {
+            if($data['status'] != 2) {
                 if ($lims_purchase_unit_data->operator == '*')
                     $quantity = $qty[$i] * $lims_purchase_unit_data->operation_value;
                 else
                     $quantity = $qty[$i] / $lims_purchase_unit_data->operation_value;
                 //deduct imei number if available
-                if ($imei_number[$i]) {
+                if($imei_number[$i]) {
                     $imei_numbers = explode(",", $imei_number[$i]);
                     $all_imei_numbers = explode(",", $lims_product_warehouse_data->imei_number);
                     foreach ($imei_numbers as $number) {
@@ -386,24 +383,27 @@ class TransferController extends Controller
                     }
                     $lims_product_warehouse_data->imei_number = implode(",", $all_imei_numbers);
                 }
-            } else
+            }
+            else
                 $quantity = 0;
             //deduct quantity from sending warehouse
             $lims_product_warehouse_data->qty -= $quantity;
             $lims_product_warehouse_data->save();
 
-            if ($data['status'] == 1) {
-                if ($lims_product_data->is_variant) {
+            if($data['status'] == 1) {
+                if($lims_product_data->is_variant) {
                     $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant($id, $lims_product_variant_data->variant_id, $data['to_warehouse_id'])->first();
-                } elseif (isset($data['product_batch_id']) && $product_batch_id[$i]) {
+                }
+                elseif(isset($data['product_batch_id']) && $product_batch_id[$i]) {
                     $lims_product_warehouse_data = Product_Warehouse::where([
-                        ['product_batch_id', $product_batch_id[$i]],
-                        ['warehouse_id', $data['to_warehouse_id']]
+                        ['product_batch_id', $product_batch_id[$i] ],
+                        ['warehouse_id', $data['to_warehouse_id'] ]
                     ])->first();
-                } else {
+                }
+                else {
                     $lims_product_warehouse_data = Product_Warehouse::where([
                         ['product_id', $id],
-                        ['warehouse_id', $data['to_warehouse_id']],
+                        ['warehouse_id', $data['to_warehouse_id'] ],
                     ])->first();
                 }
                 //add quantity to destination warehouse
@@ -418,8 +418,8 @@ class TransferController extends Controller
                     $lims_product_warehouse_data->qty = $quantity;
                 }
                 //add imei number if available
-                if ($imei_number[$i]) {
-                    if ($lims_product_warehouse_data->imei_number)
+                if($imei_number[$i]) {
+                    if($lims_product_warehouse_data->imei_number)
                         $lims_product_warehouse_data->imei_number .= ',' . $imei_number[$i];
                     else
                         $lims_product_warehouse_data->imei_number = $imei_number[$i];
@@ -428,7 +428,7 @@ class TransferController extends Controller
                 $lims_product_warehouse_data->save();
             }
 
-            $product_transfer['transfer_id'] = $lims_transfer_data->id;
+            $product_transfer['transfer_id'] = $lims_transfer_data->id ;
             $product_transfer['product_id'] = $id;
             $product_transfer['imei_number'] = $imei_number[$i];
             $product_transfer['qty'] = $qty[$i];
@@ -468,7 +468,7 @@ class TransferController extends Controller
         $mailData['to_phone'] = $toWareHouse->phone;
         $mailData['to_email'] = $toWareHouse->email;
         $mailData['to_address'] = $toWareHouse->address;
-        if ($mail_setting && ($mailData['from_email'] || $mailData['to_email'])) {
+        if($mail_setting && ($mailData['from_email'] || $mailData['to_email'])) {
             $this->setMailInfo($mail_setting);
             $productTransferData = $this->getProductTransferData($lims_transfer_data->id);
             $mailData['products'] = $productTransferData['products'];
@@ -479,23 +479,24 @@ class TransferController extends Controller
             $mailData['total'] = $productTransferData['total'];
             $mailData['batch_no'] = $productTransferData['batch_no'];
 
-            try {
-                if ($mailData['to_email'])
+            try{
+                if($mailData['to_email'])
                     Mail::to($mailData['to_email'])
-                        ->send(new TransferDetails($mailData));
+                    ->send(new TransferDetails($mailData));
                 else
                     $message .= '.To warehouse email not found.';
 
-                if ($mailData['from_email'])
+                if($mailData['from_email'])
                     Mail::to($mailData['from_email'])
-                        ->send(new TransferDetails($mailData));
+                    ->send(new TransferDetails($mailData));
                 else
                     $message .= '.From warehouse email not found.';
 
-                $lims_transfer_data->update(['is_sent' => true]);
-            } catch (\Exception $e) {
+                $lims_transfer_data->update(['is_sent'=> true]);
+            }
+            catch(\Exception $e) {
                 // return $e;
-                $lims_transfer_data->update(['is_sent' => false]);
+                $lims_transfer_data->update(['is_sent'=> false]);
                 $message .= '. Please Setup Your Mail Credentials to send Email.';
             }
         }
@@ -505,13 +506,14 @@ class TransferController extends Controller
     public function getProduct($id)
     {
         $query = Product::join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id');
-        if (config('without_stock') == 'no') {
+        if(config('without_stock') == 'no') {
             $query = $query->where([
                 ['products.is_active', true],
                 ['product_warehouse.warehouse_id', $id],
                 ['product_warehouse.qty', '>', 0]
             ]);
-        } else {
+        }
+        else {
             $query = $query->where([
                 ['products.is_active', true],
                 ['product_warehouse.warehouse_id', $id]
@@ -519,23 +521,24 @@ class TransferController extends Controller
         }
 
         $lims_product_warehouse_data = $query->whereNull('products.is_imei')
-            ->whereNull('product_warehouse.variant_id')
-            ->whereNull('product_warehouse.product_batch_id')
-            ->select('product_warehouse.*', 'products.name', 'products.code', 'products.type', 'products.product_list', 'products.qty_list', 'products.is_embeded')
-            ->get();
+                                        ->whereNull('product_warehouse.variant_id')
+                                        ->whereNull('product_warehouse.product_batch_id')
+                                        ->select('product_warehouse.*', 'products.name', 'products.code', 'products.type', 'products.product_list', 'products.qty_list', 'products.is_embeded')
+                                        ->get();
         //return $lims_product_warehouse_data;
         config()->set('database.connections.mysql.strict', false);
         \DB::reconnect(); //important as the existing connection if any would be in strict mode
 
         $query = Product::join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id');
 
-        if (config('without_stock') == 'no') {
+        if(config('without_stock') == 'no') {
             $query = $query->where([
                 ['products.is_active', true],
                 ['product_warehouse.warehouse_id', $id],
                 ['product_warehouse.qty', '>', 0]
             ]);
-        } else {
+        }
+        else {
             $query = $query->where([
                 ['products.is_active', true],
                 ['product_warehouse.warehouse_id', $id]
@@ -543,44 +546,45 @@ class TransferController extends Controller
         }
 
         $lims_product_with_batch_warehouse_data = $query->whereNull('product_warehouse.variant_id')
-            ->whereNotNull('product_warehouse.product_batch_id')
-            ->select('product_warehouse.*', 'products.name', 'products.code', 'products.type', 'products.product_list', 'products.qty_list', 'products.is_embeded')
-            ->groupBy('product_warehouse.product_id')
-            ->get();
+        ->whereNotNull('product_warehouse.product_batch_id')
+        ->select('product_warehouse.*', 'products.name', 'products.code', 'products.type', 'products.product_list', 'products.qty_list', 'products.is_embeded')
+        ->groupBy('product_warehouse.product_id')
+        ->get();
 
         //now changing back the strict ON
         config()->set('database.connections.mysql.strict', true);
         \DB::reconnect();
 
         $query = Product::join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id');
-        if (config('without_stock') == 'no') {
+        if(config('without_stock') == 'no') {
             $query = $query->where([
                 ['products.is_active', true],
                 ['product_warehouse.warehouse_id', $id],
                 ['product_warehouse.qty', '>', 0]
             ]);
-        } else {
+        }
+        else {
             $query = $query->where([
                 ['products.is_active', true],
                 ['product_warehouse.warehouse_id', $id],
             ]);
         }
         $lims_product_with_variant_warehouse_data = $query->whereNotNull('product_warehouse.variant_id')
-            ->select('product_warehouse.*', 'products.name', 'products.code', 'products.type', 'products.product_list', 'products.qty_list', 'products.is_embeded')
-            ->get();
+        ->select('product_warehouse.*', 'products.name', 'products.code', 'products.type', 'products.product_list', 'products.qty_list', 'products.is_embeded')
+        ->get();
 
         $lims_product_with_imei_warehouse_data = Product::join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
-            ->where([
-                ['products.is_active', true],
-                ['products.is_imei', true],
-                ['product_warehouse.warehouse_id', $id],
-                ['product_warehouse.qty', '>', 0]
-            ])
-            ->whereNull('product_warehouse.variant_id')
-            ->whereNotNull('product_warehouse.imei_number')
-            ->select('product_warehouse.*', 'products.is_embeded')
-            ->groupBy('product_warehouse.product_id')
-            ->get();
+        ->where([
+            ['products.is_active', true],
+            ['products.is_imei', true],
+            ['product_warehouse.warehouse_id', $id],
+            ['product_warehouse.qty', '>', 0]
+        ])
+        ->whereNull('product_warehouse.variant_id')
+        ->whereNotNull('product_warehouse.imei_number')
+        ->select('product_warehouse.*', 'products.is_embeded')
+        ->groupBy('product_warehouse.product_id')
+        ->get();
 
         $product_code = [];
         $product_name = [];
@@ -597,7 +601,8 @@ class TransferController extends Controller
         $imei_number = [];
 
         //product without variant
-        foreach ($lims_product_warehouse_data as $product_warehouse) {
+        foreach ($lims_product_warehouse_data as $product_warehouse)
+        {
             $product_qty[] = $product_warehouse->qty;
             $product_price[] = $product_warehouse->price;
             $product_code[] =  $product_warehouse->code;
@@ -609,14 +614,16 @@ class TransferController extends Controller
             $batch_no[] = null;
             $product_batch_id[] = null;
             $expired_date[] = null;
-            if ($product_warehouse->is_embeded)
+            if($product_warehouse->is_embeded)
                 $is_embeded[] = $product_warehouse->is_embeded;
             else
                 $is_embeded[] = 0;
             $imei_number[] = null;
+
         }
         //product with batches
-        foreach ($lims_product_with_batch_warehouse_data as $product_warehouse) {
+        foreach ($lims_product_with_batch_warehouse_data as $product_warehouse)
+        {
             $product_qty[] = $product_warehouse->qty;
             $product_price[] = $product_warehouse->price;
             $product_code[] =  $product_warehouse->code;
@@ -629,7 +636,7 @@ class TransferController extends Controller
             $batch_no[] = $product_batch_data->batch_no;
             $product_batch_id[] = $product_batch_data->id;
             $expired_date[] = date(config('date_format'), strtotime($product_batch_data->expired_date));
-            if ($product_warehouse->is_embeded)
+            if($product_warehouse->is_embeded)
                 $is_embeded[] = $product_warehouse->is_embeded;
             else
                 $is_embeded[] = 0;
@@ -637,10 +644,11 @@ class TransferController extends Controller
             $imei_number[] = null;
         }
         //product with variant
-        foreach ($lims_product_with_variant_warehouse_data as $product_warehouse) {
+        foreach ($lims_product_with_variant_warehouse_data as $product_warehouse)
+        {
             $product_qty[] = $product_warehouse->qty;
             $lims_product_variant_data = ProductVariant::select('item_code')->FindExactProduct($product_warehouse->product_id, $product_warehouse->variant_id)->first();
-            if ($lims_product_variant_data) {
+            if($lims_product_variant_data) {
                 $product_code[] =  $lims_product_variant_data->item_code;
                 $product_name[] = htmlspecialchars($product_warehouse->name);
                 $product_type[] = $product_warehouse->type;
@@ -650,17 +658,19 @@ class TransferController extends Controller
                 $batch_no[] = null;
                 $product_batch_id[] = null;
                 $expired_date[] = null;
-                if ($product_warehouse->is_embeded)
+                if($product_warehouse->is_embeded)
                     $is_embeded[] = $product_warehouse->is_embeded;
                 else
                     $is_embeded[] = 0;
 
                 $imei_number[] = null;
+
             }
         }
 
         //product with imei
-        foreach ($lims_product_with_imei_warehouse_data as $product_warehouse) {
+        foreach ($lims_product_with_imei_warehouse_data as $product_warehouse)
+        {
             $imei_numbers = explode(",", $product_warehouse->imei_number);
             foreach ($imei_numbers as $key => $number) {
                 $product_qty[] = $product_warehouse->qty;
@@ -682,7 +692,8 @@ class TransferController extends Controller
 
         //retrieve product with type of digital, combo and service
         $lims_product_data = Product::whereNotIn('type', ['standard'])->where('is_active', true)->get();
-        foreach ($lims_product_data as $product) {
+        foreach ($lims_product_data as $product)
+        {
             $product_qty[] = $product->qty;
             $product_code[] =  $product->code;
             $product_name[] = $product->name;
@@ -695,6 +706,7 @@ class TransferController extends Controller
             $expired_date[] = null;
             $is_embeded[] = 0;
             $imei_number[] = null;
+
         }
         $product_data = [$product_code, $product_name, $product_qty, $product_type, $product_id, $product_list, $qty_list, $product_price, $batch_no, $product_batch_id, $expired_date, $is_embeded, $imei_number];
         return $product_data;
@@ -718,33 +730,34 @@ class TransferController extends Controller
         //     $product_code[0] = rtrim($product_code[0], " ");
         //     $qty = $product_info[2];
         // }
-        if ($product_data[3][0]) {
+        if($product_data[3][0]) {
             $product_info = explode("|", $request['data']);
             $embeded_code = $product_data[0];
             $product_data[0] = substr($embeded_code, 0, 7);
             $qty = substr($embeded_code, 7, 5) / 1000;
-        } else {
+        }
+        else {
             $qty = $product_info[3];
         }
         $product_variant_id = null;
         $all_discount = DB::table('discount_plan_customers')
-            ->join('discount_plans', 'discount_plans.id', '=', 'discount_plan_customers.discount_plan_id')
-            ->join('discount_plan_discounts', 'discount_plans.id', '=', 'discount_plan_discounts.discount_plan_id')
-            ->join('discounts', 'discounts.id', '=', 'discount_plan_discounts.discount_id')
-            ->where([
-                ['discount_plans.is_active', true],
-                ['discounts.is_active', true],
-                ['discount_plan_customers.customer_id', $customer_id]
-            ])
-            ->select('discounts.*')
-            ->get();
+                        ->join('discount_plans', 'discount_plans.id', '=', 'discount_plan_customers.discount_plan_id')
+                        ->join('discount_plan_discounts', 'discount_plans.id', '=', 'discount_plan_discounts.discount_plan_id')
+                        ->join('discounts', 'discounts.id', '=', 'discount_plan_discounts.discount_id')
+                        ->where([
+                            ['discount_plans.is_active', true],
+                            ['discounts.is_active', true],
+                            ['discount_plan_customers.customer_id', $customer_id]
+                        ])
+                        ->select('discounts.*')
+                        ->get();
         // return $product_data[0];
         $lims_product_data = Product::where([
             ['code', $product_data[0]],
             ['is_active', true]
         ])->first();
 
-        if (!$lims_product_data) {
+        if(!$lims_product_data) {
             $lims_product_data = Product::join('product_variants', 'products.id', 'product_variants.product_id')
                 ->select('products.*', 'product_variants.id as product_variant_id', 'product_variants.item_code', 'product_variants.additional_cost')
                 ->where([
@@ -795,42 +808,44 @@ class TransferController extends Controller
         // elseif($no_discount)
         //     $product[] = $lims_product_data->price;
 
-        if ($lims_product_data->tax_id) {
+        if($lims_product_data->tax_id) {
             $lims_tax_data = Tax::find($lims_product_data->tax_id);
             $product[] = $lims_tax_data->rate;
             $product[] = $lims_tax_data->name;
-        } else {
+        }
+        else{
             $product[] = 0;
             $product[] = 'No Tax';
         }
         $product[] = $lims_product_data->tax_method;
-
-        // if($lims_product_data->type == 'standard'){
-        if (1) {
+        
+        if($lims_product_data->type == 'standard'){
             $units = Unit::where("base_unit", $lims_product_data->unit_id)
-                ->orWhere('id', $lims_product_data->unit_id)
-                ->get();
+                    ->orWhere('id', $lims_product_data->unit_id)
+                    ->get();
             $unit_name = array();
             $unit_operator = array();
             $unit_operation_value = array();
             foreach ($units as $unit) {
-                if ($lims_product_data->sale_unit_id == $unit->id) {
+                if($lims_product_data->sale_unit_id == $unit->id) {
                     array_unshift($unit_name, $unit->unit_name);
                     array_unshift($unit_operator, $unit->operator);
                     array_unshift($unit_operation_value, $unit->operation_value);
-                } else {
+                }
+                else {
                     $unit_name[]  = $unit->unit_name;
                     $unit_operator[] = $unit->operator;
                     $unit_operation_value[] = $unit->operation_value;
                 }
             }
-            $product[] = implode(",", $unit_name) . ',';
-            $product[] = implode(",", $unit_operator) . ',';
-            $product[] = implode(",", $unit_operation_value) . ',';
-        } else {
-            $product[] = 'n/a' . ',';
-            $product[] = 'n/a' . ',';
-            $product[] = 'n/a' . ',';
+            $product[] = implode(",",$unit_name) . ',';
+            $product[] = implode(",",$unit_operator) . ',';
+            $product[] = implode(",",$unit_operation_value) . ',';
+        }
+        else{
+            $product[] = 'n/a'. ',';
+            $product[] = 'n/a'. ',';
+            $product[] = 'n/a'. ',';
         }
 
         $product[] = $lims_product_data->id;
@@ -844,6 +859,7 @@ class TransferController extends Controller
         $product[] = $lims_product_data->cost;
         $product[] = $product_data[2];
         return $product;
+
     }
 
     public function productTransferData($id)
@@ -853,17 +869,18 @@ class TransferController extends Controller
         foreach ($lims_product_transfer_data as $key => $product_transfer_data) {
             $product = Product::find($product_transfer_data->product_id);
             $unit = Unit::find($product_transfer_data->purchase_unit_id);
-            if ($product_transfer_data->variant_id) {
+            if($product_transfer_data->variant_id) {
                 $lims_product_variant_data = ProductVariant::select('item_code')->FindExactProduct($product_transfer_data->product_id, $product_transfer_data->variant_id)->first();
                 $product->code = $lims_product_variant_data->item_code;
             }
-            $product_transfer[0][$key] = $product->name . ' [' . $product->code . ']';
+            $product_transfer[0][$key] = $product->name . ' [' . $product->code. ']';
 
             $product_id = $product_transfer_data->product_id;
             $variant_id = $product_transfer_data->variant_id ?? 0;
             $imeis = $this->findImeis($product_id, $variant_id);
             if ($imeis != 'N/A') {
                 $product_transfer[0][$key] .= '<br>IMEI or Serial Number: ' . $imeis;
+
             }
 
             $product_transfer[1][$key] = $product_transfer_data->qty;
@@ -871,10 +888,11 @@ class TransferController extends Controller
             $product_transfer[3][$key] = $product_transfer_data->tax;
             $product_transfer[4][$key] = $product_transfer_data->tax_rate;
             $product_transfer[5][$key] = $product_transfer_data->total;
-            if ($product_transfer_data->product_batch_id) {
+            if($product_transfer_data->product_batch_id) {
                 $product_batch_data = ProductBatch::select('batch_no')->find($product_transfer_data->product_batch_id);
                 $product_transfer[6][$key] = $product_batch_data->batch_no;
-            } else
+            }
+            else
                 $product_transfer[6][$key] = 'N/A';
         }
         return $product_transfer;
@@ -885,11 +903,11 @@ class TransferController extends Controller
         foreach ($lims_product_transfer_data as $key => $product_transfer_data) {
             $product = Product::find($product_transfer_data->product_id);
             $unit = Unit::find($product_transfer_data->purchase_unit_id);
-            if ($product_transfer_data->variant_id) {
+            if($product_transfer_data->variant_id) {
                 $lims_product_variant_data = ProductVariant::select('item_code')->FindExactProduct($product_transfer_data->product_id, $product_transfer_data->variant_id)->first();
                 $product->code = $lims_product_variant_data->item_code;
             }
-            $product_transfer['products'][$key] = $product->name . ' [' . $product->code . ']';
+            $product_transfer['products'][$key] = $product->name . ' [' . $product->code. ']';
             // if($product_transfer_data->imei_number)
             //     $product_transfer['imei_number'][$key] .= '<br>IMEI or Serial Number: ' . $product_transfer_data->imei_number;
             if (isset($product_transfer_data->imei_number)) {
@@ -903,10 +921,11 @@ class TransferController extends Controller
             $product_transfer['tax'][$key] = $product_transfer_data->tax;
             $product_transfer['tax_rate'][$key] = $product_transfer_data->tax_rate;
             $product_transfer['total'][$key] = $product_transfer_data->total;
-            if ($product_transfer_data->product_batch_id) {
+            if($product_transfer_data->product_batch_id) {
                 $product_batch_data = ProductBatch::select('batch_no')->find($product_transfer_data->product_batch_id);
                 $product_transfer['batch_no'][$key] = $product_batch_data->batch_no;
-            } else
+            }
+            else
                 $product_transfer['batch_no'][$key] = 'N/A';
         }
         return $product_transfer;
@@ -914,41 +933,43 @@ class TransferController extends Controller
     public function transferByCsv()
     {
         $role = Role::find(Auth::user()->role_id);
-        if ($role->hasPermissionTo('transfers-add')) {
+        if($role->hasPermissionTo('transfers-add')){
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
             return view('backend.transfer.import', compact('lims_warehouse_list'));
-        } else
+        }
+        else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
     }
 
     public function importTransfer(Request $request)
     {
         //get the file
-        $upload = $request->file('file');
+        $upload=$request->file('file');
         $ext = pathinfo($upload->getClientOriginalName(), PATHINFO_EXTENSION);
         //checking if this is a CSV file
-        if ($ext != 'csv')
+        if($ext != 'csv')
             return redirect()->back()->with('message', __('db.Please upload a CSV file'));
 
-        $filePath = $upload->getRealPath();
+        $filePath=$upload->getRealPath();
         $file_handle = fopen($filePath, 'r');
         $i = 0;
         //validate the file
-        while (!feof($file_handle)) {
+        while (!feof($file_handle) ) {
             $current_line = fgetcsv($file_handle);
-            if ($current_line && $i > 0) {
+            if($current_line && $i > 0){
                 $product_data[] = Product::where('code', $current_line[0])->first();
-                if (!$product_data[$i - 1])
+                if(!$product_data[$i-1])
                     return redirect()->back()->with('message', __('db.Product does not exist!'));
                 $unit[] = Unit::where('unit_code', $current_line[2])->first();
-                if (!$unit[$i - 1])
+                if(!$unit[$i-1])
                     return redirect()->back()->with('message', __('db.Purchase unit does not exist!'));
-                if (strtolower($current_line[4]) != "no tax") {
+                if(strtolower($current_line[4]) != "no tax"){
                     $tax[] = Tax::where('name', $current_line[4])->first();
-                    if (!$tax[$i - 1])
+                    if(!$tax[$i-1])
                         return redirect()->back()->with('message', __('db.Tax name does not exist!'));
-                } else
-                    $tax[$i - 1]['rate'] = 0;
+                }
+                else
+                    $tax[$i-1]['rate'] = 0;
 
                 $qty[] = $current_line[1];
                 $cost[] = $current_line[3];
@@ -957,7 +978,7 @@ class TransferController extends Controller
         }
 
         $data = $request->except('file');
-        $data['reference_no'] = 'tr-' . date("Ymd") . '-' . date("his");
+        $data['reference_no'] = 'tr-' . date("Ymd") . '-'. date("his");
         $document = $request->document;
         if ($document) {
             $v = Validator::make(
@@ -983,19 +1004,20 @@ class TransferController extends Controller
         $lims_transfer_data = Transfer::latest()->first();
 
         foreach ($product_data as $key => $product) {
-            if ($product['tax_method'] == 1) {
+            if($product['tax_method'] == 1){
                 $net_unit_cost = $cost[$key];
                 $product_tax = $net_unit_cost * ($tax[$key]['rate'] / 100) * $qty[$key];
                 $total = ($net_unit_cost * $qty[$key]) + $product_tax;
-            } elseif ($product['tax_method'] == 2) {
+            }
+            elseif($product['tax_method'] == 2){
                 $net_unit_cost = (100 / (100 + $tax[$key]['rate'])) * $cost[$key];
                 $product_tax = ($cost[$key] - $net_unit_cost) * $qty[$key];
                 $total = $cost[$key] * $qty[$key];
             }
-            if ($data['status'] == 1) {
-                if ($unit[$key]['operator'] == '*')
+            if($data['status'] == 1){
+                if($unit[$key]['operator'] == '*')
                     $quantity = $qty[$key] * $unit[$key]['operation_value'];
-                elseif ($unit[$key]['operator'] == '/')
+                elseif($unit[$key]['operator'] == '/')
                     $quantity = $qty[$key] / $unit[$key]['operation_value'];
                 $product_warehouse = Product_Warehouse::where([
                     ['product_id', $product['id']],
@@ -1007,20 +1029,22 @@ class TransferController extends Controller
                     ['product_id', $product['id']],
                     ['warehouse_id', $data['to_warehouse_id']]
                 ])->first();
-                if ($product_warehouse) {
+                if($product_warehouse) {
                     $product_warehouse->qty += $quantity;
                     $product_warehouse->save();
-                } else {
+                }
+                else {
                     $product_warehouse = new Product_Warehouse();
                     $product_warehouse->product_id = $product['id'];
                     $product_warehouse->warehouse_id = $data['to_warehouse_id'];
                     $product_warehouse->qty = $quantity;
                     $product_warehouse->save();
                 }
-            } elseif ($data['status'] == 3) {
-                if ($unit[$key]['operator'] == '*')
+            }
+            elseif ($data['status'] == 3) {
+                if($unit[$key]['operator'] == '*')
                     $quantity = $qty[$key] * $unit[$key]['operation_value'];
-                elseif ($unit[$key]['operator'] == '/')
+                elseif($unit[$key]['operator'] == '/')
                     $quantity = $qty[$key] / $unit[$key]['operation_value'];
                 $product_warehouse = Product_Warehouse::where([
                     ['product_id', $product['id']],
@@ -1053,12 +1077,13 @@ class TransferController extends Controller
     public function edit($id)
     {
         $role = Role::find(Auth::user()->role_id);
-        if ($role->hasPermissionTo('transfers-edit')) {
-            $lims_warehouse_list = Warehouse::where('is_active', true)->get();
+        if($role->hasPermissionTo('transfers-edit')){
+            $lims_warehouse_list = Warehouse::where('is_active',true)->get();
             $lims_transfer_data = Transfer::find($id);
             $lims_product_transfer_data = ProductTransfer::where('transfer_id', $id)->get();
             return view('backend.transfer.edit', compact('lims_warehouse_list', 'lims_transfer_data', 'lims_product_transfer_data'));
-        } else
+        }
+        else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
     }
 
@@ -1066,7 +1091,7 @@ class TransferController extends Controller
     {
         $data = $request->except('document');
         $document = $request->document;
-
+      
         if (isset($data['created_at'])) {
             $data['created_at'] = normalize_to_sql_datetime($data['created_at']);
         } else {
@@ -1116,30 +1141,32 @@ class TransferController extends Controller
                 $quantity = $product_transfer_data->qty / $lims_transfer_unit_data->operation_value;
             }
 
-            if ($lims_transfer_data->status == 1) {
-                if ($product_transfer_data->variant_id) {
+            if($lims_transfer_data->status == 1){
+                if($product_transfer_data->variant_id) {
                     $lims_product_variant_data = ProductVariant::select('id')->FindExactProduct($product_transfer_data->product_id, $product_transfer_data->variant_id)->first();
                     $lims_product_from_warehouse_data = Product_Warehouse::FindProductWithVariant($product_transfer_data->product_id, $product_transfer_data->variant_id, $lims_transfer_data->from_warehouse_id)->first();
                     $lims_product_to_warehouse_data = Product_Warehouse::FindProductWithVariant($product_transfer_data->product_id, $product_transfer_data->variant_id, $lims_transfer_data->to_warehouse_id)->first();
                     $old_product_variant_id[$key] = $lims_product_variant_data->id;
-                } elseif ($product_transfer_data->product_batch_id) {
+                }
+                elseif($product_transfer_data->product_batch_id) {
                     $lims_product_from_warehouse_data = Product_Warehouse::where([
-                        ['product_batch_id', $product_transfer_data->product_batch_id],
-                        ['warehouse_id', $lims_transfer_data->from_warehouse_id]
+                        ['product_batch_id', $product_transfer_data->product_batch_id ],
+                        ['warehouse_id', $lims_transfer_data->from_warehouse_id ]
                     ])->first();
 
                     $lims_product_to_warehouse_data = Product_Warehouse::where([
-                        ['product_batch_id', $product_transfer_data->product_batch_id],
-                        ['warehouse_id', $lims_transfer_data->to_warehouse_id]
+                        ['product_batch_id', $product_transfer_data->product_batch_id ],
+                        ['warehouse_id', $lims_transfer_data->to_warehouse_id ]
                     ])->first();
-                } else {
+                }
+                else {
                     $lims_product_from_warehouse_data = Product_Warehouse::FindProductWithoutVariant($product_transfer_data->product_id, $lims_transfer_data->from_warehouse_id)->first();
                     $lims_product_to_warehouse_data = Product_Warehouse::FindProductWithoutVariant($product_transfer_data->product_id, $lims_transfer_data->to_warehouse_id)->first();
                 }
 
-                if ($product_transfer_data->imei_number) {
+                if($product_transfer_data->imei_number) {
                     //add imei number to from warehouse
-                    if ($lims_product_from_warehouse_data->imei_number)
+                    if($lims_product_from_warehouse_data->imei_number)
                         $lims_product_from_warehouse_data->imei_number .= ',' . $product_transfer_data->imei_number;
                     else
                         $lims_product_from_warehouse_data->imei_number = $product_transfer_data->imei_number;
@@ -1159,22 +1186,25 @@ class TransferController extends Controller
 
                 $lims_product_to_warehouse_data->qty -= $quantity;
                 $lims_product_to_warehouse_data->save();
-            } elseif ($lims_transfer_data->status == 3) {
-                if ($product_transfer_data->variant_id) {
+            }
+            elseif($lims_transfer_data->status == 3) {
+                if($product_transfer_data->variant_id) {
                     $lims_product_variant_data = ProductVariant::select('id')->FindExactProduct($product_transfer_data->product_id, $product_transfer_data->variant_id)->first();
                     $lims_product_from_warehouse_data = Product_Warehouse::FindProductWithVariant($product_transfer_data->product_id, $product_transfer_data->variant_id, $lims_transfer_data->from_warehouse_id)->first();
                     $old_product_variant_id[$key] = $lims_product_variant_data->id;
-                } elseif ($product_transfer_data->product_batch_id) {
+                }
+                elseif($product_transfer_data->product_batch_id) {
                     $lims_product_from_warehouse_data = Product_Warehouse::where([
-                        ['product_batch_id', $product_transfer_data->product_batch_id],
-                        ['warehouse_id', $lims_transfer_data->from_warehouse_id]
+                        ['product_batch_id', $product_transfer_data->product_batch_id ],
+                        ['warehouse_id', $lims_transfer_data->from_warehouse_id ]
                     ])->first();
-                } else {
+                }
+                else {
                     $lims_product_from_warehouse_data = Product_Warehouse::FindProductWithoutVariant($product_transfer_data->product_id, $lims_transfer_data->from_warehouse_id)->first();
                 }
-                if ($product_transfer_data->imei_number) {
+                if($product_transfer_data->imei_number) {
                     //add imei number to from warehouse
-                    if ($lims_product_from_warehouse_data->imei_number)
+                    if($lims_product_from_warehouse_data->imei_number)
                         $lims_product_from_warehouse_data->imei_number .= ',' . $product_transfer_data->imei_number;
                     else
                         $lims_product_from_warehouse_data->imei_number = $product_transfer_data->imei_number;
@@ -1183,9 +1213,10 @@ class TransferController extends Controller
                 $lims_product_from_warehouse_data->save();
             }
 
-            if ($product_transfer_data->variant_id && !(in_array($old_product_variant_id[$key], $product_variant_id))) {
+            if($product_transfer_data->variant_id && !(in_array($old_product_variant_id[$key], $product_variant_id)) ){
                 $product_transfer_data->delete();
-            } elseif (!(in_array($old_product_id[$key], $product_id))) {
+            }
+            elseif( !(in_array($old_product_id[$key], $product_id)) ){
                 $product_transfer_data->delete();
             }
         }
@@ -1202,29 +1233,31 @@ class TransferController extends Controller
                 $quantity = $qty[$key] / $lims_transfer_unit_data->operation_value;
             }
 
-            if ($data['status'] == 1) {
-                if ($lims_product_data->is_variant) {
+            if($data['status'] == 1) {
+                if($lims_product_data->is_variant) {
                     $lims_product_variant_data = ProductVariant::select('variant_id')->find($product_variant_id[$key]);
                     $lims_product_from_warehouse_data = Product_Warehouse::FindProductWithVariant($pro_id, $lims_product_variant_data->variant_id, $data['from_warehouse_id'])->first();
                     $lims_product_to_warehouse_data = Product_Warehouse::FindProductWithVariant($pro_id, $lims_product_variant_data->variant_id, $data['to_warehouse_id'])->first();
                     $variant_id = $lims_product_variant_data->variant_id;
-                } elseif (isset($data['product_batch_id']) && $product_batch_id[$key]) {
+                }
+                elseif(isset($data['product_batch_id']) && $product_batch_id[$key]) {
                     $lims_product_from_warehouse_data = Product_Warehouse::where([
-                        ['product_batch_id', $product_batch_id[$key]],
-                        ['warehouse_id', $data['from_warehouse_id']]
+                        ['product_batch_id', $product_batch_id[$key] ],
+                        ['warehouse_id', $data['from_warehouse_id'] ]
                     ])->first();
 
                     $lims_product_to_warehouse_data = Product_Warehouse::where([
-                        ['product_batch_id', $product_batch_id[$key]],
-                        ['warehouse_id', $data['to_warehouse_id']]
+                        ['product_batch_id', $product_batch_id[$key] ],
+                        ['warehouse_id', $data['to_warehouse_id'] ]
                     ])->first();
                     $product_transfer['product_batch_id'] = $product_batch_id[$key];
-                } else {
+                }
+                else{
                     $lims_product_from_warehouse_data = Product_Warehouse::FindProductWithoutVariant($pro_id, $data['from_warehouse_id'])->first();
                     $lims_product_to_warehouse_data = Product_Warehouse::FindProductWithoutVariant($pro_id, $data['to_warehouse_id'])->first();
                 }
                 //deduct imei number if available
-                if ($imei_number[$key]) {
+                if($imei_number[$key]) {
                     $imei_numbers = explode(",", $imei_number[$key]);
                     $all_imei_numbers = explode(",", $lims_product_from_warehouse_data->imei_number);
                     foreach ($imei_numbers as $number) {
@@ -1238,9 +1271,10 @@ class TransferController extends Controller
                 $lims_product_from_warehouse_data->qty -= $quantity;
                 $lims_product_from_warehouse_data->save();
 
-                if ($lims_product_to_warehouse_data) {
+                if($lims_product_to_warehouse_data){
                     $lims_product_to_warehouse_data->qty += $quantity;
-                } else {
+                }
+                else{
                     $lims_product_to_warehouse_data = new Product_Warehouse();
                     $lims_product_to_warehouse_data->product_id = $pro_id;
                     $lims_product_to_warehouse_data->variant_id = $variant_id;
@@ -1249,29 +1283,32 @@ class TransferController extends Controller
                     $lims_product_to_warehouse_data->qty = $quantity;
                 }
                 //add imei number if available
-                if ($imei_number[$key]) {
-                    if ($lims_product_to_warehouse_data->imei_number)
+                if($imei_number[$key]) {
+                    if($lims_product_to_warehouse_data->imei_number)
                         $lims_product_to_warehouse_data->imei_number .= ',' . $imei_number[$key];
                     else
                         $lims_product_to_warehouse_data->imei_number = $imei_number[$key];
                 }
                 $lims_product_to_warehouse_data->save();
-            } elseif ($data['status'] == 3) {
-                if ($lims_product_data->is_variant) {
+            }
+            elseif($data['status'] == 3) {
+                if($lims_product_data->is_variant) {
                     $lims_product_variant_data = ProductVariant::select('variant_id')->find($product_variant_id[$key]);
                     $lims_product_from_warehouse_data = Product_Warehouse::FindProductWithVariant($pro_id, $lims_product_variant_data->variant_id, $data['from_warehouse_id'])->first();
                     $variant_id = $lims_product_variant_data->variant_id;
-                } elseif ($product_batch_id[$key]) {
+                }
+                elseif($product_batch_id[$key]) {
                     $lims_product_from_warehouse_data = Product_Warehouse::where([
-                        ['product_batch_id', $product_batch_id[$key]],
-                        ['warehouse_id', $data['from_warehouse_id']]
+                        ['product_batch_id', $product_batch_id[$key] ],
+                        ['warehouse_id', $data['from_warehouse_id'] ]
                     ])->first();
                     $product_transfer['product_batch_id'] = $product_batch_id[$key];
-                } else {
+                }
+                else{
                     $lims_product_from_warehouse_data = Product_Warehouse::FindProductWithoutVariant($pro_id, $data['from_warehouse_id'])->first();
                 }
                 //deduct imei number if available
-                if ($imei_number[$key]) {
+                if($imei_number[$key]) {
                     $imei_numbers = explode(",", $imei_number[$key]);
                     $all_imei_numbers = explode(",", $lims_product_from_warehouse_data->imei_number);
                     foreach ($imei_numbers as $number) {
@@ -1297,18 +1334,20 @@ class TransferController extends Controller
             $product_transfer['tax'] = $tax[$key];
             $product_transfer['total'] = $total[$key];
 
-            if ($lims_product_data->is_variant && in_array($product_variant_id[$key], $old_product_variant_id)) {
+            if($lims_product_data->is_variant && in_array($product_variant_id[$key], $old_product_variant_id) ) {
                 ProductTransfer::where([
                     ['transfer_id', $id],
                     ['product_id', $pro_id],
                     ['variant_id', $variant_id]
                 ])->update($product_transfer);
-            } elseif ($variant_id == null && in_array($pro_id, $old_product_id)) {
+            }
+            elseif($variant_id == null && in_array($pro_id, $old_product_id) ){
                 ProductTransfer::where([
                     ['transfer_id', $id],
                     ['product_id', $pro_id]
                 ])->update($product_transfer);
-            } else
+            }
+            else
                 ProductTransfer::create($product_transfer);
         }
 
@@ -1427,12 +1466,12 @@ class TransferController extends Controller
 
         return redirect('transfers')->with('message', __('db.Transfer updated successfully'));
     }
-
+    
     public function deleteBySelection(Request $request)
     {
         $transfer_id = $request['transferIdArray'];
         foreach ($transfer_id as $id) {
-            $lims_transfer_data = Transfer::find($id);
+            $lims_transfer_data =Transfer::find($id);
             $lims_product_transfer_data = ProductTransfer::where('transfer_id', $id)->get();
             foreach ($lims_product_transfer_data as $product_transfer_data) {
                 $lims_transfer_unit_data = Unit::find($product_transfer_data->purchase_unit_id);
@@ -1442,25 +1481,26 @@ class TransferController extends Controller
                     $quantity = $product_transfer_data / $lims_transfer_unit_data->operation_value;
                 }
 
-                if ($lims_transfer_data->status == 1) {
+                if($lims_transfer_data->status == 1) {
                     //add quantity for from warehouse
-                    if ($product_transfer_data->variant_id)
+                    if($product_transfer_data->variant_id)
                         $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant($product_transfer_data->product_id, $product_transfer_data->variant_id, $lims_transfer_data->from_warehouse_id)->first();
                     else
                         $lims_product_warehouse_data = Product_Warehouse::FindProductWithoutVariant($product_transfer_data->product_id, $lims_transfer_data->from_warehouse_id)->first();
                     $lims_product_warehouse_data->qty += $quantity;
                     $lims_product_warehouse_data->save();
                     //deduct quantity for to warehouse
-                    if ($product_transfer_data->variant_id)
+                    if($product_transfer_data->variant_id)
                         $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant($product_transfer_data->product_id, $product_transfer_data->variant_id, $lims_transfer_data->to_warehouse_id)->first();
                     else
                         $lims_product_warehouse_data = Product_Warehouse::FindProductWithoutVariant($product_transfer_data->product_id, $lims_transfer_data->to_warehouse_id)->first();
 
                     $lims_product_warehouse_data->qty -= $quantity;
                     $lims_product_warehouse_data->save();
-                } elseif ($lims_transfer_data->status == 3) {
+                }
+                elseif($lims_transfer_data->status == 3) {
                     //add quantity for from warehouse
-                    if ($product_transfer_data->variant_id)
+                    if($product_transfer_data->variant_id)
                         $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant($product_transfer_data->product_id, $product_transfer_data->variant_id, $lims_transfer_data->from_warehouse_id)->first();
                     else
                         $lims_product_warehouse_data = Product_Warehouse::FindProductWithoutVariant($product_transfer_data->product_id, $lims_transfer_data->from_warehouse_id)->first();
@@ -1472,13 +1512,14 @@ class TransferController extends Controller
             }
             $lims_transfer_data->delete();
             $this->fileDelete(public_path('documents/transfer/'), $lims_transfer_data->document);
+
         }
         return 'Transfer deleted successfully!';
     }
 
     public function destroy($id)
     {
-        $lims_transfer_data = Transfer::find($id);
+        $lims_transfer_data =Transfer::find($id);
         $lims_product_transfer_data = ProductTransfer::where('transfer_id', $id)->get();
         foreach ($lims_product_transfer_data as $product_transfer_data) {
             $lims_transfer_unit_data = Unit::find($product_transfer_data->purchase_unit_id);
@@ -1488,20 +1529,21 @@ class TransferController extends Controller
                 $quantity = $product_transfer_data / $lims_transfer_unit_data->operation_value;
             }
 
-            if ($lims_transfer_data->status == 1) {
+            if($lims_transfer_data->status == 1) {
                 //add quantity for from warehouse
-                if ($product_transfer_data->variant_id)
+                if($product_transfer_data->variant_id)
                     $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant($product_transfer_data->product_id, $product_transfer_data->variant_id, $lims_transfer_data->from_warehouse_id)->first();
-                elseif ($product_transfer_data->product_batch_id) {
+                elseif($product_transfer_data->product_batch_id) {
                     $lims_product_warehouse_data = Product_Warehouse::where([
                         ['product_batch_id', $product_transfer_data->product_batch_id],
                         ['warehouse_id', $lims_transfer_data->from_warehouse_id]
                     ])->first();
-                } else
+                }
+                else
                     $lims_product_warehouse_data = Product_Warehouse::FindProductWithoutVariant($product_transfer_data->product_id, $lims_transfer_data->from_warehouse_id)->first();
                 //add imei number to from warehouse
-                if ($product_transfer_data->imei_number) {
-                    if ($lims_product_warehouse_data->imei_number)
+                if($product_transfer_data->imei_number) {
+                    if($lims_product_warehouse_data->imei_number)
                         $lims_product_warehouse_data->imei_number .= ',' . $product_transfer_data->imei_number;
                     else
                         $lims_product_warehouse_data->imei_number = $product_transfer_data->imei_number;
@@ -1510,17 +1552,18 @@ class TransferController extends Controller
                 $lims_product_warehouse_data->qty += $quantity;
                 $lims_product_warehouse_data->save();
                 //deduct quantity for to warehouse
-                if ($product_transfer_data->variant_id)
+                if($product_transfer_data->variant_id)
                     $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant($product_transfer_data->product_id, $product_transfer_data->variant_id, $lims_transfer_data->to_warehouse_id)->first();
-                elseif ($product_transfer_data->product_batch_id) {
+                elseif($product_transfer_data->product_batch_id) {
                     $lims_product_warehouse_data = Product_Warehouse::where([
                         ['product_batch_id', $product_transfer_data->product_batch_id],
                         ['warehouse_id', $lims_transfer_data->to_warehouse_id]
                     ])->first();
-                } else
+                }
+                else
                     $lims_product_warehouse_data = Product_Warehouse::FindProductWithoutVariant($product_transfer_data->product_id, $lims_transfer_data->to_warehouse_id)->first();
                 //deduct imei number if available
-                if ($product_transfer_data->imei_number) {
+                if($product_transfer_data->imei_number) {
                     $imei_numbers = explode(",", $product_transfer_data->imei_number);
                     $all_imei_numbers = explode(",", $lims_product_warehouse_data->imei_number);
                     foreach ($imei_numbers as $number) {
@@ -1533,20 +1576,22 @@ class TransferController extends Controller
 
                 $lims_product_warehouse_data->qty -= $quantity;
                 $lims_product_warehouse_data->save();
-            } elseif ($lims_transfer_data->status == 3) {
+            }
+            elseif($lims_transfer_data->status == 3) {
                 //add quantity for from warehouse
-                if ($product_transfer_data->variant_id)
+                if($product_transfer_data->variant_id)
                     $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant($product_transfer_data->product_id, $product_transfer_data->variant_id, $lims_transfer_data->from_warehouse_id)->first();
-                elseif ($product_transfer_data->product_batch_id) {
+                elseif($product_transfer_data->product_batch_id) {
                     $lims_product_warehouse_data = Product_Warehouse::where([
                         ['product_batch_id', $product_transfer_data->product_batch_id],
                         ['warehouse_id', $lims_transfer_data->from_warehouse_id]
                     ])->first();
-                } else
+                }
+                else
                     $lims_product_warehouse_data = Product_Warehouse::FindProductWithoutVariant($product_transfer_data->product_id, $lims_transfer_data->from_warehouse_id)->first();
                 //add imei number to from warehouse
-                if ($product_transfer_data->imei_number) {
-                    if ($lims_product_warehouse_data->imei_number)
+                if($product_transfer_data->imei_number) {
+                    if($lims_product_warehouse_data->imei_number)
                         $lims_product_warehouse_data->imei_number .= ',' . $lims_product_warehouse_data->imei_number;
                     else
                         $lims_product_warehouse_data->imei_number = $lims_product_warehouse_data->imei_number;

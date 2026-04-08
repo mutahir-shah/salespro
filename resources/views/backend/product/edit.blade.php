@@ -55,12 +55,13 @@
                                     <div class="form-group">
                                         <label>{{__('db.Product Type')}} * </label>
                                         <div class="input-group">
-                                            <select name="type" required class="form-control selectpicker" id="type">
-                                              <option value="Bag">Bag</option>
-                                                <option value="Box">Box</option>
-                                                <option value="Taan">Taan</option>
+                                            <select name="packing_type" required class="form-control selectpicker" id="packing_type">
+                                              <option @if ($lims_product_data->type == 'Bag') selected @endif value="Bag">Bag</option>
+                                                <option @if ($lims_product_data->type == 'Box') selected @endif value="Box">Box</option>
+                                                <option @if ($lims_product_data->type == 'Taan') selected @endif value="Taan">Taan</option>
                                             </select>
                                             <input type="hidden" name="type_hidden" value="{{$lims_product_data->type}}">
+                                              <input type="hidden" name="type" value="{{$lims_product_data->type}}">
                                         </div>
                                     </div>
                                 </div>

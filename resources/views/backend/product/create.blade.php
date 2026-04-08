@@ -52,13 +52,15 @@
                                     <div class="form-group">
                                         <label>{{__('db.Product Type')}} *</strong> </label>
                                         <div class="input-group">
-                                            <select name="type" required class="form-control selectpicker" id="type">
+                                            <select name="packing_type" required class="form-control selectpicker" id="packing_type">
                                                 <option value="Bag">Bag</option>
                                                 <option value="Box">Box</option>
                                                 <option value="Taan">Taan</option>
                                             </select>
+                                            <input type="hidden" name="type" value="standard" id="type"></input>
                                         </div>
                                     </div>
+                                      
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
