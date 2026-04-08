@@ -3,35 +3,16 @@
 namespace App\Http\Controllers;
 
 use Stripe\Stripe;
-use App\Models\Tax;
-use App\Models\Sale;
-use App\Models\Unit;
-use App\Models\Account;
-use App\Models\Payment;
-use App\Models\Product;
-use App\Models\Currency;
-use App\Models\Purchase;
-use App\Models\Supplier;
-use App\Models\Warehouse;
-use App\Models\PosSetting;
-use App\Traits\TenantInfo;
-use App\Models\CustomField;
-use App\Traits\StaffAccess;
-use App\Models\Product_Sale;
-use App\Models\ProductBatch;
-use Illuminate\Http\Request;
-use App\Models\GeneralSetting;
-use App\Models\ProductVariant;
-use App\Models\ProductPurchase;
+use App\Models\{Tax, Sale, Unit, Account, Payment, Product, Currency, Purchase, Supplier, Warehouse};
+use App\Models\{PosSetting, CustomField, Product_Sale, ProductBatch, Product_Warehouse};
+use App\Models\{GeneralSetting, ProductVariant, ProductPurchase, PaymentWithCheque, PaymentWithCreditCard};
 use App\Services\PaymentService;
-use App\Models\PaymentWithCheque;
-use App\Models\Product_Warehouse;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Auth;
-use App\Models\PaymentWithCreditCard;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\{Auth, DB, Validator};
 use App\Http\Requests\Purchase\UpdatePurchaseRequest;
+use Carbon\Carbon;
+use App\Traits\{TenantInfo, StaffAccess};
 
 class PurchaseController extends Controller
 {
@@ -114,6 +95,7 @@ class PurchaseController extends Controller
             }
             $lims_tax_list = Tax::where('is_active', true)->get();
             $lims_product_list_without_variant = $this->productWithoutVariant();
+
             $lims_product_list_with_variant = $this->productWithVariant();
             $currency_list = Currency::where('is_active', true)->get();
             $custom_fields = CustomField::where('belongs_to', 'purchase')->get();
@@ -176,13 +158,14 @@ class PurchaseController extends Controller
                 $data['created_at'] = date('Y-m-d H:i:s');
             }
 
-            // Due date calculate from payment terms
+            // Due date calculate from payment terms 
             if (!empty($data['due_date'])) {
-                $data['due_date'] = $data['due_date']->format('Y-m-d');
+                // Ensure it's a Carbon instance before formatting
+                $data['due_date'] = Carbon::parse($data['due_date'])->format('Y-m-d');
             }
 
             if (!empty($data['pay_term_no']) && !empty($data['pay_term_period'])) {
-                $purchaseDate = isset($data['created_at']) ? \Carbon\Carbon::parse($data['created_at']) : \Carbon\Carbon::now();
+                $purchaseDate = isset($data['created_at']) ? Carbon::parse($data['created_at']) : Carbon::now();
 
                 if ($data['pay_term_period'] === 'days') {
                     $data['due_date'] = $purchaseDate->addDays((int)$data['pay_term_no'])->format('Y-m-d');

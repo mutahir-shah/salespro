@@ -1003,7 +1003,8 @@ class SaleController extends Controller
 
 
         if (isset($data['pay_term_no']) && $data['pay_term_no']) {
-            $sale_date = isset($data['created_at']) ? $data['created_at'] : date('Y-m-d');
+            
+        $sale_date = isset($data['created_at']) ? Carbon::parse($data['created_at'])->format('Y-m-d') : date('Y-m-d');
             if ($data['pay_term_period'] == 'days') {
                 $data['due_date'] = date('Y-m-d', strtotime($sale_date . ' +' . $data['pay_term_no'] . ' days'));
             } elseif ($data['pay_term_period'] == 'months') {

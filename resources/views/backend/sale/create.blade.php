@@ -1011,7 +1011,7 @@
         // Trigger on input
         $input.on('input', function () {
             const value = $(this).val().trim();
-            if (value.length >= 3) {
+            if (value.length >= 4) {
                 click = 0;
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(() => searchProducts(value), doneTypingInterval);
@@ -1023,7 +1023,7 @@
         // Trigger on paste
         $input.on('paste', function (e) {
             const pastedData = (e.originalEvent || e).clipboardData.getData('text');
-            if (pastedData.length >= 3) {
+            if (pastedData.length >= 4) {
                 click = 0;
                 searchProducts(pastedData.trim());
             }
@@ -1599,15 +1599,16 @@ function productSearch(data) {
 
                 }
                 var flag = 1;
-                if (pre_qty > 0) {
-                    var qty = data[15];
-                    $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ') .qty').val(qty);
-
-                    product_price[rowindex] = parseFloat(data[2] * currency['exchange_rate']) + parseFloat(data[2] * currency['exchange_rate'] * customer_group_rate);
-
-                    checkDiscount(String(qty), true);
-                    flag = 0;
-                }
+                // Always add as new product instead of increasing quantity
+                // if (pre_qty > 0) {
+                //     var qty = data[15];
+                //     $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ') .qty').val(qty);
+                //
+                //     product_price[rowindex] = parseFloat(data[2] * currency['exchange_rate']) + parseFloat(data[2] * currency['exchange_rate'] * customer_group_rate);
+                //
+                //     checkDiscount(String(qty), true);
+                //     flag = 0;
+                // }
                 $("input[name='product_code_name']").val('');
 
                 if(flag){
