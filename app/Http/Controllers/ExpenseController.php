@@ -3,19 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Expense;
-use App\Models\Account;
-use App\Models\Warehouse;
-use App\Models\CashRegister;
-use App\Traits\StaffAccess;
-use App\Traits\TenantInfo;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\Validator;
+use App\Models\{Expense,Account,Warehouse,CashRegister};
+use App\Traits\{StaffAccess,TenantInfo};
+use Spatie\Permission\Models\{Role,Permission};
+use Illuminate\Support\Facades\{Validator,DB,Auth};
 use App\Helpers\DateHelper;
-use DateTime;
-use Auth;
-use DB;
+use DateTime; 
 
 class ExpenseController extends Controller
 {
@@ -195,6 +188,7 @@ class ExpenseController extends Controller
     {
         $data = $request->except('document');
         $data = $request->all();
+        dd($data);
         $document = $request->document;
         if ($document) {
             $v = Validator::make(
