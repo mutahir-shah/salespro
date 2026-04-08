@@ -446,25 +446,30 @@ $('#lims_productcodeSearch').on('input', function(){
 });
 
 var lims_productcodeSearch = $('#lims_productcodeSearch');
+
 lims_productcodeSearch.autocomplete({
     minLength: 5, // require 5 characters
     source: function(request, response) {
         var matcher = new RegExp(".?" + $.ui.autocomplete.escapeRegex(request.term), "i");
-        response($.grep(lims_product_code, function(item) {
+        response($.grep(lims_product_array, function(item) {
             return matcher.test(item);
         }));
     },
+
     response: function(event, ui) {
+
         // stop auto select before 5 characters
         if ($(this).val().length < 5) {
             return;
         }
+
         if (ui.content.length == 1) {
             var data = ui.content[0].value;
             $(this).autocomplete("close");
             productSearch(data);
         }
     },
+
     select: function(event, ui) {
         var data = ui.item.value;
         productSearch(data);

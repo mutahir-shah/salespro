@@ -324,7 +324,7 @@ lims_productcodeSearch.autocomplete({
     minLength: 5, // require 5 characters
     source: function(request, response) {
         var matcher = new RegExp(".?" + $.ui.autocomplete.escapeRegex(request.term), "i");
-        response($.grep(lims_product_code, function(item) {
+        response($.grep(lims_product_array, function(item) {
             return matcher.test(item);
         }));
     },
