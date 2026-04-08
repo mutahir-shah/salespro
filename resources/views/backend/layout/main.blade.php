@@ -665,6 +665,7 @@
                         <p class="italic">
                             <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
                         <form action="{{ route('expenses.store') }}" method="post" enctype="multipart/form-data">
+                            @csrf
                         <?php
                         $lims_expense_category_list = DB::table('expense_categories')->where('is_active', true)->get();
                         if (Auth::user()->role_id > 2) {
@@ -789,6 +790,7 @@
                         <p class="italic">
                             <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
                         <form action="{{ route('incomes.store') }}" method="post">
+                             @csrf
                         <?php
                         $lims_income_category_list = DB::table('income_categories')->where('is_active', true)->get();
                         if (Auth::user()->role_id > 2) {
@@ -867,6 +869,7 @@
             <div role="document" class="modal-dialog">
                 <div class="modal-content">
                     <form action="{{ route('return-sale.create') }}" method="get">
+                         @csrf
                     <div class="modal-header">
                         <h5 id="exampleModalLabel" class="modal-title">Add Sale Return</h5>
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span
@@ -897,6 +900,7 @@
             <div role="document" class="modal-dialog">
                 <div class="modal-content">
                     <form action="{{ route('exchange.create') }}" method="get">
+                         @csrf
                     <div class="modal-header">
                         <h5 id="exampleModalLabel" class="modal-title">Add Exchange</h5>
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span
@@ -927,6 +931,7 @@
             <div role="document" class="modal-dialog">
                 <div class="modal-content">
                     <form action="{{ route('return-purchase.create') }}" method="get">
+                         @csrf
                     <div class="modal-header">
                         <h5 id="exampleModalLabel" class="modal-title">Add Purchase Return</h5>
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span
@@ -965,6 +970,7 @@
                         <p class="italic">
                             <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
                         <form action="{{ route('accounts.store') }}" method="post">
+                             @csrf
                         <div class="form-group">
                             <label>{{ __('Account No') }} *</label>
                             <input type="text" name="account_no" required class="form-control">
