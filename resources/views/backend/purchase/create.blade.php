@@ -837,6 +837,7 @@ lims_productcodeSearch.autocomplete({
         productSearch(data);
     }
 });
+
     $('body').on('focus',".expired-date", function() {
         $(this).datepicker({
             format: "yyyy-mm-dd",
