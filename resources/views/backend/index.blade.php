@@ -202,19 +202,7 @@
                                 </div>
                             </div>
 
-                            <!-- Count item widget-->
-                            <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <div class="icon"><i class="dripicons-wallet" style="color: #f66162"></i></div>
-                                    <div>
-                                        <div class="count-number expense-data">
-                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                        </div>
-                                        <div class="name"><strong style="color: #f66162">{{ __('db.Expense') }}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                         
 
                             <!-- Count item widget-->
                             <div class="col-sm-3">
@@ -400,6 +388,50 @@
                                     </div>
                                 </div>
                             </div> 
+
+                               <!-- Count item widget-->
+                            <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <div class="icon"><i class="dripicons-wallet" style="color: #f66162"></i></div>
+                                    <div>
+                                        <div class="count-number expense-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </div>
+                                        <div class="name"><strong style="color: #f66162">{{ __('db.Expense') }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                               <!-- Count item widget-->
+                            <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <div class="icon"><i class="dripicons-wallet" style="color: #f66162"></i></div>
+                                    <div>
+                                        <div class="count-number" id="totalRent">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </div>
+                                        <div class="name"><strong style="color: #f66162">{{ __('Total Rent') }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                                <!-- Count item widget-->
+                            <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <div class="icon"><i class="dripicons-wallet" style="color: #f66162"></i></div>
+                                    <div>
+                                        <div class="count-number" id="totalBill">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </div>
+                                        <div class="name"><strong style="color: #f66162">{{ __('Total Bill') }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
 
                         </div>
@@ -687,10 +719,7 @@
                             (item.total_price / item.exchange_rate).toFixed({{ $general_setting->decimal }}) + '</td></tr>');
                     })
                 }
-            });
-        });
-
-        $(document).ready(function() {
+            }); 
             $.ajax({
                 url: '{{ url('/yearly-best-selling-qty') }}',
                 type: 'GET',
@@ -711,9 +740,7 @@
                     })
                 }
             });
-        });
-
-        $(document).ready(function() {
+        
             $.ajax({
                 url: '{{ url('/monthly-best-selling-qty') }}',
                 type: 'GET',
@@ -734,9 +761,7 @@
                     })
                 }
             });
-        });
-
-        $(document).ready(function() {
+      
             $.ajax({
                 url: "{{ url('/recent-sale') }}",
                 type: 'GET',
@@ -762,9 +787,7 @@
                     })
                 }
             });
-        });
-
-        $(document).ready(function() {
+        
             $.ajax({
                 url: '{{ url('/recent-purchase') }}',
                 type: 'GET',
@@ -793,9 +816,7 @@
                     })
                 }
             });
-        });
-
-        $(document).ready(function() {
+        
             $.ajax({
                 url: '{{ url('/recent-quotation') }}',
                 type: 'GET',
@@ -819,9 +840,7 @@
                     })
                 }
             });
-        });
-
-        $(document).ready(function() {
+        
             $.ajax({
                 url: '{{ url('/recent-payment') }}',
                 type: 'GET',
@@ -838,6 +857,32 @@
                 }
             });
         });
+
+
+        
+ function singleCategoryWiseExpenses(starting_date = null, ending_date = null,warehouse_id=null) {
+    var date = '&starting_date=' + starting_date + '&ending_date=' + ending_date;
+   
+        $.ajax({
+            url: '{{route("dashboard.rent-category-wise-expenses")}}/?warehouse_id=' + warehouse_id + date+'&category_id=1',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+              $('#totalRent').text(data.total_amount);
+
+            }
+        });
+
+          $.ajax({
+            url: '{{route("dashboard.rent-category-wise-expenses")}}/?warehouse_id=' + warehouse_id + date+'&category_id=2',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+              $('#totalBill').text(data.total_amount);
+            }
+        });
+
+}
 
         function dateFormat(inputDate, format) {
             const date = new Date(inputDate);
@@ -903,6 +948,8 @@
             $.get('dashboard-filter/' + start_date + '/' + end_date + '/' + warehouse_id, function(data) {
                 dashboardFilter(data);
             });
+
+            singleCategoryWiseExpenses(start_date,end_date,warehouse_id);
         });
 
         function dashboardFilter(data) {

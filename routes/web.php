@@ -188,6 +188,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::get('/dashboard-filter/{start_date}/{end_date}/{warehouse_id}', 'dashboardFilter');
         Route::get('addon-list', 'addonList');
         Route::get('my-transactions/{year}/{month}', 'myTransaction');
+        Route::get('/dashboard/rent-category-wise-expenses', 'categoryTotalExpense')->name('dashboard.rent-category-wise-expenses');
     });
 
     // Need to check again
@@ -446,8 +447,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::get('{id}/create_purchase', 'createPurchase')->name('quotation.create_purchase');
             Route::post('sendmail', 'sendMail')->name('quotation.sendmail');
             Route::post('deletebyselection', 'deleteBySelection');
-            Route::get('invoice/{id}','genInvoice')->name('quotation.invoice');
-
+            Route::get('invoice/{id}', 'genInvoice')->name('quotation.invoice');
         });
     });
     Route::resource('quotations', QuotationController::class);
@@ -853,18 +853,17 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
     });
 
     Route::controller(DamageStockController::class)->group(function () {
-        Route::get('damage-stock/getproduct/{id}',       'getProduct')         ->name('damage-stock.getproduct');
-        Route::get('damage-stock/lims_product_search',   'limsProductSearch')  ->name('damage-stock.search');
+        Route::get('damage-stock/getproduct/{id}',       'getProduct')->name('damage-stock.getproduct');
+        Route::get('damage-stock/lims_product_search',   'limsProductSearch')->name('damage-stock.search');
         Route::post('damage-stock/deletebyselection',    'deleteBySelection');
     });
     Route::resource('damage-stock', DamageStockController::class);
 
     // booking route..........
     Route::controller(BookingController::class)->group(function () {
-        Route::get('bookings/calendar',           'index')            ->name('booking.index');
-        Route::get('bookings/events',             'getEvents')        ->name('booking.events');
+        Route::get('bookings/calendar',           'index')->name('booking.index');
+        Route::get('bookings/events',             'getEvents')->name('booking.events');
         Route::post('bookings/deletebyselection', 'deleteBySelection');
     });
     Route::resource('bookings', BookingController::class)->except(['create', 'edit']);
-
 });
