@@ -274,7 +274,119 @@
                                     </div>
                                 </div>
                             </div>
+
+                            
+                            <!-- Count item widget product_cost-->
+                            <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <div class="icon"><i class="dripicons-return" style="color: #00c689;transform:rotate(180deg)"></i></div>
+                                    <a href="{{route('return-purchase.index')}}">
+                                        <div>
+                                            <div class="count-number product_cost-data">
+                                                {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                            </div>
+                                            <div class="name"><strong style="color: #00c689">{{ __('db.Product Cost') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            
             
+                            <!-- Count item widget payroll_amount-->
+                            <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <div class="icon"><i class="dripicons-return" style="color: #00c689;transform:rotate(180deg)"></i></div>
+                                    <a href="{{route('return-purchase.index')}}">
+                                        <div>
+                                            <div class="count-number payroll_amount-data">
+                                                {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                            </div>
+                                            <div class="name"><strong style="color: #00c689">{{ __('db.Payroll Amount') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+
+                         <!-- Count item widget billers -->
+                            <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <div class="icon"><i class="dripicons-return" style="color: #00c689;transform:rotate(180deg)"></i></div>
+                                    <a href="{{route('return-purchase.index')}}">
+                                        <div>
+                                            <div class="count-number billers-data">
+                                                {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                            </div>
+                                            <div class="name"><strong style="color: #00c689">{{ __('db.Total Billers') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+
+                          
+
+                             <!-- Count item widget remaining stock -->
+                             <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <x-info title="Total quantity of products in stock" type="info" />
+                                    <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
+                                    <div>
+                                        <div class="count-number remaining_stock-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('db.Remaining Stock') }}</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            
+                             <!-- Count item widget total quantity sold -->
+                             <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <x-info title="Total quantity of products sold" type="info" />
+                                    <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
+                                    <div>
+                                        <div class="count-number total_quantity_sold-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('db.Total Quantity Sold') }}</strong></div>
+                                    </div>
+                                </div>
+                            </div> 
+  
+                               <!-- Count item widget total quantity sold -->
+                             <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <x-info title="Total quantity of products sold" type="info" />
+                                    <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
+                                    <div>
+                                        <div class="count-number supplier_total_dues-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('db.Total Supplier Dues') }}</strong></div>
+                                    </div>
+                                </div>
+                            </div> 
+
+
+                               <!-- Count item widget total quantity sold -->
+                             <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <x-info title="Total quantity of products sold" type="info" />
+                                    <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
+                                    <div>
+                                        <div class="count-number customer_total_dues-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('db.Total Customer Dues') }}</strong></div>
+                                    </div>
+                                </div>
+                            </div> 
+
+
                         </div>
                     </div>
                 @endif
@@ -817,6 +929,36 @@
             $('.profit-data').hide();
             $('.profit-data').html(parseFloat(data[2] ?? 0).toFixed({{ $general_setting->decimal }}));
             $('.profit-data').show(500);
+
+            $('.product_cost-data').hide();
+            $('.product_cost-data').html(parseFloat(data[9] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.product_cost-data').show(500);
+
+            $('.payroll_amount-data').hide();
+            $('.payroll_amount-data').html(parseFloat(data[10] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.payroll_amount-data').show(500);
+
+            $('.billers-data').hide();
+            $('.billers-data').html(parseFloat(data[11] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.billers-data').show(500);
+            
+            $('.remaining_stock-data').hide();
+            $('.remaining_stock-data').html(parseFloat(data[12] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.remaining_stock-data').show(500);
+
+            $('.total_quantity_sold-data').hide();
+            $('.total_quantity_sold-data').html(parseFloat(data[13] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.total_quantity_sold-data').show(500);
+
+            $('.supplier_total_dues-data').hide();
+            $('.supplier_total_dues-data').html(parseFloat(data[14] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.supplier_total_dues-data').show(500);
+
+            $('.customer_total_dues-data').hide();
+            $('.customer_total_dues-data').html(parseFloat(data[15] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.customer_total_dues-data').show(500);
+            
+
         }
 
         $(function () {

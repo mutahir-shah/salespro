@@ -6,14 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product_Warehouse extends Model
 {
-	protected $table = 'product_warehouse';
-    protected $fillable =[
-        "product_id", "product_batch_id", "variant_id", "imei_number", "warehouse_id", "qty", "price"
+    protected $table = 'product_warehouse';
+    protected $fillable = [
+        "product_id",
+        "product_batch_id",
+        "variant_id",
+        "imei_number",
+        "warehouse_id",
+        "qty",
+        "price"
     ];
 
     public function scopeFindProductWithVariant($query, $product_id, $variant_id, $warehouse_id)
     {
-    	return $query->where([
+        return $query->where([
             ['product_id', $product_id],
             ['variant_id', $variant_id],
             ['warehouse_id', $warehouse_id]
@@ -22,9 +28,13 @@ class Product_Warehouse extends Model
 
     public function scopeFindProductWithoutVariant($query, $product_id, $warehouse_id)
     {
-    	return $query->where([
+        return $query->where([
             ['product_id', $product_id],
             ['warehouse_id', $warehouse_id]
         ]);
+    }
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

@@ -1012,9 +1012,7 @@ class SaleController extends Controller
             }
         }
         $lims_sale_data = Sale::create($data);
-
         $data['paid_amount'] = $new_data['paid_amount'];
-
         //inserting data for custom fields
         $custom_field_data = [];
         $custom_fields = CustomField::where('belongs_to', 'sale')->select('name', 'type')->get();
