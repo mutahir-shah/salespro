@@ -3,30 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\ReturnPurchase;
-use App\Models\Warehouse;
-use App\Models\Supplier;
-use App\Models\Tax;
-use App\Models\Product;
-use App\Models\Product_Warehouse;
-use App\Models\Unit;
-use App\Models\PurchaseProductReturn;
-use App\Models\Account;
-use App\Models\ProductVariant;
-use App\Models\ProductBatch;
-use App\Models\Variant;
-use App\Models\Purchase;
-use App\Models\ProductPurchase;
-use App\Models\Currency;
-use Auth;
-use DB;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use App\Mail\UserNotification;
-use App\Models\Payment;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
+use App\Models\{ReturnPurchase,Warehouse,Supplier,Tax,Product,Product_Warehouse,Unit,PurchaseProductReturn,Account,ProductVariant};
+use App\Models\{ProductBatch,Variant,Purchase,ProductPurchase,Currency,Payment}; 
+use Spatie\Permission\Models\{Role,Permission};
+use Illuminate\Support\Facades\{Validator,Mail,DB,Auth};
 use App\Traits\TenantInfo;
+use App\Mail\UserNotification;
+use Carbon\Carbon;
 
 class ReturnPurchaseController extends Controller
 {
@@ -52,7 +35,7 @@ class ReturnPurchaseController extends Controller
                 $ending_date = $request->input('ending_date');
             }
             else {
-                $starting_date = date("Y-m-d", strtotime(date('Y-m-d', strtotime('-1 year', strtotime(date('Y-m-d') )))));
+                $starting_date = date("Y-m-d", strtotime(date('Y-m-d', strtotime('-1 month', strtotime(date('Y-m-d') )))));
                 $ending_date = date("Y-m-d");
             }
 
@@ -421,14 +404,15 @@ class ReturnPurchaseController extends Controller
     {
         $data = $request->except('document');
         //return dd($data);
-        $data['reference_no'] = 'prr-' . date("Ymd") . '-'. date("his");
-        $data['user_id'] = Auth::id();
-        $lims_purchase_data = Purchase::select('warehouse_id', 'supplier_id', 'currency_id', 'exchange_rate')->find($data['purchase_id']);
-        $data['user_id'] = Auth::id();
-        $data['supplier_id'] = $lims_purchase_data->supplier_id;
-        $data['warehouse_id'] = $lims_purchase_data->warehouse_id;
-        $data['currency_id'] = $lims_purchase_data->currency_id;
+        $data['reference_no']  = 'prr-' . date("Ymd") . '-'. date("his");
+        $data['user_id']       = Auth::id();
+        $lims_purchase_data    = Purchase::select('warehouse_id', 'supplier_id', 'currency_id', 'exchange_rate')->find($data['purchase_id']);
+        $data['user_id']       = Auth::id();
+        $data['supplier_id']   = $lims_purchase_data->supplier_id;
+        $data['warehouse_id']  = $lims_purchase_data->warehouse_id;
+        $data['currency_id']   = $lims_purchase_data->currency_id;
         $data['exchange_rate'] = $lims_purchase_data->exchange_rate;
+         $data['created_at']   =  Carbon::parse($data['created_at'])->format('Y-m-d H:i:s');
         $document = $request->document;
         if ($document) {
             $v = Validator::make(

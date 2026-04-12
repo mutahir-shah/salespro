@@ -14,6 +14,18 @@
                         <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
                         <form action="{{ route('return-purchase.store') }}" method="POST" enctype="multipart/form-data" class="payment-form">
                             @csrf
+                              <div class="row">
+                                     <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.date')}}</label>
+                                            @can('change_sale_date')
+                                                <input type="text" name="created_at" class="form-control date" placeholder="{{ __('db.Choose date') }}" value="{{date($general_setting->date_format,strtotime('now'))}}" />
+                                            @else
+                                                <input type="text" name="created_at" class="form-control date" placeholder="{{ __('db.Choose date') }}" value="{{date($general_setting->date_format,strtotime('now'))}}" readonly/>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="row">

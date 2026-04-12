@@ -464,8 +464,7 @@ class HomeController extends Controller
     private function getTotalDues()
     {
         // Supplier dues
-        $supplier_total_dues = Purchase::whereNull('deleted_at')
-            ->selectRaw('COALESCE(SUM(grand_total - paid_amount),0) as remaining_balance')->value('remaining_balance');
+        $supplier_total_dues = Purchase::whereNull('deleted_at')->selectRaw('COALESCE(SUM(grand_total - paid_amount),0) as remaining_balance')->value('remaining_balance');
         $total_returned = DB::table('return_purchases')->selectRaw('COALESCE(SUM(grand_total),0) as total')->value('total');
         $supplier_total_dues = max(0, $supplier_total_dues - $total_returned);
 
@@ -477,8 +476,8 @@ class HomeController extends Controller
             })->selectRaw('COALESCE(SUM(grand_total - paid_amount),0) as remaining_balance')->value('remaining_balance');
 
         return [
-            'supplier_total_dues' => number_format($supplier_total_dues, 0),
-            'customer_total_dues' => number_format($customer_total_dues, 0),
+            'supplier_total_dues' => $supplier_total_dues,
+            'customer_total_dues' => $customer_total_dues
         ];
     }
 

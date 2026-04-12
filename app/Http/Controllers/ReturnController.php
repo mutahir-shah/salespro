@@ -324,7 +324,6 @@ class ReturnController extends Controller
         try {
             // $used_points = ceil($data['amount'] / $lims_reward_point_setting_data->per_point_amount);
             $data = $request->except('document', 'total_sale_discount');
-
             $data['reference_no'] = 'rr-' . date("Ymd") . '-' . date("his");
             $data['total_discount'] = $request->total_sale_discount;
             $data['user_id'] = Auth::id();
@@ -420,8 +419,11 @@ class ReturnController extends Controller
             $tax_rate = $data['tax_rate'];
             $tax = $data['tax'];
             $total = $data['subtotal'];
+
             foreach ($product_sale_ids as $product_sale_id) {
                 $key = array_search($product_sale_id, $data['product_sale_id']);
+                
+                if($qty[$key] == 0 || $qty[$key] === '0') continue; // skip if quantity is 0
                 $pro_id = $data['product_id'][$key];
                 $lims_product_data = Product::find($pro_id);
                 $variant_id = null;
@@ -533,8 +535,8 @@ class ReturnController extends Controller
                         'tax_rate' => $tax_rate[$key],
                         'tax' => $tax[$key],
                         'total' => $total[$key],
-                        'created_at' => \Carbon\Carbon::now(),
-                        'updated_at' => \Carbon\Carbon::now()
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
                     ]
                 );
                 $product_sale_data = Product_Sale::where([
