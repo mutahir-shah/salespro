@@ -423,7 +423,7 @@
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
                                     <div class="icon"><i class="dripicons-wallet" style="color: #f66162"></i></div>
-                                    <div>
+                                    <div>{{ config('currency') }}
                                         <div class="count-number" id="totalBill">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                         </div>
