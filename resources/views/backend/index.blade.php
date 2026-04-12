@@ -285,7 +285,23 @@
                                             <div class="count-number product_cost-data">
                                                 {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                             </div>
-                                            <div class="name"><strong style="color: #00c689">{{ __('db.Product Cost') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
+                                            <div class="name"><strong style="color: #00c689">{{ __('Product Cost') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+
+                             <!-- Count item widget-->
+                            <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <div class="icon"><i class="dripicons-return" style="color: #00c689;transform:rotate(180deg)"></i></div>
+                                    <a href="{{route('return-purchase.index')}}">
+                                        <div>
+                                            <div class="count-number product_selling_cost-data">
+                                                {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                            </div>
+                                            <div class="name"><strong style="color: #00c689">{{ __('db.Product Selling Cost') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
                                         </div>
                                     </a>
                                 </div>
@@ -302,7 +318,7 @@
                                             <div class="count-number payroll_amount-data">
                                                 {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                             </div>
-                                            <div class="name"><strong style="color: #00c689">{{ __('db.Payroll Amount') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
+                                            <div class="name"><strong style="color: #00c689">{{ __('Payroll Amount') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
                                         </div>
                                     </a>
                                 </div>
@@ -318,7 +334,7 @@
                                             <div class="count-number billers-data">
                                                 {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                             </div>
-                                            <div class="name"><strong style="color: #00c689">{{ __('db.Total Billers') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
+                                            <div class="name"><strong style="color: #00c689">{{ __('Total Billers') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
                                         </div>
                                     </a>
                                 </div>
@@ -336,7 +352,7 @@
                                         <div class="count-number remaining_stock-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                         </div>
-                                        <div class="name"><strong style="color: #297ff9">{{ __('db.Remaining Stock') }}</strong></div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('Remaining Stock') }}</strong></div>
                                     </div>
                                 </div>
                             </div>
@@ -352,7 +368,7 @@
                                         <div class="count-number total_quantity_sold-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                         </div>
-                                        <div class="name"><strong style="color: #297ff9">{{ __('db.Total Quantity Sold') }}</strong></div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('Total Quantity Sold') }}</strong></div>
                                     </div>
                                 </div>
                             </div> 
@@ -366,11 +382,10 @@
                                         <div class="count-number supplier_total_dues-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                         </div>
-                                        <div class="name"><strong style="color: #297ff9">{{ __('db.Total Supplier Dues') }}</strong></div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('Total Supplier Dues') }}</strong></div>
                                     </div>
                                 </div>
                             </div> 
-
 
                                <!-- Count item widget total quantity sold -->
                              <div class="col-sm-3">
@@ -381,7 +396,7 @@
                                         <div class="count-number customer_total_dues-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                         </div>
-                                        <div class="name"><strong style="color: #297ff9">{{ __('db.Total Customer Dues') }}</strong></div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('db.total_customer_dues') }}</strong></div>
                                     </div>
                                 </div>
                             </div> 
@@ -933,6 +948,10 @@
             $('.product_cost-data').hide();
             $('.product_cost-data').html(parseFloat(data[9] ?? 0).toFixed({{ $general_setting->decimal }}));
             $('.product_cost-data').show(500);
+ 
+            $('.product_selling_cost-data').hide();
+            $('.product_selling_cost-data').html(parseFloat(data[16] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.product_selling_cost-data').show(500);            
 
             $('.payroll_amount-data').hide();
             $('.payroll_amount-data').html(parseFloat(data[10] ?? 0).toFixed({{ $general_setting->decimal }}));

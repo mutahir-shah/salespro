@@ -406,7 +406,7 @@ class HomeController extends Controller
             $remaining_stock   = $this->totalQuantity($warehouse_id);
             $totalQuantitySold = $this->totalQuantitySold($warehouse_id, $start_date, $end_date);
             $totalDues         = $this->getTotalDues(); // Call the method to get dues, but not using the returned values here. You can modify this as needed.
-          
+            $remainingProductSellingCost = $this->remainingProductSellingCost($warehouse_id);
 
 
             $revenue = $total_sale - $return + $income;
@@ -430,7 +430,26 @@ class HomeController extends Controller
         $data[13] = $totalQuantitySold ?? 0;
         $data[14] = $totalDues['supplier_total_dues'] ?? 0;
         $data[15] = $totalDues['customer_total_dues'] ?? 0;
+        $data[16] = $remainingProductSellingCost ?? 0;
         return      $data;
+    }
+
+
+    private function remainingProductSellingCost($warehouse_id = null)
+    {
+        return Product::where('is_active', 1)->join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
+            ->where('product_warehouse.qty', '>', 0)->when(!empty($warehouse_id), function ($query) use ($warehouse_id) {
+                return $query->where('product_warehouse.warehouse_id', $warehouse_id);
+            })->selectRaw('SUM(product_warehouse.qty * products.price) as total_price')->value('total_price');
+
+        // $totalCost = Product::where('is_active', 1)
+        //     ->join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
+        //     ->where('product_warehouse.qty', '>', 0)
+        //     ->when(!empty($warehouse_id), function ($query) use ($warehouse_id) {
+        //         return $query->where('product_warehouse.warehouse_id', $warehouse_id);
+        //     })
+        //     ->selectRaw('SUM(product_warehouse.qty * products.cost) as total_cost')
+        //     ->value('total_cost');
     }
     private function totalQuantitySold($warehouse_id, $start_date, $end_date)
     {
