@@ -248,6 +248,21 @@
                                 </div>
                             </div>
 
+                                  <!-- Count item widget total quantity sold -->
+                             <div class="col-sm-3">
+                                <div class="wrapper count-title">
+                                    <x-info title="Total quantity of products sold" type="info" />
+                                    <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
+                                    <div>
+                                        <div class="count-number supplier_total_dues-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('Total Supplier Dues') }}</strong></div>
+                                    </div>
+                                </div>
+                            </div> 
+
+
                             <!-- Count item widget-->
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
@@ -361,20 +376,7 @@
                                 </div>
                             </div> 
   
-                               <!-- Count item widget total quantity sold -->
-                             <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <x-info title="Total quantity of products sold" type="info" />
-                                    <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
-                                    <div>
-                                        <div class="count-number supplier_total_dues-data">
-                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                        </div>
-                                        <div class="name"><strong style="color: #297ff9">{{ __('Total Supplier Dues') }}</strong></div>
-                                    </div>
-                                </div>
-                            </div> 
-
+                         
                                <!-- Count item widget total quantity sold -->
                              <div class="col-sm-3">
                                 <div class="wrapper count-title">
