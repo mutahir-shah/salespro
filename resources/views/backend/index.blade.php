@@ -396,7 +396,7 @@
                                         <div class="count-number customer_total_dues-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                         </div>
-                                        <div class="name"><strong style="color: #297ff9">{{ __('db.total_customer_dues') }}</strong></div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('Total Customer Dues') }}</strong></div>
                                     </div>
                                 </div>
                             </div> 
