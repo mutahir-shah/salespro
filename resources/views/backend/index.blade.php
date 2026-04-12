@@ -301,7 +301,7 @@
                                             <div class="count-number product_selling_cost-data">
                                                 {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                             </div>
-                                            <div class="name"><strong style="color: #00c689">{{ __('db.Product Selling Cost') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
+                                            <div class="name"><strong style="color: #00c689">{{ __('Product Selling Cost') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
                                         </div>
                                     </a>
                                 </div>
@@ -396,7 +396,7 @@
                                         <div class="count-number customer_total_dues-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                         </div>
-                                        <div class="name"><strong style="color: #297ff9">{{ __('db.total_customer_dues') }}</strong></div>
+                                        <div class="name"><strong style="color: #297ff9">{{ __('total_customer_dues') }}</strong></div>
                                     </div>
                                 </div>
                             </div> 
