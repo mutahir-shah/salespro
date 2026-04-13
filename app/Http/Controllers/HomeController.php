@@ -443,7 +443,7 @@ class HomeController extends Controller
             ->when($warehouse_id, function ($query) use ($warehouse_id) {
                 $query->where('pw.warehouse_id', $warehouse_id);
             })->selectRaw("COALESCE(SUM(pw.qty * products.price),0) as selling_cost,COALESCE(SUM(pw.qty * products.cost),0) as product_cost")->first();
-        dd($result);
+        
         return [
             'selling_cost' => $result->selling_cost,
             'product_cost' => $result->product_cost,
