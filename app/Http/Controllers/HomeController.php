@@ -423,34 +423,37 @@ class HomeController extends Controller
         $data[6]  = $purchase - $purchase_return;
         $data[7]  = $purchase_due ?? 0;
         $data[8]  = $expense ?? 0;
-        $data[9]  = $product_cost ?? 0;
+        $data[9]  = $remainingProductSellingCost['product_cost'] ?? 0;
         $data[10] = $payroll_amount ?? 0;
         $data[11] = $billers ?? 0;
         $data[12] = $remaining_stock ?? 0;
         $data[13] = $totalQuantitySold ?? 0;
         $data[14] = $totalDues['supplier_total_dues'] ?? 0;
         $data[15] = $totalDues['customer_total_dues'] ?? 0;
-        $data[16] = $remainingProductSellingCost ?? 0;
+        $data[16] = $remainingProductSellingCost['selling_cost'] ?? 0;
         return      $data;
     }
 
 
     private function remainingProductSellingCost($warehouse_id = null)
     {
-        return Product::where('is_active', 1)->join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
-            ->where('product_warehouse.qty', '>', 0)->when(!empty($warehouse_id), function ($query) use ($warehouse_id) {
-                return $query->where('product_warehouse.warehouse_id', $warehouse_id);
-            })->selectRaw('SUM(product_warehouse.qty * products.price) as total_price')->value('total_price');
+        $result = Product::query()
+            ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
+            ->where('products.is_active', 1)
+            ->where('pw.qty', '>', 0)
+            ->when($warehouse_id, function ($query) use ($warehouse_id) {
+                $query->where('pw.warehouse_id', $warehouse_id);
+            })->selectRaw("
+            COALESCE(SUM(pw.qty * products.price),0) as selling_cost,
+            COALESCE(SUM(pw.qty * products.cost),0) as product_cost
+        ")->first();
 
-        // $totalCost = Product::where('is_active', 1)
-        //     ->join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
-        //     ->where('product_warehouse.qty', '>', 0)
-        //     ->when(!empty($warehouse_id), function ($query) use ($warehouse_id) {
-        //         return $query->where('product_warehouse.warehouse_id', $warehouse_id);
-        //     })
-        //     ->selectRaw('SUM(product_warehouse.qty * products.cost) as total_cost')
-        //     ->value('total_cost');
+        return [
+            'selling_cost' => $result->selling_cost,
+            'product_cost' => $result->product_cost,
+        ];
     }
+
     private function totalQuantitySold($warehouse_id, $start_date, $end_date)
     {
         return Product_Sale::whereHas('sale', function ($query) use ($warehouse_id, $start_date, $end_date) {
