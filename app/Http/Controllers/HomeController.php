@@ -441,16 +441,20 @@ class HomeController extends Controller
             ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
             ->where('products.is_active', 1)
             ->where('pw.qty', '>', 0)
-            ->when($warehouse_id, function ($query) use ($warehouse_id) {
-                $query->where('pw.warehouse_id', $warehouse_id);
-            })->selectRaw("
-            COALESCE(SUM(pw.qty * products.price),0) as selling_cost,
-            COALESCE(SUM(pw.qty * products.cost),0) as product_cost
-        ")->first();
+            ->when(
+                $warehouse_id,
+                fn($q) =>
+                $q->where('pw.warehouse_id', $warehouse_id)
+            )
+            ->selectRaw("
+            SUM(pw.qty * COALESCE(products.price,0)) as selling_cost,
+            SUM(pw.qty * COALESCE(pw.price, products.cost,0)) as product_cost
+        ")
+            ->first();
 
         return [
-            'selling_cost' => $result->selling_cost,
-            'product_cost' => $result->product_cost,
+            'selling_cost' => $result->selling_cost ?? 0,
+            'product_cost' => $result->product_cost ?? 0,
         ];
     }
 
