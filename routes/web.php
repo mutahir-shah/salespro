@@ -773,8 +773,15 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
 
 
 
-
-    Route::post('employees/deletebyselection', [EmployeeController::class, 'deleteBySelection']);
+    Route::prefix('employees')->group(function () {
+        Route::post('/deletebyselection', [EmployeeController::class, 'deleteBySelection']);
+        // Show the report page
+        Route::get('/employee-commission', [EmployeeController::class, 'commission'])->name('reports.employee-commission.index');
+        // Server-side DataTables JSON feed
+        Route::get('/employee-commission/data', [EmployeeController::class, 'data'])->name('reports.employee-commission.data');
+        // Pay all commissions for an employee (POST)
+        Route::post('/employee-commission/pay-all', [EmployeeController::class, 'payAll'])->name('reports.employee-commission.pay-all');
+    });
     Route::resource('employees', EmployeeController::class);
 
 

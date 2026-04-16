@@ -4,17 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
-use App\Models\Warehouse;
-use App\Models\Biller;
-use App\Models\Employee;
-use App\Models\User;
-use App\Models\Department;
-use App\Models\Designation;
-use App\Models\Shift;
-use Auth;
+use App\Models\{Warehouse, Biller, Employee, User, Department, Designation, Shift};
 use Illuminate\Validation\Rule;
 use App\Traits\TenantInfo;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\{File, DB, Auth};
+use Yajra\DataTables\Facades\DataTables;
 
 class EmployeeController extends Controller
 {
@@ -23,11 +17,11 @@ class EmployeeController extends Controller
     public function index()
     {
         $role = Role::find(Auth::user()->role_id);
-        if($role->hasPermissionTo('employees-index')){
+        if ($role->hasPermissionTo('employees-index')) {
             $permissions = Role::findByName($role->name)->permissions;
             foreach ($permissions as $permission)
                 $all_permission[] = $permission->name;
-            if(empty($all_permission))
+            if (empty($all_permission))
                 $all_permission[] = 'dummy text';
 
             $lims_employee_all = Employee::with('user')->where('is_active', true)->get();
@@ -50,8 +44,7 @@ class EmployeeController extends Controller
                 'all_permission',
                 'numberOfEmployee'
             ));
-        }
-        else {
+        } else {
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
         }
     }
@@ -59,7 +52,7 @@ class EmployeeController extends Controller
     public function create()
     {
         $role = Role::find(Auth::user()->role_id);
-        if($role->hasPermissionTo('employees-add')){
+        if ($role->hasPermissionTo('employees-add')) {
             $lims_role_list = Role::where('is_active', true)->get();
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
             $lims_biller_list = Biller::where('is_active', true)->get();
@@ -71,7 +64,7 @@ class EmployeeController extends Controller
             $numberOfUserAccount = User::where('is_active', true)->count();
 
             $general_setting = \App\Models\GeneralSetting::first();
-            if(in_array('project', explode(',', $general_setting->modules))){
+            if (in_array('project', explode(',', $general_setting->modules))) {
                 $companies = \Modules\Project\Entities\Company::where('is_active', true)->get();
             } else {
                 $companies = [];
@@ -88,8 +81,7 @@ class EmployeeController extends Controller
                 'lims_shift_list',
                 'lims_designation_list'
             ));
-        }
-        else {
+        } else {
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
         }
     }
@@ -103,7 +95,7 @@ class EmployeeController extends Controller
         $data['is_active'] = true;
 
         // Handle user creation if checkbox selected
-        if(isset($data['user'])){
+        if (isset($data['user'])) {
             $this->validate($request, [
                 'name' => [
                     'max:255',
@@ -123,7 +115,7 @@ class EmployeeController extends Controller
             $data['is_deleted'] = false;
             $data['password'] = bcrypt($data['password']);
             $data['phone'] = $data['phone_number'];
-            if(isset($data['company']))
+            if (isset($data['company']))
                 $data['company_name'] = $data['company'];
 
             User::create($data);
@@ -148,11 +140,10 @@ class EmployeeController extends Controller
         if ($image) {
             $ext = pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
             $imageName = date("Ymdhis");
-            if(!config('database.connections.saleprosaas_landlord')) {
+            if (!config('database.connections.saleprosaas_landlord')) {
                 $imageName = $imageName . '.' . $ext;
                 $image->move(public_path('images/employee'), $imageName);
-            }
-            else {
+            } else {
                 $imageName = $this->getTenantId() . '_' . $imageName . '.' . $ext;
                 $image->move(public_path('images/employee'), $imageName);
             }
@@ -183,7 +174,7 @@ class EmployeeController extends Controller
             'sales_target'          => $isSaleAgent == 1 ? ($data['sales_target'] ?? null) : null,
         ]);
 
-        if($isSaleAgent){
+        if ($isSaleAgent) {
             return redirect('sale-agents')->with('message', $message);
         }
 
@@ -194,7 +185,7 @@ class EmployeeController extends Controller
     {
         $lims_employee_data = Employee::find($request->employee_id);
 
-        if($lims_employee_data->user_id){
+        if ($lims_employee_data->user_id) {
             $this->validate($request, [
                 'name' => [
                     'max:255',
@@ -229,11 +220,10 @@ class EmployeeController extends Controller
             $this->fileDelete(public_path('images/employee/'), $lims_employee_data->image);
             $ext = pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
             $imageName = date("Ymdhis");
-            if(!config('database.connections.saleprosaas_landlord')) {
+            if (!config('database.connections.saleprosaas_landlord')) {
                 $imageName = $imageName . '.' . $ext;
                 $image->move(public_path('images/employee'), $imageName);
-            }
-            else {
+            } else {
                 $imageName = $this->getTenantId() . '_' . $imageName . '.' . $ext;
                 $image->move(public_path('images/employee'), $imageName);
             }
@@ -265,7 +255,7 @@ class EmployeeController extends Controller
         $employee_id = $request['employeeIdArray'];
         foreach ($employee_id as $id) {
             $lims_employee_data = Employee::find($id);
-            if($lims_employee_data->user_id){
+            if ($lims_employee_data->user_id) {
                 $lims_user_data = User::find($lims_employee_data->user_id);
                 $lims_user_data->is_deleted = true;
                 $lims_user_data->save();
@@ -281,7 +271,7 @@ class EmployeeController extends Controller
     public function destroy($id)
     {
         $lims_employee_data = Employee::find($id);
-        if($lims_employee_data->user_id){
+        if ($lims_employee_data->user_id) {
             $lims_user_data = User::find($lims_employee_data->user_id);
             $lims_user_data->is_deleted = true;
             $lims_user_data->save();
@@ -292,5 +282,224 @@ class EmployeeController extends Controller
         $lims_employee_data->is_active = false;
         $lims_employee_data->save();
         return redirect('employees')->with('not_permitted', __('db.Employee deleted successfully'));
+    }
+
+    /**
+     * Display the report page.
+     */
+    public function commission()
+    {
+        $role = Role::find(Auth::user()->role_id);
+        $permissions = Role::findByName($role->name)->permissions;
+        foreach ($permissions as $permission)
+            $all_permission[] = $permission->name;
+        if (empty($all_permission))
+            $all_permission[] = 'dummy text'; 
+        $employees = Employee::select('id', 'name')->where('is_active', true)->get();
+         
+        return view('backend.employee.employee_commission', compact('employees', 'all_permission'));
+    }
+
+    /**
+     * Return DataTables JSON for the report.
+     * Query params: employee_id (required)
+     */
+    public function data(Request $request)
+    {
+        $request->validate([
+            'employee_id' => 'required|integer|exists:employees,id',
+        ]);
+
+        $employeeId = $request->employee_id;
+
+        /*
+         * Join chain:
+         *  employees  →  users  (employees.user_id = users.id)
+         *  users      →  sales  (users.id = sales.user_id)
+         *  sales      →  product_sales  (sales.id = product_sales.sale_id)
+         *  sales      →  biller_commissions  (sales.id = biller_commissions.sale_id)
+         *
+         * Commission per product line is calculated proportionally:
+         *   line_commission = (product_sales.total / sales.grand_total) * biller_commissions.commission_amount
+         *
+         * Profit per line:
+         *   profit = product_sales.total - (product_sales.net_unit_price - product_sales.discount + product_sales.tax) * product_sales.qty
+         *   Simplified: product_sales.total - (product_sales.qty * product_sales.net_unit_price)
+         *   Because net_unit_price already reflects cost, and total = qty * sale_price after discount/tax.
+         *   We store cost in products table (not in schema provided), so we use:
+         *   profit = sales.total_profit * (product_sales.total / sales.grand_total)  (proportional split)
+         */
+
+        $query = DB::table('product_sales as ps')
+            ->join('sales as s', 's.id', '=', 'ps.sale_id')
+            ->join('users as u', 'u.id', '=', 's.user_id')
+            ->join('employees as e', 'e.user_id', '=', 'u.id')
+            ->leftJoin('biller_commissions as bc', function ($join) {
+                $join->on('bc.sale_id', '=', 's.id')
+                    ->on('bc.biller_id', '=', 's.biller_id');
+            })
+            ->leftJoin('products as p', 'p.id', '=', 'ps.product_id')
+            ->where('e.id', $employeeId)
+            ->whereNull('s.deleted_at')
+            ->select([
+                'ps.id as ps_id',
+                'p.name as product_name',
+
+                // product cost (purchase price) — stored in products table
+                DB::raw('COALESCE(p.cost, 0) as product_cost'),
+
+                // net unit price = sale price per unit (after discount, before tax)
+                DB::raw('ps.net_unit_price as product_sales_price'),
+
+                // qty sold
+                DB::raw('(ps.qty - ps.return_qty) as qty_sold'),
+
+                // total sale amount for this line
+                DB::raw('ps.total as total_sale'),
+
+                // proportional profit for this line
+                DB::raw('CASE WHEN s.grand_total > 0
+                            THEN ROUND(s.total_profit * (ps.total / s.grand_total), 2)
+                            ELSE 0 END as profit'),
+
+                // proportional commission for this line
+                DB::raw('CASE WHEN bc.commission_amount IS NOT NULL AND s.grand_total > 0
+                            THEN ROUND(bc.commission_amount * (ps.total / s.grand_total), 2)
+                            ELSE 0 END as salesman_commission'),
+
+                // commission status
+                DB::raw('CASE WHEN bc.is_paid = 1 THEN "paid" ELSE "unpaid" END as commission_status'),
+
+                // commission date
+                DB::raw('DATE(bc.calculated_at) as commission_date'),
+
+                // sale date
+                DB::raw('DATE(s.created_at) as sale_date'),
+
+                // sale reference
+                's.reference_no as sale_reference',
+
+                // ids needed for action links
+                's.id as sale_id',
+                'bc.id as commission_id',
+                'bc.is_paid',
+            ]);
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->editColumn('commission_status', function ($row) {
+                if ($row->commission_status === 'paid') {
+                    return '<span class="badge badge-success">Paid</span>';
+                }
+                return '<span class="badge badge-warning">Unpaid</span>';
+            })
+            ->editColumn('commission_date', function ($row) {
+                return $row->commission_date
+                    ? \Carbon\Carbon::parse($row->commission_date)->format('d/m/Y')
+                    : '—';
+            })
+            ->editColumn('sale_date', function ($row) {
+                return $row->sale_date
+                    ? \Carbon\Carbon::parse($row->sale_date)->format('d/m/Y')
+                    : '—';
+            })
+            ->addColumn('action', function ($row) {
+                $viewUrl   = route('sales.show', $row->sale_id);
+                $payUrl    = $row->commission_id && !$row->is_paid
+                    ? route('employee.commission.pay', $row->commission_id)
+                    : null;
+
+                $btn = '<div class="dropdown">
+                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                        Action
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">';
+
+                $btn .= '<a class="dropdown-item" href="' . $viewUrl . '">
+                            <i class="fa fa-eye"></i> View Sale
+                         </a>';
+
+                if ($payUrl) {
+                    $btn .= '<a class="dropdown-item text-success pay-commission-btn"
+                                href="#"
+                                data-url="' . $payUrl . '"
+                                data-commission-id="' . $row->commission_id . '">
+                                <i class="fa fa-money-bill"></i> Pay Commission
+                             </a>';
+                }
+
+                $btn .= '</div></div>';
+
+                return $btn;
+            })
+            ->rawColumns(['commission_status', 'action'])
+            ->make(true);
+    }
+
+    /**
+     * Mark a single commission record as paid.
+     */
+    public function payCommission(Request $request, $commissionId)
+    {
+        $commission = DB::table('biller_commissions')->where('id', $commissionId)->first();
+
+        if (!$commission) {
+            return response()->json(['success' => false, 'message' => 'Commission record not found.'], 404);
+        }
+
+        if ($commission->is_paid) {
+            return response()->json(['success' => false, 'message' => 'Commission already paid.']);
+        }
+
+        DB::table('biller_commissions')->where('id', $commissionId)->update([
+            'is_paid'      => 1,
+            'paid_amount'  => $commission->commission_amount,
+            'paid_at'      => now(),
+            'updated_at'   => now(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Commission marked as paid.']);
+    }
+
+    /**
+     * Pay ALL unpaid commissions for a given employee at once.
+     */
+    public function payAll(Request $request)
+    {
+        $request->validate(['employee_id' => 'required|integer|exists:employees,id']);
+
+        $employeeId = $request->employee_id;
+
+        // Get all sale IDs for this employee
+        $saleIds = DB::table('sales as s')
+            ->join('users as u', 'u.id', '=', 's.user_id')
+            ->join('employees as e', 'e.user_id', '=', 'u.id')
+            ->where('e.id', $employeeId)
+            ->whereNull('s.deleted_at')
+            ->pluck('s.id');
+
+        $updated = DB::table('biller_commissions')
+            ->whereIn('sale_id', $saleIds)
+            ->where('is_paid', 0)
+            ->update([
+                'is_paid'     => 1,
+                'paid_at'     => now(),
+                'updated_at'  => now(),
+            ]);
+
+        // Also update paid_amount = commission_amount for those records
+        DB::table('biller_commissions')
+            ->whereIn('sale_id', $saleIds)
+            ->where('is_paid', 1)
+            ->whereColumn('paid_amount', '<', 'commission_amount')
+            ->update([
+                'paid_amount' => DB::raw('commission_amount'),
+                'updated_at'  => now(),
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $updated . ' commission(s) marked as paid.',
+        ]);
     }
 }
