@@ -877,9 +877,7 @@ class SaleController extends Controller
 
     public function store(StoreSaleRequest $request)
     {
-
-        $data = $request->all();
-        
+        $data = $request->all(); 
         $lims_pos_setting_data = PosSetting::latest()->first();
         /*try {*/
         if (isset($request->reference_no)) {
@@ -891,7 +889,6 @@ class SaleController extends Controller
                 ],
             ]);
         }
-
         $data['user_id'] = Auth::id();
         // dd($data);
         $cash_register_data = CashRegister::where([
@@ -899,17 +896,14 @@ class SaleController extends Controller
             ['warehouse_id', $data['warehouse_id']],
             ['status', true]
         ])->first();
-
         if ($cash_register_data)
             $data['cash_register_id'] = $cash_register_data->id;
-
         if (cache()->has('general_setting')) {
             $general_setting = cache()->get('general_setting');
         } else {
             $general_setting = GeneralSetting::latest()->first();
             cache()->put('general_setting', $general_setting, 60 * 60 * 24);
         }
-
         if (isset($data['created_at'])) {
             $data['created_at'] = normalize_to_sql_datetime($data['created_at']);
         } else {

@@ -519,6 +519,13 @@
                 @can('due-report')
                     @php $showReportMenu = true; @endphp
                 @endcan
+
+                
+                @can('category_stock_report')
+                    @php $showReportMenu = true; @endphp
+                @endcan
+
+
                 @can('supplier-report')
                     @php $showReportMenu = true; @endphp
                 @endcan
@@ -653,6 +660,7 @@
                                     <a id="customer-group-report-link" class="{{ request()->is('report/customer-group') ? 'active' : '' }}" href="">{{__('db.Customer Group Report')}}</a>
                                 </li>
                             @endcan
+
                             @can('due-report')
                                 <li id="due-report-menu">
                                     <form action= "{{route('report.customerDueByDate')}}"  method= "post" id = "customer-due-report-form">
@@ -663,6 +671,13 @@
                                     </form>
                                 </li>
                             @endcan
+
+                            @can('category_stock_report')
+                                <li id="category-sale-report-menu">
+                                    <a id="category-sale-report-link" class="{{ request()->is('report/new/category-stock') ? 'active' : '' }}" href="{{route('report.category.stock') }}">{{__('Category Stock Report')}}</a>
+                                </li>
+                            @endcan
+
                             @can('supplier-report')
                                 <li id="supplier-report-menu">
                                     <a id="supplier-report-link" class="{{ request()->is('report/supplier') ? 'active' : '' }}" href="">{{__('db.Supplier Report')}}</a>
