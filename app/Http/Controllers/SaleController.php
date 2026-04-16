@@ -879,6 +879,7 @@ class SaleController extends Controller
     {
 
         $data = $request->all();
+        
         $lims_pos_setting_data = PosSetting::latest()->first();
         /*try {*/
         if (isset($request->reference_no)) {
@@ -1003,8 +1004,8 @@ class SaleController extends Controller
 
 
         if (isset($data['pay_term_no']) && $data['pay_term_no']) {
-            
-        $sale_date = isset($data['created_at']) ? Carbon::parse($data['created_at'])->format('Y-m-d') : date('Y-m-d');
+
+            $sale_date = isset($data['created_at']) ? Carbon::parse($data['created_at'])->format('Y-m-d') : date('Y-m-d');
             if ($data['pay_term_period'] == 'days') {
                 $data['due_date'] = date('Y-m-d', strtotime($sale_date . ' +' . $data['pay_term_no'] . ' days'));
             } elseif ($data['pay_term_period'] == 'months') {
@@ -1298,7 +1299,7 @@ class SaleController extends Controller
                     $product_sale['topping_id'] = $data['topping_product'][$i];
                 }
             }
-// Billier commission new login created by mutahir
+            // Billier commission new login created by mutahir
             $profit = $lims_product_data->price - $lims_product_data->cost;
             $commission = 0;
             if ($profit > 0) {
@@ -1311,7 +1312,7 @@ class SaleController extends Controller
 
             Product_Sale::create($product_sale);
         }
-// Billier commission new login created by mutahir
+        // Billier commission new login created by mutahir
         $lims_sale_data->update([
             'total_profit' => $totalProfit,
             'total_commission' => $totalCommission

@@ -2620,7 +2620,11 @@ $(document).on('submit', '.payment-form', function(e) {
                     location.href = response.redirect_url;
                 }else if(response.payment_method === 'moneipoint'){
                 }else if ($('select[name="sale_status"]').val() == 1 && response !== 'pesapal') {
-                    let link = "{{ url('sales/gen_invoice') }}/" + response + "?is_print=true";
+                   // let link = "{{ url('sales/gen_invoice') }}/" + response + "?is_print=true";
+                    let link = "{{route('sales.create')}}";
+                      alert("{{ __('Sales Created Successfully.') }}");
+                             
+                     location.href = link;
                     $.ajax({
                         url: link,
                         type: 'GET',

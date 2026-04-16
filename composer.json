@@ -32,7 +32,8 @@
         "srmklive/paypal": "^3.0",
         "stripe/stripe-php": "^7.57",
         "twilio/sdk": "^6.10",
-        "xendit/xendit-php": "^5.0"
+        "xendit/xendit-php": "^5.0",
+        "yajra/laravel-datatables-oracle": "^12.7"
     },
 
     "require-dev": {
