@@ -63,7 +63,7 @@
                                                     }
                                                 @endphp
                                                 @if($customer_active)
-                                                <select required name="customer_id" id="customer_id" class="selectpicker form-control" data-live-search="true" title="Select customer..." style="width: 100px">
+                                                <select required name="customer_id" id="customer_id" class="selectpicker form-control" data-live-search="true"  style="width: 100px">
                                                 @foreach($lims_customer_list as $customer)
                                                     @php
                                                       $deposit[$customer->id] = $customer->deposit - $customer->expense;
