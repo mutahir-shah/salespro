@@ -44,15 +44,6 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>
-                                                {{__('db.Reference No')}}
-                                            </label>
-                                            <input type="text" name="reference_no" class="form-control" />
-                                        </div>
-                                        <x-validation-error fieldName="reference_no" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
                                             <label>{{__('db.customer')}} *</label>
                                             <div class="input-group pos">
                                                 @php
@@ -99,6 +90,29 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                       @if(isset(auth()->user()->biller_id))
+                                    <input type="hidden" name="biller_id" id="biller_id" value="{{auth()->user()->biller_id}}" />
+                                    @else
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Biller')}} *</label>
+                                            @php
+                                            if($lims_pos_setting_data) {
+                                                $biller_id = $lims_pos_setting_data->biller_id;
+                                            }
+                                            else{
+                                                $biller_id = $lims_biller_list[0]->id;
+                                            }
+                                            @endphp
+                                            <select required id="biller_id" name="biller_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select Biller...">
+                                                @foreach($lims_biller_list as $biller)
+                                                <option value="{{$biller->id}}" @if($biller->id == $biller_id) selected @endif>{{$biller->name . ' (' . $biller->company_name . ')'}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    @endif
                                     @if(isset(auth()->user()->warehouse_id))
                                     <input type="hidden" name="warehouse_id" id="warehouse_id" value="{{auth()->user()->warehouse_id}}" />
                                     @else
@@ -122,29 +136,18 @@
                                     </div>
                                     @endif
                                     <x-validation-error fieldName="warehouse_id" />
-                                    @if(isset(auth()->user()->biller_id))
-                                    <input type="hidden" name="biller_id" id="biller_id" value="{{auth()->user()->biller_id}}" />
-                                    @else
+
+                                    
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{__('db.Biller')}} *</label>
-                                            @php
-                                            if($lims_pos_setting_data) {
-                                                $biller_id = $lims_pos_setting_data->biller_id;
-                                            }
-                                            else{
-                                                $biller_id = $lims_biller_list[0]->id;
-                                            }
-                                            @endphp
-                                            <select required id="biller_id" name="biller_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select Biller...">
-                                                @foreach($lims_biller_list as $biller)
-                                                <option value="{{$biller->id}}" @if($biller->id == $biller_id) selected @endif>{{$biller->name . ' (' . $biller->company_name . ')'}}</option>
-                                                @endforeach
-                                            </select>
+                                            <label>
+                                                {{__('db.Reference No')}}
+                                            </label>
+                                            <input type="text" name="reference_no" class="form-control" />
                                         </div>
-                                    </div>
-                                    @endif
-                                    <div class="col-md-2">
+                                        <x-validation-error fieldName="reference_no" />
+                                    </div>                                 
+                                    <div class="col-md-2 d-none">
                                         <div class="form-group">
                                             <label>{{__('db.Currency')}} *</label>
                                             <select name="currency_id" id="currency" class="form-control selectpicker" data-toggle="tooltip" title="" data-original-title="Sale currency">
@@ -154,7 +157,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 d-none">
                                         <div class="form-group mb-0">
                                             <label>{{__('db.Exchange Rate')}} *</label>
                                         </div>
@@ -306,7 +309,7 @@
                                     </div>
                                 </div>
                                 <div class="row mt-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 d-none">
                                         <div class="form-group">
                                             <label>{{__('db.Order Tax')}}</label>
                                             <select class="form-control" name="order_tax_rate">
@@ -317,7 +320,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 d-none">
                                         <div class="form-group">
                                             <label>{{__('db.Order Discount Type')}}</label>
                                             <select id="order-discount-type" name="order_discount_type" class="form-control">
@@ -326,7 +329,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 d-none">
                                         <div class="form-group">
                                             <label>{{ __('db.Order Discount Value') }}</label>
                                             <input type="number"
@@ -338,7 +341,7 @@
                                             <input type="hidden" name="order_discount" id="order-discount">
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 d-none">
                                         <div class="form-group">
                                             <label>
                                                 {{__('db.Shipping Cost')}}
@@ -653,7 +656,7 @@
                                 <label>{{__('db.Quantity')}}</label>
                                 <input type="number" step="any" name="edit_qty" class="form-control numkey">
                             </div>
-                            <div class="col-md-4 form-group">
+                            <div class="col-md-4 form-group d-none">
                                 <label>{{__('db.Unit Discount')}}</label>
                                 <input type="number" name="edit_discount" class="form-control numkey">
                             </div>
@@ -678,7 +681,7 @@
                                     $tax_rate_all[] = $tax->rate;
                                 }
                             ?>
-                            <div class="col-md-4 form-group">
+                            <div class="col-md-4 form-group d-none">
                                 <label>{{__('db.Tax Rate')}}</label>
                                 <select name="edit_tax_rate" class="form-control selectpicker">
                                     @foreach($tax_name_all as $key => $name)
@@ -686,7 +689,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div id="edit_unit" class="col-md-4 form-group">
+                            <div id="edit_unit" class="col-md-4 form-group d-none">
                                 <label>{{__('db.Product Unit')}}</label>
                                 <select name="edit_unit" class="form-control selectpicker">
                                 </select>
