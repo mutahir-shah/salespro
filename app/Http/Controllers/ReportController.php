@@ -1529,28 +1529,42 @@ class ReportController extends Controller
         $query = Product::query()
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
+
             ->when(
                 $warehouse_id,
-                fn($q) =>
-                $q->where('pw.warehouse_id', $warehouse_id)
+                fn($q) => $q->where('pw.warehouse_id', $warehouse_id)
             )
+
+            ->when(
+                $request->category_id,
+                fn($q) => $q->where('products.category_id', $request->category_id)
+            )
+
             ->when(
                 $start_date && $end_date,
-                fn($q) =>
-                $q->whereBetween('pw.updated_at', [$start_date, $end_date])
+                fn($q) => $q->whereBetween('pw.updated_at', [$start_date, $end_date])
             )
+
             ->where('pw.qty', '>', 0)
-            ->selectRaw("
-                    products.id,
-                    products.name as product_name,
-                    categories.name as category_name,
-                    products.cost,
-                    products.price,
-                    SUM(pw.qty) as remaining_quantity,
-                    SUM(pw.qty * products.cost) as total_cost_price,
-                    SUM(pw.qty * products.price) as total_sales_price
-                ")
+
             ->groupBy(
+                'products.id',
+                'products.name',
+                'categories.name',
+                'products.cost',
+                'products.price'
+            )
+
+            ->select([
+                'products.id',
+                'products.name as product_name',
+                'categories.name as category_name',
+                'products.cost',
+                'products.price',
+                DB::raw('SUM(pw.qty) as remaining_quantity'),
+                DB::raw('SUM(pw.qty * products.cost) as total_cost_price'),
+                DB::raw('SUM(pw.qty * products.price) as total_sales_price'),
+            ])->groupBy(
                 'products.id',
                 'products.name',
                 'categories.name',

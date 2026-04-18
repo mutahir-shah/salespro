@@ -3,33 +3,37 @@
 @section('content')
 
 <section class="forms">
-
     <div class="container-fluid">
-
         <div class="card">
+
             <div class="card-header mt-2">
-                <h3 class="text-center">{{ __('Category Stock Report') }}</h3>
+                <h3 class="text-center">Category Stock Report</h3>
             </div>
 
-            <form id="filter-form">
-                <div class="row mb-3">
+            {{-- FILTERS --}}
+            <div class="row mb-3 product-report-filter">
 
-                    {{-- Date Filter --}}
-                    <div class="col-md-4 mt-3">
-                        <label><strong>Choose Date</strong></label>
+                {{-- DATE FILTER --}}
+                <div class="col-md-3 offset-md-2 mt-3">
+                    <div class="form-group top-fields">
+                        <label><strong>Choose Your Date</strong></label>
+
                         <div class="input-group">
                             <input type="text"
                                 class="daterangepicker-field form-control"
                                 id="date_range" />
 
-                            <input type="hidden" name="starting_date" id="starting_date">
-                            <input type="hidden" name="ending_date" id="ending_date">
+                            <input type="hidden" id="starting_date">
+                            <input type="hidden" id="ending_date">
                         </div>
                     </div>
+                </div>
 
-                    {{-- Warehouse --}}
-                    <div class="col-md-4 mt-3">
+                {{-- WAREHOUSE --}}
+                <div class="col-md-3 mt-3">
+                    <div class="form-group top-fields">
                         <label><strong>Choose Warehouse</strong></label>
+
                         <select id="warehouse_id"
                             class="selectpicker form-control"
                             data-live-search="true">
@@ -44,22 +48,40 @@
 
                         </select>
                     </div>
-
-                    {{-- Submit --}}
-                    <div class="col-md-4 mt-4 text-center">
-                        <button type="button"
-                            id="filterBtn"
-                            class="btn btn-primary mt-2">
-                            {{ __('Submit') }}
-                        </button>
-                    </div>
-
                 </div>
-            </form>
+
+                {{-- CATEGORY --}}
+                <div class="col-md-3 mt-3">
+                    <div class="form-group top-fields">
+                        <label><strong>Category</strong></label>
+
+                        <select id="category_id"
+                            class="selectpicker form-control"
+                            data-live-search="true">
+
+                            <option value="">All Category</option>
+
+                            @foreach($categories_list as $category)
+                            <option value="{{$category->id}}">
+                                {{$category->name}}
+                            </option>
+                            @endforeach
+
+                        </select>
+                    </div>
+                </div>
+
+                {{-- SUBMIT --}}
+                <div class="col-md-12 text-center mt-3">
+                    <button id="filterBtn" class="btn btn-primary">
+                        Submit
+                    </button>
+                </div>
+
+            </div>
 
         </div>
     </div>
-
 
     {{-- TABLE --}}
     <div class="table-responsive">
@@ -99,6 +121,7 @@
 </section>
 
 @endsection
+
 @push('scripts')
 
 <script>
@@ -144,6 +167,7 @@
             data: function(d) {
 
                 d.warehouse_id = $('#warehouse_id').val();
+                d.category_id = $('#category_id').val();
                 d.starting_date = $('#starting_date').val();
                 d.ending_date = $('#ending_date').val();
             }
