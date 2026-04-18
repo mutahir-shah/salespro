@@ -615,7 +615,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::post('supplier-due-report-data', 'supplierDueReportData');
             // MUTHIR SHAH ADDED REPORTS
             Route::get('new/category-stock', 'categoryStockPerProduct')->name('report.category.stock');
-            Route::get('new/category-stock/datatable', 'categoryStockPerProductDatatable')->name('report.category.stock.datatable');
+            Route::post('new/category-stock/datatable', 'categoryStockPerProductDatatable')->name('report.category.stock.datatable');
         });
     });
 

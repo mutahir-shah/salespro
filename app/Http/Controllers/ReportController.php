@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Biller, Category, Challan, Customer, CustomerGroup, CustomField, Expense, GeneralSetting, Income, Payment, Payroll, Product_Sale};
 use App\Models\{Product_Warehouse, Product, ProductPurchase, ProductVariant, Purchase, ReturnPurchase, Returns, Sale, Supplier, Unit, User, Variant, Warehouse};
+use Carbon\Carbon;
 use Illuminate\Support\Facades\{Auth, Cache, DB};
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
@@ -1295,8 +1296,7 @@ class ReportController extends Controller
             ->get();
 
         // Sales
-        $saleRows = DB::table('sales')
-            ->join('product_sales', 'sales.id', '=', 'product_sales.sale_id')
+        $saleRows = DB::table('sales')->join('product_sales', 'sales.id', '=', 'product_sales.sale_id')
             ->when($warehouse_id > 0, function ($q) use ($warehouse_id) {
                 return $q->where('sales.warehouse_id', $warehouse_id);
             })
@@ -1307,8 +1307,7 @@ class ReportController extends Controller
             ->whereBetween(DB::raw('DATE(sales.created_at)'), [$start_date, $end_date])
             ->whereIn('product_sales.product_id', $pagedProductIds)
             ->selectRaw('product_sales.product_id, COALESCE(product_sales.variant_id, 0) as variant_id, product_sales.sale_unit_id as unit_id, SUM(product_sales.qty) as qty_sum, SUM(product_sales.total / sales.exchange_rate) as amount_sum')
-            ->groupBy('product_sales.product_id', 'variant_id', 'product_sales.sale_unit_id')
-            ->get();
+            ->groupBy('product_sales.product_id', 'variant_id', 'product_sales.sale_unit_id')->get();
 
         // Product returns (returns join product_returns)
         $returnRows = DB::table('returns')
@@ -1492,6 +1491,95 @@ class ReportController extends Controller
             'recordsFiltered' => (int)$totalFiltered,
             'data' => $data
         ]);
+    }
+
+
+    public function categoryStockPerProduct()
+    {
+        $start_date = $request->start_date ?? date('Y-m') . '-' . '01';
+        $end_date = $request->end_date ?? date('Y-m-d');
+        $warehouse_id = $data['warehouse_id'] ?? 0;
+        $category_id = $data['category_id'] ?? 0;
+        $lims_warehouse_list = Warehouse::where('is_active', true)->get();
+        return view(
+            'backend.report.category_stock_per_product',
+            compact('start_date', 'end_date', 'warehouse_id', 'category_id', 'lims_warehouse_list')
+        );
+    }
+
+
+
+    public function categoryStockPerProductDatatable(Request $request)
+    {
+        $warehouse_id = $request->warehouse_id;
+        $start_date = null;
+        $end_date   = null;
+        try {
+            if ($request->starting_date && $request->ending_date) {
+                $start_date = Carbon::createFromFormat('d/m/Y', $request->starting_date)->startOfDay();
+                $end_date   = Carbon::createFromFormat('d/m/Y', $request->ending_date)->endOfDay();
+            }
+        } catch (\Exception $e) {
+        }
+        /*
+    |--------------------------------------------------------------------------
+    | BASE QUERY
+    |--------------------------------------------------------------------------
+    */
+        $query = Product::query()
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
+            ->when(
+                $warehouse_id,
+                fn($q) =>
+                $q->where('pw.warehouse_id', $warehouse_id)
+            )
+            ->when(
+                $start_date && $end_date,
+                fn($q) =>
+                $q->whereBetween('pw.updated_at', [$start_date, $end_date])
+            )
+            ->where('pw.qty', '>', 0)
+            ->selectRaw("
+                    products.id,
+                    products.name as product_name,
+                    categories.name as category_name,
+                    products.cost,
+                    products.price,
+                    SUM(pw.qty) as remaining_quantity,
+                    SUM(pw.qty * products.cost) as total_cost_price,
+                    SUM(pw.qty * products.price) as total_sales_price
+                ")
+            ->groupBy(
+                'products.id',
+                'products.name',
+                'categories.name',
+                'products.cost',
+                'products.price'
+            )
+            ->select([
+                'products.id',
+                'products.name as product_name',
+                'categories.name as category_name',
+                'products.cost',
+                'products.price',
+                DB::raw('SUM(pw.qty) as remaining_quantity'),
+                DB::raw('SUM(pw.qty * products.cost) as total_cost_price'),
+                DB::raw('SUM(pw.qty * products.price) as total_sales_price'),
+            ]);
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->editColumn('cost', fn($r) => number_format($r->cost, 2))
+            ->editColumn('price', fn($r) => number_format($r->price, 2))
+            ->editColumn(
+                'total_cost_price',
+                fn($r) =>
+                number_format($r->total_cost_price, 2)
+            )->editColumn(
+                'total_sales_price',
+                fn($r) =>
+                number_format($r->total_sales_price, 2)
+            )->make(true);
     }
 
     private function findImeis(string $product_id, string $variant_id = '0')
@@ -5474,101 +5562,5 @@ class ReportController extends Controller
         $lims_supplier_list = Supplier::where('is_active', true)->get();
 
         return view('backend.report.supplier_due_report', compact('lims_purchase_data', 'start_date', 'end_date', 'lims_supplier_list', 'supplier_id'));
-    }
-
-
-    public function categoryStockPerProduct()
-    {
-        $lims_warehouse_list = Warehouse::where('is_active', true)->get();
-
-        return view(
-            'backend.report.category_stock_per_product',
-            compact('lims_warehouse_list')
-        );
-    }
-
-
-
-    public function categoryStockPerProductDatatable(Request $request)
-    {
-        $warehouse_id = $request->warehouse_id;
-
-        $start_date = null;
-        $end_date   = null;
-
-        try {
-            if ($request->starting_date && $request->ending_date) {
-                $start_date = Carbon::createFromFormat('d/m/Y', $request->starting_date)->startOfDay();
-                $end_date   = Carbon::createFromFormat('d/m/Y', $request->ending_date)->endOfDay();
-            }
-        } catch (\Exception $e) {
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | BASE QUERY
-    |--------------------------------------------------------------------------
-    */
-
-        $query = Product::query()
-            ->join('categories', 'products.category_id', '=', 'categories.id')
-            ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
-
-            ->when(
-                $warehouse_id,
-                fn($q) =>
-                $q->where('pw.warehouse_id', $warehouse_id)
-            )
-
-            ->when(
-                $start_date && $end_date,
-                fn($q) =>
-                $q->whereBetween('pw.updated_at', [$start_date, $end_date])
-            )
-
-            ->where('pw.qty', '>', 0)
-
-            ->groupBy(
-                'products.id',
-                'products.name',
-                'categories.name',
-                'products.cost',
-                'products.price'
-            )
-
-            ->select([
-                'products.id',
-                'products.name as product_name',
-                'categories.name as category_name',
-                'products.cost',
-                'products.price',
-
-                DB::raw('SUM(pw.qty) as remaining_quantity'),
-
-                DB::raw('SUM(pw.qty * products.cost) as total_cost_price'),
-
-                DB::raw('SUM(pw.qty * products.price) as total_sales_price'),
-            ]);
-
-        return DataTables::of($query)
-
-            ->addIndexColumn()
-
-            ->editColumn('cost', fn($r) => number_format($r->cost, 2))
-            ->editColumn('price', fn($r) => number_format($r->price, 2))
-
-            ->editColumn(
-                'total_cost_price',
-                fn($r) =>
-                number_format($r->total_cost_price, 2)
-            )
-
-            ->editColumn(
-                'total_sales_price',
-                fn($r) =>
-                number_format($r->total_sales_price, 2)
-            )
-
-            ->make(true);
     }
 }
