@@ -226,7 +226,7 @@
                     'next': '<i class="dripicons-chevron-right"></i>'
             }
         },
-        order:[['1', 'desc']],
+        order:[['13', 'desc']],
         'columnDefs': [
             {
                 "orderable": false,

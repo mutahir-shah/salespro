@@ -424,10 +424,10 @@
                                         <div class="form-group">
                                             <label>{{__('db.Payment Status')}} *</label>
                                             <select name="payment_status" id="payment_status" class="form-control">
+                                                <option value="4" selected>{{__('db.Paid')}}</option>
                                                 <option value="1">{{__('db.Pending')}}</option>
                                                 <option value="2">{{__('db.Due')}}</option>
                                                 <option value="3">{{__('db.Partial')}}</option>
-                                                <option value="4">{{__('db.Paid')}}</option>
                                             </select>
                                             <x-validation-error fieldName="payment_status" />
                                         </div>
