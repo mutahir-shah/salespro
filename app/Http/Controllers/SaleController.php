@@ -877,7 +877,7 @@ class SaleController extends Controller
 
     public function store(StoreSaleRequest $request)
     {
-        $data = $request->all(); 
+        $data = $request->all();
         $lims_pos_setting_data = PosSetting::latest()->first();
         /*try {*/
         if (isset($request->reference_no)) {
@@ -1293,8 +1293,8 @@ class SaleController extends Controller
                     $product_sale['topping_id'] = $data['topping_product'][$i];
                 }
             }
-            // Billier commission new login created by mutahir
-            $profit = $lims_product_data->price - $lims_product_data->cost;
+            // Billier commission new option created by mutahir
+            $profit =   $product_sale['net_unit_price'] - $lims_product_data->price;
             $commission = 0;
             if ($profit > 0) {
                 $commission = $profit * 0.10;
@@ -1302,17 +1302,17 @@ class SaleController extends Controller
             $totalProfit += $profit;
             $totalCommission += $commission;
             $totalItems++;
-            // End Billier commission new login created by mutahir
-
+            // End Billier commission new optioin created by mutahir
             Product_Sale::create($product_sale);
         }
-        // Billier commission new login created by mutahir
-        $lims_sale_data->update([
-            'total_profit' => $totalProfit,
-            'total_commission' => $totalCommission
-        ]);
-
         BillerCommission::create([
+            /**
+             * Identifier of the sale record.
+             * Used to associate commission calculations and other sold-product processing
+             * with the originating sale entry.
+             *
+             * @var int $sale_id
+             */
             'sale_id'           => $lims_sale_data->id,
             'biller_id'         => $lims_sale_data->biller_id,
             'total_items'       => $totalItems,
@@ -1321,14 +1321,16 @@ class SaleController extends Controller
             'calculated_at'     => now(),
         ]);
 
+        // Billier commission new option created by mutahir
+        $lims_sale_data->update([
+            'total_profit' => $totalProfit,
+            'total_commission' => $totalCommission
+        ]);
         // END BILLER COMMISSION
-
-
         if ($data['sale_status'] == 3)
             $message = 'Sale successfully added to draft';
         else
             $message = ' Sale created successfully';
-
         //creating log
         $log_data['action'] = 'Sale Created';
         $log_data['user_id'] = Auth::id();
@@ -1341,7 +1343,6 @@ class SaleController extends Controller
         $log_data['user_message'] = 'You just created a sale. Reference No: ' . $lims_sale_data->reference_no;
         // $log_data['mail_setting'] = $mail_setting = MailSetting::latest()->first();
         $this->createActivityLog($log_data);
-
         if ($request->enable_installment) {
             $installment_plan_data = $request->installment_plan;
             $installment_plan_data['reference_id'] = $lims_sale_data->id;

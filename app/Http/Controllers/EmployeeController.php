@@ -309,9 +309,7 @@ class EmployeeController extends Controller
         $request->validate([
             'employee_id' => 'required|integer|exists:employees,id',
         ]);
-
         $employeeId = $request->employee_id;
-
         /*
          * Join chain:
          *  employees  →  users  (employees.user_id = users.id)
@@ -330,61 +328,34 @@ class EmployeeController extends Controller
          *   profit = sales.total_profit * (product_sales.total / sales.grand_total)  (proportional split)
          */
 
-        $query = DB::table('product_sales as ps')
-            ->join('sales as s', 's.id', '=', 'ps.sale_id')
-            ->join('users as u', 'u.id', '=', 's.user_id')
-            ->join('employees as e', 'e.user_id', '=', 'u.id')
+        $query = DB::table('product_sales as ps')->join('sales as s', 's.id', '=', 'ps.sale_id')
+            ->join('users as u', 'u.id', '=', 's.user_id')->join('employees as e', 'e.user_id', '=', 'u.id')
             ->leftJoin('biller_commissions as bc', function ($join) {
-                $join->on('bc.sale_id', '=', 's.id')
-                    ->on('bc.biller_id', '=', 's.biller_id');
-            })
-            ->leftJoin('products as p', 'p.id', '=', 'ps.product_id')
-            ->where('e.id', $employeeId)
-            ->whereNull('s.deleted_at')
-            ->select([
-                'ps.id as ps_id',
-                'p.name as product_name',
-
+                $join->on('bc.sale_id', '=', 's.id')->on('bc.biller_id', '=', 's.biller_id');
+            })->leftJoin('products as p', 'p.id', '=', 'ps.product_id')->where('e.id', $employeeId)->whereNull('s.deleted_at')
+            ->select(['ps.id as ps_id','p.name as product_name',
                 // product cost (purchase price) — stored in products table
                 DB::raw('COALESCE(p.cost, 0) as product_cost'),
-
                 // net unit price = sale price per unit (after discount, before tax)
                 DB::raw('ps.net_unit_price as product_sales_price'),
-
                 // qty sold
                 DB::raw('(ps.qty - ps.return_qty) as qty_sold'),
-
                 // total sale amount for this line
                 DB::raw('ps.total as total_sale'),
-
                 // proportional profit for this line
-                DB::raw('CASE WHEN s.grand_total > 0
-                            THEN ROUND(s.total_profit * (ps.total / s.grand_total), 2)
-                            ELSE 0 END as profit'),
-
+                DB::raw('CASE WHEN s.grand_total > 0 THEN ROUND(s.total_profit * (ps.total / s.grand_total), 2) ELSE 0 END as profit'),
                 // proportional commission for this line
-                DB::raw('CASE WHEN bc.commission_amount IS NOT NULL AND s.grand_total > 0
-                            THEN ROUND(bc.commission_amount * (ps.total / s.grand_total), 2)
-                            ELSE 0 END as salesman_commission'),
-
+                DB::raw('CASE WHEN bc.commission_amount IS NOT NULL AND s.grand_total > 0 THEN ROUND(bc.commission_amount * (ps.total / s.grand_total), 2) ELSE 0 END as salesman_commission'),
                 // commission status
                 DB::raw('CASE WHEN bc.is_paid = 1 THEN "paid" ELSE "unpaid" END as commission_status'),
-
                 // commission date
                 DB::raw('DATE(bc.calculated_at) as commission_date'),
-
                 // sale date
                 DB::raw('DATE(s.created_at) as sale_date'),
-
                 // sale reference
                 's.reference_no as sale_reference',
-
                 // ids needed for action links
-                's.id as sale_id',
-                'bc.id as commission_id',
-                'bc.is_paid',
-            ]);
-
+                's.id as sale_id','bc.id as commission_id','bc.is_paid']);
         return DataTables::of($query)
             ->addIndexColumn()
             ->editColumn('commission_status', function ($row) {
@@ -394,9 +365,7 @@ class EmployeeController extends Controller
                 return '<span class="badge badge-warning">Unpaid</span>';
             })
             ->editColumn('commission_date', function ($row) {
-                return $row->commission_date
-                    ? \Carbon\Carbon::parse($row->commission_date)->format('d/m/Y')
-                    : '—';
+                return $row->commission_date  ? \Carbon\Carbon::parse($row->commission_date)->format('d/m/Y') : '—';
             })
             ->editColumn('sale_date', function ($row) {
                 return $row->sale_date
