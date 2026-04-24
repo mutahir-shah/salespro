@@ -15,5 +15,8 @@ return [
         "sidebar_reports" => "Reports",
         "sidebar_manufacturing" => "Manufacturing",
         "sidebar_whatsapp" => "whatsapp",
+        "sidebar_settings" => "Settings",
+        "sidebar_booking" => "Booking",
+        "sidebar_app_setting" => "AppSetting"
     ],
 ];
