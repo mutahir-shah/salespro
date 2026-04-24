@@ -182,6 +182,7 @@
                             </div>
                             @endif
                             <!-- Count item widget-->
+                              @if ($role_has_permissions_list->contains('name', 'sale_return_statistics'))
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
                                     <x-info title="Total Sale Return Amount" type="info" />
@@ -197,7 +198,8 @@
                                     </a>
                                 </div>
                             </div>
-
+@endif
+ @if ($role_has_permissions_list->contains('name', 'purchase_statistics'))
                          
 
                             <!-- Count item widget-->
@@ -215,8 +217,9 @@
                                 </div>
                             </div>
 
-
-                            <!-- Count item widget-->
+@endif
+ @if ($role_has_permissions_list->contains('name', 'purchase_due_statistics'))      
+<!-- Count item widget-->
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
                                     <div class="icon"><i class="dripicons-warning" style="color: #bdbb39"></i></div>
@@ -228,7 +231,8 @@
                                     </div>
                                 </div>
                             </div>
-
+@endif
+ @if ($role_has_permissions_list->contains('name', 'purchase_return_statistics'))
                             <!-- Count item widget-->
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
@@ -243,7 +247,9 @@
                                     </a>
                                 </div>
                             </div>
+@endif
 
+ @if ($role_has_permissions_list->contains('name', 'total_supplier_dues_statistics'))
                                   <!-- Count item widget total quantity sold -->
                              <div class="col-sm-3">
                                 <div class="wrapper count-title">
@@ -257,7 +263,9 @@
                                     </div>
                                 </div>
                             </div> 
+@endif 
 
+ @if ($role_has_permissions_list->contains('name', 'profit_statistics'))
 
                             <!-- Count item widget-->
                             <div class="col-sm-3">
@@ -274,7 +282,9 @@
                                 </div>
                             </div>
 
-                            
+                            @endif 
+
+                             @if ($role_has_permissions_list->contains('name', 'product_cost_statistics'))
                             <!-- Count item widget product_cost-->
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
@@ -289,7 +299,9 @@
                                     </a>
                                 </div>
                             </div>
+@endif 
 
+ @if ($role_has_permissions_list->contains('name', 'product_selling_cost_statistics'))
 
                              <!-- Count item widget-->
                             <div class="col-sm-3">
@@ -306,7 +318,9 @@
                                 </div>
                             </div>
 
-                            
+                            @endif 
+
+                             @if ($role_has_permissions_list->contains('name', 'payroll_amount_statistics'))
             
                             <!-- Count item widget payroll_amount-->
                             <div class="col-sm-3">
@@ -323,7 +337,9 @@
                                 </div>
                             </div>
 
+@endif 
 
+ @if ($role_has_permissions_list->contains('name', 'total_billers_statistics'))
                          <!-- Count item widget billers -->
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
@@ -339,7 +355,9 @@
                                 </div>
                             </div>
 
+@endif 
 
+ @if ($role_has_permissions_list->contains('name', 'remaining_stocks_statistics'))
                           
 
                              <!-- Count item widget remaining stock -->
@@ -357,7 +375,9 @@
                             </div>
 
 
-                            
+                            @endif
+
+                             @if ($role_has_permissions_list->contains('name', 'total_quantity_sold_statistics'))
                              <!-- Count item widget total quantity sold -->
                              <div class="col-sm-3">
                                 <div class="wrapper count-title">
@@ -371,6 +391,10 @@
                                     </div>
                                 </div>
                             </div> 
+
+
+                            @endif 
+                             @if ($role_has_permissions_list->contains('name', 'total_customer_dues_statistics'))
   
                          
                                <!-- Count item widget total quantity sold -->
@@ -385,7 +409,9 @@
                                         <div class="name"><strong style="color: #297ff9">{{ __('Total Customer Dues') }}</strong></div>
                                     </div>
                                 </div>
-                            </div> 
+                            </div> @endif 
+
+                             @if ($role_has_permissions_list->contains('name', 'expense_statistics'))
 
                                <!-- Count item widget-->
                             <div class="col-sm-3">
@@ -400,7 +426,9 @@
                                     </div>
                                 </div>
                             </div>
+@endif 
 
+ @if ($role_has_permissions_list->contains('name', 'total_rent_statistics'))
 
 
                                <!-- Count item widget-->
@@ -416,7 +444,9 @@
                                     </div>
                                 </div>
                             </div>
+@endif 
 
+ @if ($role_has_permissions_list->contains('name', 'total_bill_statistics'))
                                 <!-- Count item widget-->
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
@@ -430,6 +460,8 @@
                                     </div>
                                 </div>
                             </div>
+@endif 
+
 
 
                         </div>
