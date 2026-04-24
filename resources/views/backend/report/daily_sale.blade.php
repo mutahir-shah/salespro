@@ -51,19 +51,19 @@
 						    					echo '<td><p><strong>'.$i.'</strong></p>';
 
 						    				if($total_discount[$i]){
-						    					echo '<strong>'.__("db.Product Discount").'</strong><br><span>'.$total_discount[$i].'</span><br><br>';
+						    				//	echo '<strong>'.__("db.Product Discount").'</strong><br><span>'.$total_discount[$i].'</span><br><br>';
 						    				}
 						    				if($order_discount[$i]){
-						    					echo '<strong>'.__("db.Order Discount").'</strong><br><span>'.$order_discount[$i].'</span><br><br>';
+						    				//	echo '<strong>'.__("db.Order Discount").'</strong><br><span>'.$order_discount[$i].'</span><br><br>';
 						    				}
 						    				if($total_tax[$i]){
-						    					echo '<strong>'.__("db.Product Tax").'</strong><br><span>'.$total_tax[$i].'</span><br><br>';
+						    				//	echo '<strong>'.__("db.Product Tax").'</strong><br><span>'.$total_tax[$i].'</span><br><br>';
 						    				}
 						    				if($order_tax[$i]){
-						    					echo '<strong>'.__("db.Order Tax").'</strong><br><span>'.$order_tax[$i].'</span><br><br>';
+						    				//	echo '<strong>'.__("db.Order Tax").'</strong><br><span>'.$order_tax[$i].'</span><br><br>';
 						    				}
 						    				if($shipping_cost[$i]){
-						    					echo '<strong>'.__("db.Shipping Cost").'</strong><br><span>'.$shipping_cost[$i].'</span><br><br>';
+						    				//	echo '<strong>'.__("db.Shipping Cost").'</strong><br><span>'.$shipping_cost[$i].'</span><br><br>';
 						    				}
 						    				if($grand_total[$i]){
 						    					echo '<strong>'.__("db.grand total").'</strong><br><span>'.$grand_total[$i].'</span><br><br>';
@@ -78,19 +78,19 @@
 						    					echo '<td><p><strong>'.$i.'</strong></p>';
 
 						    				if($total_discount[$i]){
-						    					echo '<strong>'.__("db.Product Discount").'</strong><br><span>'.$total_discount[$i].'</span><br><br>';
+						    				//	echo '<strong>'.__("db.Product Discount").'</strong><br><span>'.$total_discount[$i].'</span><br><br>';
 						    				}
 						    				if($order_discount[$i]){
-						    					echo '<strong>'.__("db.Order Discount").'</strong><br><span>'.$order_discount[$i].'</span><br><br>';
+						    				//	echo '<strong>'.__("db.Order Discount").'</strong><br><span>'.$order_discount[$i].'</span><br><br>';
 						    				}
 						    				if($total_tax[$i]){
-						    					echo '<strong>'.__("db.Product Tax").'</strong><br><span>'.$total_tax[$i].'</span><br><br>';
+						    				//	echo '<strong>'.__("db.Product Tax").'</strong><br><span>'.$total_tax[$i].'</span><br><br>';
 						    				}
 						    				if($order_tax[$i]){
-						    					echo '<strong>'.__("db.Order Tax").'</strong><br><span>'.$order_tax[$i].'</span><br><br>';
+						    					//echo '<strong>'.__("db.Order Tax").'</strong><br><span>'.$order_tax[$i].'</span><br><br>';
 						    				}
 						    				if($shipping_cost[$i]){
-						    					echo '<strong>'.__("db.Shipping Cost").'</strong><br><span>'.$shipping_cost[$i].'</span><br><br>';
+						    				//	echo '<strong>'.__("db.Shipping Cost").'</strong><br><span>'.$shipping_cost[$i].'</span><br><br>';
 						    				}
 						    				if($grand_total[$i]){
 						    					echo '<strong>'.__("db.grand total").'</strong><br><span>'.$grand_total[$i].'</span><br><br>';

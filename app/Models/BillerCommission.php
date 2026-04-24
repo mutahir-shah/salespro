@@ -18,6 +18,12 @@ class BillerCommission extends Model
         'paid_at'
     ];
 
+    protected $casts = [
+        'calculated_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'is_paid' => 'boolean',
+    ];
+
     public function sale()
     {
         return $this->belongsTo(Sale::class);

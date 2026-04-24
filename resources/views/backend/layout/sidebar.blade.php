@@ -167,6 +167,9 @@
                             @can('exchange-index')
                                 <li id="exchange-menu"><a class="{{ request()->is('exchange') ? 'active' : '' }}" href="{{route('exchange.index')}}">{{__('db.Sale Exchange')}}</a></li>
                             @endcan
+                            @can('sales-index')
+                                <li id="biller-commissions-menu"><a class="{{ request()->is('biller-commissions') ? 'active' : '' }}" href="{{route('biller.commissions')}}">{{__('Biller Commissions')}}</a></li>
+                            @endcan
                         </ul>
                     </li>
                 @endisset

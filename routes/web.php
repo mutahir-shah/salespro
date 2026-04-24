@@ -383,6 +383,8 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::get('customer-sales/{customer_id}', 'customerSales')->name('sales.customer');
 
         Route::post('sales/set-price-type', 'setPriceType')->name('set.price.type');
+        Route::get('sales/biller-commissions', 'billerCommissions')->name('biller.commissions');
+        Route::post('sales/biller-commissions/pay', 'payBillerCommissions')->name('biller.commissions.pay');
     });
     Route::resource('sales', SaleController::class)->except('show');
 

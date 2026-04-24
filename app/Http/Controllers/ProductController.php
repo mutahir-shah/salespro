@@ -13,7 +13,7 @@ use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\{Role,Permission};
 use App\Traits\{TenantInfo,CacheForget};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{DB,Log,Str,Auth,Http};
+use Illuminate\Support\Facades\{DB,Log,Str,Auth,Http, Session};
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 
@@ -459,6 +459,11 @@ class ProductController extends Controller
     {
 
         $this->validate($request, [
+            'name' => ['required','max:255',
+                    Rule::unique('products')->where(function ($query) {
+                    return $query->where('is_active', 1);
+                }),
+            ],
             'code' => [
                 'max:255',
                     Rule::unique('products')->where(function ($query) {
@@ -468,7 +473,6 @@ class ProductController extends Controller
         ]);
 
         $data = $request->except('image', 'file');
-
         // handle warranty and guarantee
         if (!isset($data['warranty'])) {
             unset($data['warranty']);
@@ -478,7 +482,6 @@ class ProductController extends Controller
             unset($data['guarantee']);
             unset($data['guarantee_type']);
         }
-
         if(isset($data['is_variant'])) {
             $data['variant_option'] = json_encode(array_unique($data['variant_option']));
             $data['variant_value'] = json_encode(array_unique($data['variant_value']));
@@ -486,20 +489,15 @@ class ProductController extends Controller
         else {
             $data['variant_option'] = $data['variant_value'] = null;
         }
-
         $data['name'] = preg_replace('/[\n\r]/', "<br>", htmlspecialchars(trim($data['name']), ENT_QUOTES));
-
         if(in_array('ecommerce', explode(',',config('addons')))) {
             $data['slug'] = Str::slug($data['name'], '-');
             $data['slug'] = preg_replace('/[^A-Za-z0-9\-]/', '', $data['slug']);
             $data['slug'] = str_replace( '\/', '/', $data['slug'] );
         }
-
         if(in_array('restaurant', explode(',',config('addons')))) {
             $data['menu_type'] = implode(",", $request->menu_type);
         }
-
-
         if($data['type'] == 'combo' || (isset($data['is_recipe']) && $data['is_recipe'] == 1)) {
 
             $data['product_list'] = implode(",", $data['product_id']);
@@ -511,12 +509,9 @@ class ProductController extends Controller
 
             //$data['cost'] = $data['unit_id'] = $data['purchase_unit_id'] = $data['sale_unit_id'] = 0;
         }
-
         elseif($data['type'] == 'digital' || $data['type'] == 'service')
             $data['cost'] = $data['unit_id'] = $data['purchase_unit_id'] = $data['sale_unit_id'] = 0;
-
         $data['product_details'] = str_replace('"', '@', $data['product_details']);
-
         if($data['starting_date'])
             $data['starting_date'] = date('Y-m-d', strtotime($data['starting_date']));
         if($data['last_date'])
@@ -527,30 +522,22 @@ class ProductController extends Controller
         if ($images) {
             // Ensure the necessary directories exist using public_path()
             $this->diffSizeOfImagePathExistOrCreate();
-
             foreach ($images as $key => $image) {
                 $ext = pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
                 $imageName = date("Ymdhis") . ($key + 1);
-
                 // Handle multi-tenant logic if necessary
                 if (!config('database.connections.saleprosaas_landlord')) {
                     $imageName = $imageName . '.' . $ext;
                 } else {
                     $imageName = $this->getTenantId() . '_' . $imageName . '.' . $ext;
                 }
-
-
                 $image->move(public_path('images/product'), $imageName);
-
                 $manager = new ImageManager(new GdDriver());
                 $image = $manager->read(public_path('images/product/' . $imageName));
-
                 $this->diffSizeImageStore($image, $imageName);
-
                 // Collect image names for saving in the database
                 $image_names[] = $imageName;
             }
-
             // Save the image names in the database
             $data['image'] = implode(",", $image_names);
         }
@@ -572,7 +559,6 @@ class ProductController extends Controller
             $data['profit_margin'] = 0;
         }
         $lims_product_data = Product::create($data);
-
         $custom_field_data = [];
         $custom_fields = CustomField::where('belongs_to', 'product')->select('name', 'type')->get();
         foreach ($custom_fields as $type => $custom_field) {
@@ -657,9 +643,8 @@ class ProductController extends Controller
         }
         $this->cacheForget('product_list');
         $this->cacheForget('product_list_with_variant');
-        \Session::flash('create_message', 'Product created successfully');
+        Session::flash('create_message', 'Product created successfully');
     }
-
     public function autoPurchase($product_data, $warehouse_id, $stock)
     {
         $data['reference_no'] = 'pr-' . date("Ymd") . '-'. date("his");
@@ -1352,6 +1337,13 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             $this->validate($request, [
+                'name' => [
+                    'required',
+                    'max:255',
+                    Rule::unique('products')->ignore($request->input('id'))->where(function ($query) {
+                        return $query->where('is_active', 1);
+                    }),
+                ],
                 'code' => [
                     'max:255',
                     Rule::unique('products')->ignore($request->input('id'))->where(function ($query) {

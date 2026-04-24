@@ -1922,6 +1922,8 @@
                               else if(response.responseJSON.errors.code) {
                                   $("#code-error").text(response.responseJSON.errors.code);
                               }
+                                $('#submit-btn').prop('disabled', false).html('{{__("db.add_product")}}');
+                            
                             },
                         });
                     }

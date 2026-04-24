@@ -4681,6 +4681,48 @@ class SaleController extends Controller
         return redirect('sales')->with('not_permitted', __('db.Payment deleted successfully'));
     }
 
+    public function billerCommissions(Request $request)
+    {
+        $date = $request->input('date', date('Y-m-d'));
+        $billerId = $request->input('biller_id', null);
+
+        // Get all billers for dropdown
+        $billers = Biller::orderBy('name')->get();
+
+        // Build query
+        $query = BillerCommission::with(['sale', 'biller'])
+            ->whereDate('calculated_at', $date);
+
+        // Apply biller filter if selected
+        if ($billerId) {
+            $query->where('biller_id', $billerId);
+        }
+        $commissions = $query->orderBy('created_at', 'desc')->get();
+        // Calculate total commission for filtered results
+        $totalCommission = $commissions->sum('commission_amount');
+        $totalUnpaidCommission = $commissions->where('is_paid', false)->sum('commission_amount');
+        return view('backend.sale.biller_commissions', compact('commissions', 'date', 'billerId', 'billers', 'totalCommission', 'totalUnpaidCommission'));
+    }
+
+    public function payBillerCommissions(Request $request)
+    {
+        $commissionIds = $request->input('commission_ids', []);
+        $paidAt = $request->input('paid_at', now());
+        if (empty($commissionIds)) {
+            return redirect()->back()->with('error', 'No commissions selected');
+        }
+        $commissions = BillerCommission::whereIn('id', $commissionIds)->get();
+        // Calculate total commission for selected items
+        $totalPaidAmount = $commissions->sum('commission_amount');
+        foreach ($commissions as $commission) {
+            $commission->update([
+                'paid_amount' => $commission->commission_amount,
+                'is_paid' => true,
+                'paid_at' => $paidAt,
+            ]);
+        }
+        return redirect()->back()->with('message', 'Commissions paid successfully. Total paid: ' . number_format($totalPaidAmount, 2));
+    }
     public function todaySale()
     {
         // 🔹 Total sales (normalized by exchange_rate)
