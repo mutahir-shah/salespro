@@ -164,8 +164,8 @@
                             </div>
                             @endif
 
-                            <!-- Count item widget invoice due-->
-                             @if(Auth::user()->hasPermissionTo('sale_due_statistics'))
+                            <!-- Count item widget invoice due--> 
+                             @if ($role_has_permissions_list->contains('name', 'sale_due_statistics'))
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
                                     <x-info title="Grand Total - Paid Amount = Invoice Due" type="info" />
