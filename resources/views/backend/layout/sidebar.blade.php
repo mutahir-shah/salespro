@@ -741,8 +741,6 @@
         @endcan
 
         @can('sidebar_settings')
-
-
         @php $showSettingsMenu = false; @endphp
         @if(\Auth::user()->role_id <= 2)
             @php $showSettingsMenu=true; @endphp
