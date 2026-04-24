@@ -71,19 +71,13 @@
                 @if (in_array('restaurant', explode(',', cache()->get('general_setting')->modules)))
                     @if (Auth::user()->role_id > 2 && isset(Auth::user()->service_staff))
                         @php
-                            $cooked = DB::table('sales')
-                                ->where('waiter_id', Auth::user()->id)
-                                ->where('sale_status', 5)
-                                ->orWhere('sale_status', 6)
-                                ->where('sales.created_at', '>=', now()->subDay())
-                                ->count();
+                            $cooked = DB::table('sales')->where('waiter_id', Auth::user()->id)
+                                ->where('sale_status', 5)->orWhere('sale_status', 6)->where('sales.created_at', '>=', now()->subDay())->count();
                         @endphp
                     @elseif(Auth::user()->role_id <= 2)
                         @php
-                            $cooked = DB::table('sales')
-                                ->where('sale_status', 6)
-                                ->where('sales.created_at', '>=', now()->subDay())
-                                ->count();
+                            $cooked = DB::table('sales')->where('sale_status', 6)
+                                ->where('sales.created_at', '>=', now()->subDay())->count();
                         @endphp
                     @endif
                 @endif
@@ -94,11 +88,9 @@
                         </div>
                     </a>
                 @endif
-
+ 
                 @php
-                    $revenue_profit_summary = $role_has_permissions_list
-                        ->where('name', 'revenue_profit_summary')
-                        ->first();
+                    $revenue_profit_summary = $role_has_permissions_list->where('name', 'revenue_profit_summary')->first();
                 @endphp
                 @if ($revenue_profit_summary)
                     <div class="filter-toggle btn-group d-inline-block">
@@ -152,6 +144,7 @@
                     <div class="col-md-12 form-group">
                         <div class="row">
                             <!-- Count item widget-->
+                             @if ($role_has_permissions_list->contains('name', 'sale_statistics'))
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
                                     <x-info title="Grand Total - Shipping Cost = Total Sale" type="info" />
@@ -169,8 +162,10 @@
                                     </a>
                                 </div>
                             </div>
+                            @endif
 
                             <!-- Count item widget invoice due-->
+                             @if(Auth::user()->hasPermissionTo('sale_due_statistics'))
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">
                                     <x-info title="Grand Total - Paid Amount = Invoice Due" type="info" />
@@ -185,6 +180,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                             <!-- Count item widget-->
                             <div class="col-sm-3">
                                 <div class="wrapper count-title">

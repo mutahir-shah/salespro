@@ -89,18 +89,11 @@ class HomeController extends Controller
                 ->whereNull('deleted_at')
                 ->where('customer_id', $customer->id)
                 ->where(function ($q) {
-                    $q->where('sale_type', '!=', 'opening balance')
-                        ->orWhereNull('sale_type');
-                })
-                ->orderBy('created_at', 'desc')
-                ->get();
-            $lims_payment_data = DB::table('payments')
-                ->join('sales', 'payments.sale_id', '=', 'sales.id')
-                ->whereNull('sales.deleted_at')
-                ->where('customer_id', $customer->id)
-                ->select('payments.*', 'sales.reference_no as sale_reference')
-                ->orderBy('payments.created_at', 'desc')
-                ->get();
+                    $q->where('sale_type', '!=', 'opening balance')->orWhereNull('sale_type');
+                })->orderBy('created_at', 'desc')->get();
+            $lims_payment_data = DB::table('payments')->join('sales', 'payments.sale_id', '=', 'sales.id')
+                ->whereNull('sales.deleted_at')->where('customer_id', $customer->id)
+                ->select('payments.*', 'sales.reference_no as sale_reference')->orderBy('payments.created_at', 'desc')->get();
             $lims_quotation_data = Quotation::with('biller', 'customer', 'supplier', 'user')->orderBy('id', 'desc')->where('customer_id', $customer->id)->orderBy('created_at', 'desc')->get();
 
             $lims_return_data = Returns::with('warehouse', 'customer', 'biller')->where('customer_id', $customer->id)->orderBy('created_at', 'desc')->get();
@@ -110,11 +103,8 @@ class HomeController extends Controller
 
         $end_date = date('Y-m-d');
         $start_date = date('Y-m-d', strtotime('-29 days'));
-
         $yearly_sale_amount = [];
-
         if (Auth::user()->role_id > 2 && cache()->get('general_setting')->staff_access == 'own') {
-
             $sale_query = Sale::whereDate('created_at', '>=', $start_date)->where('user_id', Auth::id())->whereDate('created_at', '<=', $end_date)->whereNull('deleted_at');
 
             $revenue = $sale_query->sum(DB::raw('(grand_total - shipping_cost) / exchange_rate'));

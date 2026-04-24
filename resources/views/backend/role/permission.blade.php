@@ -2239,6 +2239,337 @@
 
 											</td>
 										</tr>
+
+										<tr>
+											<td>{{__('db.Dashboar Statistics')}}</td>
+											<td class="report-permissions" colspan="5">
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("sale_statistics", $all_permission))
+															<input type="checkbox" value="1" id="sale_statistics" name="sale_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="sale_statistics" name="sale_statistics">
+															@endif
+															<label for="sale_statistics" class="padding05">{{__('db.Sale')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("sale_due_statistics", $all_permission))
+															<input type="checkbox" value="1" id="sale_due_statistics" name="sale_due_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="sale_due_statistics" name="sale_due_statistics">
+															@endif
+															<label for="sale_due_statistics" class="padding05">{{__('db.Sale Due')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("sale_return_statistics", $all_permission))
+															<input type="checkbox" value="1" id="sale_return_statistics" name="sale_return_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="sale_return_statistics" name="sale_return_statistics">
+															@endif
+															<label for="sale_return_statistics" class="padding05">{{__('db.Sale Return')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("purchase_statistics", $all_permission))
+															<input type="checkbox" value="1" id="purchase_statistics" name="purchase_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="purchase_statistics" name="purchase_statistics">
+															@endif
+															<label for="purchase_statistics" class="padding05">{{__('db.Purchase')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("purchase_due_statistics", $all_permission))
+															<input type="checkbox" value="1" id="purchase_due_statistics" name="purchase_due_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="purchase_due_statistics" name="purchase_due_statistics">
+															@endif
+															<label for="purchase_due_statistics" class="padding05">{{__('db.Purchase Due')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("purchase_return_statistics", $all_permission))
+															<input type="checkbox" value="1" id="purchase_return_statistics" name="purchase_return_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="purchase_return_statistics" name="purchase_return_statistics">
+															@endif
+															<label for="purchase_return_statistics" class="padding05">{{__('db.Purchase Return')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("total_supplier_dues_statistics", $all_permission))
+															<input type="checkbox" value="1" id="total_supplier_dues_statistics" name="total_supplier_dues_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="total_supplier_dues_statistics" name="total_supplier_dues_statistics">
+															@endif
+															<label for="total_supplier_dues_statistics" class="padding05">{{__('db.Total Supplier Dues')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span> 
+
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("profit_statistics", $all_permission))
+															<input type="checkbox" value="1" id="profit_statistics" name="profit_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="profit_statistics" name="profit_statistics">
+															@endif
+															<label for="profit_statistics" class="padding05">{{__('db.Profit')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("product_cost_statistics", $all_permission))
+															<input type="checkbox" value="1" id="product_cost_statistics" name="product_cost_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="product_cost_statistics" name="product_cost_statistics">
+															@endif
+															<label for="product_cost_statistics" class="padding05">{{__('db.Product Cost')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("product_selling_cost_statistics", $all_permission))
+															<input type="checkbox" value="1" id="product_selling_cost_statistics" name="product_selling_cost_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="product_selling_cost_statistics" name="product_selling_cost_statistics">
+															@endif
+															<label for="product_selling_cost_statistics" class="padding05">{{__('db.Product Selling Cost')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("payroll_amount_statistics", $all_permission))
+															<input type="checkbox" value="1" id="payroll_amount_statistics" name="payroll_amount_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="payroll_amount_statistics" name="payroll_amount_statistics">
+															@endif
+															<label for="payroll_amount_statistics" class="padding05">{{__('db.Payroll Amount')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span> 
+
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("total_billers_statistics", $all_permission))
+															<input type="checkbox" value="1" id="total_billers_statistics" name="total_billers_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="total_billers_statistics" name="total_billers_statistics">
+															@endif
+															<label for="total_billers_statistics" class="padding05">{{__('db.Total Billers')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span> 
+
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("remaining_stocks_statistics", $all_permission))
+															<input type="checkbox" value="1" id="remaining_stocks_statistics" name="remaining_stocks_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="remaining_stocks_statistics" name="remaining_stocks_statistics">
+															@endif
+															<label for="remaining_stocks_statistics" class="padding05">{{__('db.Remaining Stocks')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("total_quantity_sold_statistics", $all_permission))
+															<input type="checkbox" value="1" id="total_quantity_sold_statistics" name="total_quantity_sold_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="total_quantity_sold_statistics" name="total_quantity_sold_statistics">
+															@endif
+															<label for="total_quantity_sold_statistics" class="padding05">{{__('db.Total Quantity Sold')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("total_customer_dues_statistics", $all_permission))
+															<input type="checkbox" value="1" id="total_customer_dues_statistics" name="total_customer_dues_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="total_customer_dues_statistics" name="total_customer_dues_statistics">
+															@endif
+															<label for="total_customer_dues_statistics" class="padding05">{{__('db.Total Customer Dues')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span> 
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("expense_statistics", $all_permission))
+															<input type="checkbox" value="1" id="expense_statistics" name="expense_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="expense_statistics" name="expense_statistics">
+															@endif
+															<label for="expense_statistics" class="padding05">{{__('db.Expense')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+	<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("total_rent_statistics", $all_permission))
+															<input type="checkbox" value="1" id="total_rent_statistics" name="total_rent_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="total_rent_statistics" name="total_rent_statistics">
+															@endif
+															<label for="total_rent_statistics" class="padding05">{{__('db.Total Rent')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+													<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("total_bill_statistics", $all_permission))
+															<input type="checkbox" value="1" id="total_bill_statistics" name="total_bill_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="total_bill_statistics" name="total_bill_statistics">
+															@endif
+															<label for="total_bill_statistics" class="padding05">{{__('db.Total Bill')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+													<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("cash_flow_statistics", $all_permission))
+															<input type="checkbox" value="1" id="cash_flow_statistics" name="cash_flow_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="cash_flow_statistics" name="cash_flow_statistics">
+															@endif
+															<label for="cash_flow_statistics" class="padding05">{{__('db.Cash Flow')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+													<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("dougnut_statistics", $all_permission))
+															<input type="checkbox" value="1" id="dougnut_statistics" name="dougnut_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="dougnut_statistics" name="dougnut_statistics">
+															@endif
+															<label for="dougnut_statistics" class="padding05">{{__('db.Doughnut')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+													<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("yearly_report_statistics", $all_permission))
+															<input type="checkbox" value="1" id="yearly_report_statistics" name="yearly_report_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="yearly_report_statistics" name="yearly_report_statistics">
+															@endif
+															<label for="yearly_report_statistics" class="padding05">{{__('db.Yearly Report')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+												
+													<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("best_seller_april_statistics", $all_permission))
+															<input type="checkbox" value="1" id="best_seller_april_statistics" name="best_seller_april_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="best_seller_april_statistics" name="best_seller_april_statistics">
+															@endif
+															<label for="best_seller_april_statistics" class="padding05">{{__('db.Best Seller April')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+													<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("best_seller_quantity_statistics", $all_permission))
+															<input type="checkbox" value="1" id="best_seller_quantity_statistics" name="best_seller_quantity_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="best_seller_quantity_statistics" name="best_seller_quantity_statistics">
+															@endif
+															<label for="best_seller_quantity_statistics" class="padding05">{{__('db.Best Seller Quantity')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+													<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("best_seller_price_statistics", $all_permission))
+															<input type="checkbox" value="1" id="best_seller_price_statistics" name="best_seller_price_statistics" checked>
+															@else
+															<input type="checkbox" value="1" id="best_seller_price_statistics" name="best_seller_price_statistics">
+															@endif
+															<label for="best_seller_price_statistics" class="padding05">{{__('db.Best Seller Price')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+												
+
+												</td>
+												</tr>
 									</tbody>
 								</table>
 							</div>
