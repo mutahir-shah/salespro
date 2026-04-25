@@ -160,7 +160,9 @@
                     @can('coupon')
                     <li id="coupon-menu"><a class="{{ request()->is('coupons') ? 'active' : '' }}" href="{{route('coupons.index')}}">{{__('db.Coupon List')}}</a> </li>
                     @endcan
+                    @can('courier')
                     <li id="courier-menu"><a class="{{ request()->is('couriers') ? 'active' : '' }}" href="{{route('couriers.index')}}">{{__('db.Courier List')}}</a> </li>
+                    @endcan
                     @can('returns-index')
                     <li id="sale-return-menu"><a class="{{ request()->is('return-sale') ? 'active' : '' }}" href="{{route('return-sale.index')}}">{{__('db.Sale Return')}}</a></li>
                     @endcan

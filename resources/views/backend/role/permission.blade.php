@@ -2234,6 +2234,18 @@
 												</span>
 
 
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("courier", $all_permission))
+															<input type="checkbox" value="1" id="courier" name="courier" checked>
+															@else
+															<input type="checkbox" value="1" id="courier" name="courier">
+															@endif
+															<label for="courier" class="padding05">{{__('db.Courier List')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
 
 
 
