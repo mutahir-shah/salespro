@@ -198,13 +198,19 @@
             <header class="container-fluid">
                 <nav class="navbar">
                     <a id="toggle-btn" class="menu-btn"><i class="fa fa-bars"> </i></a>
-
+@if (Auth::user()->role_id != 1 && Auth::user()->warehouse_id)
+                                @if (Auth::user()->warehouse)
+                                 <a class="btn-pos btn-sm" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <span class="">{{ Auth::user()->warehouse->name }}</span></a>
+                                @endif
+                            @endif
                     <ul class="nav-menu list-unstyled d-flex flex-md-row align-items-md-center">
                         <div class="dropdown d-none d-lg-block">
-
+ 
                             <a class="btn-pos btn-sm" type="button" data-toggle="dropdown" aria-expanded="false">
                                 <i class="dripicons-plus"></i>
                             </a>
+                           
                             <ul class="dropdown-menu">
                                 <?php
                                 $category_permission_active = $role_has_permissions_list->where('name', 'category')->first();

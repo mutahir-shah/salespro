@@ -92,7 +92,22 @@
                                     </div>
 
                                        @if(isset(auth()->user()->biller_id))
-                                    <input type="hidden" name="biller_id" id="biller_id" value="{{auth()->user()->biller_id}}" />
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Biller')}} *</label>
+                                            @php
+                                                $userBillerId = auth()->user()->biller_id;
+                                            @endphp
+                                            <select id="biller_id" class="selectpicker form-control" disabled>
+                                                @foreach($lims_biller_list as $biller)
+                                                    @if($biller->id == $userBillerId)
+                                                        <option value="{{$biller->id}}" selected>{{$biller->name . ' (' . $biller->company_name . ')'}}</option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                            <input type="hidden" name="biller_id" value="{{$userBillerId}}" />
+                                        </div>
+                                    </div>
                                     @else
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -114,7 +129,22 @@
                                     </div>
                                     @endif
                                     @if(isset(auth()->user()->warehouse_id))
-                                    <input type="hidden" name="warehouse_id" id="warehouse_id" value="{{auth()->user()->warehouse_id}}" />
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Warehouse')}} *</label>
+                                            @php
+                                                $userWarehouseId = auth()->user()->warehouse_id;
+                                            @endphp
+                                            <select id="warehouse_id" class="selectpicker form-control" disabled>
+                                                @foreach($lims_warehouse_list as $warehouse)
+                                                    @if($warehouse->id == $userWarehouseId)
+                                                        <option value="{{$warehouse->id}}" selected>{{$warehouse->name}}</option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                            <input type="hidden" name="warehouse_id" value="{{$userWarehouseId}}" />
+                                        </div>
+                                    </div>
                                     @else
                                     <div class="col-md-4">
                                         <div class="form-group">
