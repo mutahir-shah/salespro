@@ -113,7 +113,7 @@ Route::get('migrate', function () {
     dd('migrated');
 });
 
-Route::get('clear', function () {
+Route::get('clear', function (Request $request) {
     Artisan::call('optimize:clear');
     cache()->forget('biller_list');
     cache()->forget('brand_list');
@@ -133,7 +133,13 @@ Route::get('clear', function () {
     cache()->forget('permissions');
     cache()->forget('role_has_permissions');
     cache()->forget('role_has_permissions_list');
-});
+
+    $redirect = $request->query('redirect');
+    if ($redirect && parse_url($redirect, PHP_URL_HOST) === request()->getHost()) {
+        return redirect($redirect);
+    }
+    return redirect()->back();
+})->name('cache.clear');
 
 Route::get('update-coupon', [CouponController::class, 'updateCoupon']);
 

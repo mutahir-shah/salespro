@@ -476,6 +476,12 @@
                                     </li> -->
                                 @endif
                                 <li>
+                                    <a href="{{ route('cache.clear', ['redirect' => request()->fullUrl()]) }}"><i
+                                            class="dripicons-refresh"></i>
+                                        {{ __('db.Clear Cache') }}
+                                    </a>
+                                </li>
+                                <li>
                                     <a href="{{ route('logout') }}"
                                         onclick="event.preventDefault();
                                         document.getElementById('logout-form').submit();"><i
