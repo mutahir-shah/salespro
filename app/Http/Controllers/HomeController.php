@@ -18,6 +18,7 @@ use App\Models\Payroll;
 use App\Models\Product;
 use App\Models\Returns;
 use App\Models\Customer;
+use App\Models\Employee;
 use App\Models\Purchase;
 use App\Models\Quotation;
 use App\Models\Product_Sale;
@@ -392,7 +393,7 @@ class HomeController extends Controller
                 })->sum('amount');
 
             $payroll_amount = Payroll::whereBetween('created_at', [Carbon::parse($start_date)->startOfDay(), Carbon::parse($end_date)->endOfDay()])->sum('amount');
-            $billers           = $this->getTotalBillers($warehouse_id);
+            $billers           = $this->getTotalEmployees($warehouse_id);
             $remaining_stock   = $this->totalQuantity($warehouse_id);
             $totalQuantitySold = $this->totalQuantitySold($warehouse_id, $start_date, $end_date);
             $totalDues         = $this->getTotalDues(); // Call the method to get dues, but not using the returned values here. You can modify this as needed.
@@ -433,7 +434,7 @@ class HomeController extends Controller
             ->when($warehouse_id, function ($query) use ($warehouse_id) {
                 $query->where('pw.warehouse_id', $warehouse_id);
             })->selectRaw("COALESCE(SUM(pw.qty * products.price),0) as selling_cost,COALESCE(SUM(pw.qty * products.cost),0) as product_cost")->first();
-        
+
         return [
             'selling_cost' => $result->selling_cost,
             'product_cost' => $result->product_cost,
@@ -501,7 +502,17 @@ class HomeController extends Controller
     }
 
 
-    public function getTotalBillers($warehouse_id = 0)
+    public function getTotalEmployees($warehouse_id = 0)
+    {
+        return Employee::where('is_active', 1)
+            ->when($warehouse_id, function ($query) use ($warehouse_id) {
+                $query->where('warehouse_id', $warehouse_id);
+            })
+            ->count();
+    }
+
+
+    public function getTotalUsers($warehouse_id = 0)
     {
         return Biller::where('is_active', 1)->whereHas('users', function ($query) use ($warehouse_id) {
             if ($warehouse_id) {
