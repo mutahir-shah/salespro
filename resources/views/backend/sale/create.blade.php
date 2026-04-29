@@ -1527,7 +1527,6 @@ function loadBillersForWarehouse(warehouse_id, selectedBillerId = null) {
     $('#warehouse_id').on('change', function() {
         warehouse_id = $(this).val();
         // getProduct(warehouse_id);
-        isCashRegisterAvailable(warehouse_id);
         loadBillersForWarehouse(warehouse_id);
         $('#featured-filter').trigger('click');
     });
