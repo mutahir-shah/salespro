@@ -2535,16 +2535,11 @@ class SaleController extends Controller
 
     public function getBillersByWarehouse($warehouse_id)
     {
-        $lims_biller_list = Biller::select('billers.id', 'billers.name', 'billers.company_name')
-            ->join('users', 'users.biller_id', '=', 'billers.id')
-            ->rightJoin('employees', 'employees.user_id', '=', 'users.id')
-            ->where('billers.is_active', true)
-            ->where(function ($query) use ($warehouse_id) {
-                $query->where('users.warehouse_id', $warehouse_id)
-                    ->orWhere('employees.warehouse_id', $warehouse_id);
+        $lims_biller_list = Biller::where('is_active', true)
+            ->whereHas('users', function ($query) use ($warehouse_id) {
+                $query->where('warehouse_id', $warehouse_id);
             })
-            ->groupBy('billers.id', 'billers.name', 'billers.company_name')
-            ->get();
+            ->get(['id', 'name', 'company_name']);
 
         return response()->json($lims_biller_list);
     }
