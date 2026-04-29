@@ -1500,12 +1500,42 @@ $("#myTable").on('click', '.minus', function() {
 
 });
 
-$('#warehouse_id').on('change', function() {
+function loadBillersForWarehouse(warehouse_id, selectedBillerId = null) {
+        if (!warehouse_id) {
+            return;
+        }
+
+        $.get('{{ url("sales/get-billers-by-warehouse") }}/' + warehouse_id, function(data) {
+            var $biller = $('#biller_id');
+            var currentSelection = selectedBillerId || $biller.val();
+            $biller.empty();
+            $biller.append('<option value="">Select Biller...</option>');
+
+            if (data.length === 0) {
+                $biller.append('<option value="">No biller available for this warehouse</option>');
+            } else {
+                $.each(data, function(index, biller) {
+                    var selected = currentSelection && currentSelection == biller.id ? 'selected' : '';
+                    $biller.append('<option value="' + biller.id + '" ' + selected + '>' + biller.name + ' (' + biller.company_name + ')</option>');
+                });
+            }
+
+            $biller.selectpicker('refresh');
+        });
+    }
+
+    $('#warehouse_id').on('change', function() {
         warehouse_id = $(this).val();
         // getProduct(warehouse_id);
         isCashRegisterAvailable(warehouse_id);
+        loadBillersForWarehouse(warehouse_id);
         $('#featured-filter').trigger('click');
     });
+
+    var initialWarehouseId = $('#warehouse_id').val();
+    if (initialWarehouseId && !$('#biller_id').is('[disabled]')) {
+        loadBillersForWarehouse(initialWarehouseId, $('#biller_id').val());
+    }
 
     $('#customer_id').on('change', function() {
         var customer_id = $(this).val();

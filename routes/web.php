@@ -361,6 +361,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::get('sales/lims_sale_search', 'limsSaleSearch')->name('sale.search');
         Route::get('sales/lims_product_search', 'limsProductSearch')->name('product_sale.search');
         Route::get('sales/getcustomergroup/{id}', 'getCustomerGroup')->name('sale.getcustomergroup');
+        Route::get('sales/get-billers-by-warehouse/{warehouse_id}', 'getBillersByWarehouse')->name('sale.getBillersByWarehouse');
 
         Route::get('sales/getproduct/{id}', 'getProduct')->name('sale.getproduct');
 

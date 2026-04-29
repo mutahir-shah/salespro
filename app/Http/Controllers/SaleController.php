@@ -2533,6 +2533,17 @@ class SaleController extends Controller
         return $lims_customer_group_data->percentage;
     }
 
+    public function getBillersByWarehouse($warehouse_id)
+    {
+        $lims_biller_list = Biller::where('is_active', true)
+            ->whereHas('users', function ($query) use ($warehouse_id) {
+                $query->where('warehouse_id', $warehouse_id);
+            })
+            ->get(['id', 'name', 'company_name']);
+
+        return response()->json($lims_biller_list);
+    }
+
     public function limsProductSearch(Request $request)
     {
         $todayDate = date('Y-m-d');
