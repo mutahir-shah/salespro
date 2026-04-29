@@ -30,4 +30,9 @@ class Biller extends Model
     {
         return $this->hasOne(User::class, 'biller_id');
     }
+
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
 }

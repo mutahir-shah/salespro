@@ -16,6 +16,7 @@ class Employee extends Model
         "email",
         "phone_number",
         "user_id",
+        "biller_id",
         "staff_id",
         "address",
         "city",
@@ -54,5 +55,10 @@ class Employee extends Model
     public function designation()
     {
         return $this->belongsTo(Designation::class);
+    }
+
+    public function biller()
+    {
+        return $this->belongsTo(Biller::class);
     }
 }

@@ -90,10 +90,8 @@ class EmployeeController extends Controller
     {
         $data = $request->except('image');
         $message = 'Employee created successfully';
-
         $data['name'] = $data['employee_name'];
         $data['is_active'] = true;
-
         // Handle user creation if checkbox selected
         if (isset($data['user'])) {
             $this->validate($request, [
@@ -294,9 +292,9 @@ class EmployeeController extends Controller
         foreach ($permissions as $permission)
             $all_permission[] = $permission->name;
         if (empty($all_permission))
-            $all_permission[] = 'dummy text'; 
+            $all_permission[] = 'dummy text';
         $employees = Employee::select('id', 'name')->where('is_active', true)->get();
-         
+
         return view('backend.employee.employee_commission', compact('employees', 'all_permission'));
     }
 
@@ -333,7 +331,9 @@ class EmployeeController extends Controller
             ->leftJoin('biller_commissions as bc', function ($join) {
                 $join->on('bc.sale_id', '=', 's.id')->on('bc.biller_id', '=', 's.biller_id');
             })->leftJoin('products as p', 'p.id', '=', 'ps.product_id')->where('e.id', $employeeId)->whereNull('s.deleted_at')
-            ->select(['ps.id as ps_id','p.name as product_name',
+            ->select([
+                'ps.id as ps_id',
+                'p.name as product_name',
                 // product cost (purchase price) — stored in products table
                 DB::raw('COALESCE(p.cost, 0) as product_cost'),
                 // net unit price = sale price per unit (after discount, before tax)
@@ -355,7 +355,10 @@ class EmployeeController extends Controller
                 // sale reference
                 's.reference_no as sale_reference',
                 // ids needed for action links
-                's.id as sale_id','bc.id as commission_id','bc.is_paid']);
+                's.id as sale_id',
+                'bc.id as commission_id',
+                'bc.is_paid'
+            ]);
         return DataTables::of($query)
             ->addIndexColumn()
             ->editColumn('commission_status', function ($row) {
