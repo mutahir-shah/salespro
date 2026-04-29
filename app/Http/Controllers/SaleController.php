@@ -2537,7 +2537,7 @@ class SaleController extends Controller
     {
         $lims_biller_list = Biller::select('billers.id', 'billers.name', 'billers.company_name')
             ->join('users', 'users.biller_id', '=', 'billers.id')
-            ->leftJoin('employees', 'employees.user_id', '=', 'users.id')
+            ->rightJoin('employees', 'employees.user_id', '=', 'users.id')
             ->where('billers.is_active', true)
             ->where(function ($query) use ($warehouse_id) {
                 $query->where('users.warehouse_id', $warehouse_id)
