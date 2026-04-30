@@ -5577,4 +5577,33 @@ class ReportController extends Controller
 
         return view('backend.report.supplier_due_report', compact('lims_purchase_data', 'start_date', 'end_date', 'lims_supplier_list', 'supplier_id'));
     }
+
+
+
+
+    public function supplierInventory()
+    {
+        $suppliers = Supplier::where('is_active', 1)->get();
+        $products  = Product::where('is_active', 1)->get();
+        return view('report.supplier_inventory', compact('suppliers','products'));
+    }
+
+
+    public function supplierInventoryData(Request $request)
+    {
+        $query = DB::table('product_purchases as pp')
+            ->join('purchases as p', 'p.id', '=', 'pp.purchase_id')
+            ->join('products as pr', 'pr.id', '=', 'pp.product_id')
+            ->join('suppliers as s', 's.id', '=', 'p.supplier_id')
+            ->select('s.name as supplier','pr.name as product',
+                DB::raw('SUM(pp.recieved - pp.return_qty) as total_purchased'),
+                DB::raw('(SELECT COALESCE(SUM(qty),0) FROM product_warehouse pw
+                WHERE pw.product_id = pr.id ) as remaining_qty') )
+            ->when($request->supplier_id, function ($q) use ($request) {
+                $q->where('s.id', $request->supplier_id);
+            })->when($request->product_id, function ($q) use ($request) {
+                $q->where('pr.id', $request->product_id);
+            })->groupBy('s.id', 'pr.id');
+        return DataTables::of($query)->make(true);
+    }
 }
