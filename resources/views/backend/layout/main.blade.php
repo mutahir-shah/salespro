@@ -323,10 +323,9 @@
                         $language_setting_active = $role_has_permissions_list->where('name', 'language_setting')->first();
 
                         ?>
-                        @if ($sale_add_permission_active)
-                            <li class="nav-item"><a class="btn-pos btn-sm" href="{{ route('sale.pos') }}"><i
-                                        class="dripicons-shopping-bag"></i><span> POS</span></a></li>
-                        @endif
+                        @can('pos_menu_button')
+                            <li class="nav-item"><a class="btn-pos btn-sm" href="{{ route('sale.pos') }}"><i class="dripicons-shopping-bag"></i><span> POS</span></a></li>
+                        @endcan
                         <li class="nav-item d-none d-lg-block"><a id="switch-theme" data-toggle="tooltip"
                                 title="{{ __('Switch Theme') }}"><i class="dripicons-brightness-max"></i></a></li>
                         @if (config('database.connections.saleprosaas_landlord'))
