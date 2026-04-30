@@ -5585,25 +5585,58 @@ class ReportController extends Controller
     {
         $suppliers = Supplier::where('is_active', 1)->get();
         $products  = Product::where('is_active', 1)->get();
-        return view('report.supplier_inventory', compact('suppliers','products'));
+        return view('backend.report.supplier_inventory', compact('suppliers', 'products'));
     }
 
 
     public function supplierInventoryData(Request $request)
     {
         $query = DB::table('product_purchases as pp')
+
             ->join('purchases as p', 'p.id', '=', 'pp.purchase_id')
             ->join('products as pr', 'pr.id', '=', 'pp.product_id')
             ->join('suppliers as s', 's.id', '=', 'p.supplier_id')
-            ->select('s.name as supplier','pr.name as product',
+            ->select(
+                's.name as supplier',
+                'pr.name as product',
                 DB::raw('SUM(pp.recieved - pp.return_qty) as total_purchased'),
-                DB::raw('(SELECT COALESCE(SUM(qty),0) FROM product_warehouse pw
-                WHERE pw.product_id = pr.id ) as remaining_qty') )
-            ->when($request->supplier_id, function ($q) use ($request) {
-                $q->where('s.id', $request->supplier_id);
-            })->when($request->product_id, function ($q) use ($request) {
-                $q->where('pr.id', $request->product_id);
-            })->groupBy('s.id', 'pr.id');
+                // Remaining Stock
+                DB::raw('(
+                SELECT COALESCE(SUM(qty),0)
+                FROM product_warehouse pw
+                WHERE pw.product_id = pr.id
+            ) as remaining_qty'),
+                // Average Cost
+                DB::raw('
+                SUM(pp.net_unit_cost * (pp.recieved - pp.return_qty))
+                /
+                NULLIF(SUM(pp.recieved - pp.return_qty),0)
+                as avg_cost
+            '),
+                // Remaining Stock Value
+                DB::raw('
+                (
+                    (
+                        SELECT COALESCE(SUM(qty),0)
+                        FROM product_warehouse pw
+                        WHERE pw.product_id = pr.id
+                    )
+                )
+                *
+                (
+                    SUM(pp.net_unit_cost * (pp.recieved - pp.return_qty))
+                    /
+                    NULLIF(SUM(pp.recieved - pp.return_qty),0)
+                )
+                as remaining_stock_value
+            ')
+            )
+
+            ->when($request->supplier_id, fn($q) => $q->where('s.id', $request->supplier_id))
+            ->when($request->product_id, fn($q) => $q->where('pr.id', $request->product_id))
+
+            ->groupBy('s.id', 'pr.id');
+
         return DataTables::of($query)->make(true);
     }
 }

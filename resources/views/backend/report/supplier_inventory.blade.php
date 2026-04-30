@@ -1,7 +1,6 @@
 @extends('backend.layout.main') @section('content')
 
 <section class="forms">
-
     <div class="container-fluid">
         <div class="card">
             <div class="card-header">
@@ -9,7 +8,6 @@
             </div>
             <div class="card-body">
                 <div class="row mb-4">
-
                     <div class="col-md-4">
                         <label>Filter by Supplier</label>
                         <select id="supplier_id" class="form-control">
@@ -33,7 +31,7 @@
                             @endforeach
                         </select>
                     </div>
-                    
+
                     <div class="col-md-4 d-flex align-items-end">
                         <button id="filter" class="btn btn-primary">
                             Load Report
@@ -57,6 +55,8 @@
                     <th>Product</th>
                     <th>Total Purchased</th>
                     <th>Remaining Qty</th>
+                    <th>Average Cost</th>
+                    <th>Stock Value</th>
                 </tr>
             </thead>
 
@@ -94,6 +94,12 @@
             },
             {
                 data: 'remaining_qty'
+            },
+            {
+                data: 'avg_cost'
+            },
+            {
+                data: 'remaining_stock_value'
             },
         ]
     });
