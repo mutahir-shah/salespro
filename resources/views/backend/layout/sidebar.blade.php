@@ -140,8 +140,12 @@
                     @can('sales-index')
                     <li id="sale-list-menu"><a class="{{ request()->is('sales') ? 'active' : '' }}" href="{{route('sales.index')}}">{{__('db.Sale List')}}</a></li>
                     @endcan
-                    @can('sales-add')
+
+                    @can('pos_menu_button')
                     <li><a class="{{ request()->is('pos') ? 'active' : '' }}" href="{{route('sale.pos')}}">POS</a></li>
+                    @endcan
+                    @can('sales-add')
+
                     <li id="sale-create-menu"><a class="{{ request()->is('sales/create') ? 'active' : '' }}" href="{{route('sales.create')}}">{{__('db.Add Sale')}}</a></li>
                     @endcan
                     @can('sales-import')

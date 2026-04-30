@@ -1081,6 +1081,20 @@
 										<tr>
 											<td>{{__('db.POS')}}</td>
 											<td class="report-permissions" colspan="5">
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("pos_menu_button", $all_permission))
+															<input type="checkbox" value="1" id="pos_menu_button" name="pos_menu_button" checked>
+															@else
+															<input type="checkbox" value="1" id="pos_menu_button" name="pos_menu_button">
+															@endif
+															<label for="pos_menu_button" class="padding05">{{__('db.POS Menu Button')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
 												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
