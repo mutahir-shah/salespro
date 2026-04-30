@@ -320,9 +320,7 @@
 
                         $general_setting_permission_active = $role_has_permissions_list->where('name', 'general_setting')->first();
 
-                        $language_setting_active = $role_has_permissions_list->where('name', 'language_setting')->first();
-
-                        ?>
+                        $language_setting_active = $role_has_permissions_list->where('name', 'language_setting')->first();?>
                         @can('pos_menu_button')
                             <li class="nav-item"><a class="btn-pos btn-sm" href="{{ route('sale.pos') }}"><i class="dripicons-shopping-bag"></i><span> POS</span></a></li>
                         @endcan
