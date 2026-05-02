@@ -53,7 +53,7 @@ class SupplierController extends Controller
         DB::beginTransaction();
         try {
             $supplier           = Supplier::findOrFail($request->supplier_id);
-            $previous_balance   = $supplier->balance;
+            $previous_balance   = $supplier->opening_balance;
             $totalPaymentAmount = $request->amount;
             // Use Carbon instance, not a formatted string
            
@@ -100,7 +100,7 @@ class SupplierController extends Controller
                 $warehouse_id       = $purchase->warehouse_id;
                 $purchase_id        = $purchase->id;
 
-                $supplier->balance  = $previous_balance - $allocatedAmount;
+                $supplier->opening_balance  = $previous_balance - $allocatedAmount;
                 $supplier->save();
             }
 

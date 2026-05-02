@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('suppliers', function (Blueprint $table) {
-            $table->decimal('balance', 12, 2)->after('opening_balance')->default(0);
+            $table->decimal('opening_balance', 12, 2)->after('country')->default(0);
         });
     }
 
