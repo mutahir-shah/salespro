@@ -23,7 +23,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <input type="hidden" name="supplier_id">
-                                <input type="text" name="change" value="0" id="change">
+                                <input type="hidden" name="change" value="0" id="change">
                                 <label>{{trans('Paying Amount')}} *</label>
                                 <input type="number" name="amount" step="any" class="form-control" required>
                             </div>
@@ -38,7 +38,7 @@
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{trans('file.Paid By')}}</label>
+                                <label>{{trans('Paid By')}}</label>
                                 <select name="paying_method" class="form-control">
                                     <option value="Account Transfer">Account Transfer</option>
                                     <option value="Cash">Cash</option>
@@ -64,7 +64,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{trans('file.Account')}}</label>
+                                <label>{{trans('Account')}}</label>
                                 <select class="form-control selectpicker" name="account_id">
                                     @foreach($lims_account_list as $account)
                                     @if($account->is_default)
@@ -78,7 +78,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{trans('file.Date')}}</label>
+                                <label>{{trans('Payment Date')}}</label>
                                 <input type="date" name="created_at" value="" class="form-control" required>
                             </div>
                         </div>
@@ -87,7 +87,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label>{{trans('file.Note')}}</label>
+                                <label>{{trans('Payment Note')}}</label>
                                 <textarea name="note" rows="4" class="form-control"></textarea>
                             </div>
                         </div>
