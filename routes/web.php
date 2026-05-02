@@ -269,6 +269,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::get('suppliers/ledger/{id}', 'ledger')->name('suppliers.ledger');
         Route::get('supplier-due/{id}', 'supplierDue')->name('supplier.due');
         Route::get('suppliers/{supplier_id}', 'supplierPayments')->name('suppliers.payments');
+        Route::post('add_payment', 'addPayment')->name('purchase.add-payment');
     });
     Route::resource('supplier', SupplierController::class);
 

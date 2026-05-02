@@ -13,7 +13,7 @@
         @endcan
     </div>
     <div class="table-responsive">
-        <table id="supplier-table" class="table">
+        <table id="supplier-table" class="table purchase-list">
             <thead>
                 <tr>
                     <th class="not-exported"></th>
@@ -110,7 +110,7 @@
                                 </li>
                                 @endif
                                 <li>
-                                    <button type="button" data-id="{{$supplier->id}}" class="clear-due btn btn-link" data-toggle="modal" data-target="#clearDueModal" ><i class="dripicons-brush"></i> {{__('db.Clear Due')}}</button>
+                                    <button type="button" data-due="{{number_format($balance_due, 2)}}" data-id="{{$supplier->id}}" class="clear-due btn btn-link" data-toggle="modal" data-target="#clearDueModal" ><i class="dripicons-brush"></i> {{__('db.Clear Due')}}</button>
                                 </li>
                                 <li class="divider"></li>
                                 @php
@@ -153,7 +153,7 @@
     </div>
 </section>
 
-<div id="clearDueModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
+<div id="clearDueModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
     <div role="document" class="modal-dialog">
       <div class="modal-content">
         <form action="{{ route('supplier.clearDue') }}" method="POST">
@@ -180,39 +180,9 @@
     </div>
 </div>
 
-<div id="importSupplier" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
-	<div role="document" class="modal-dialog">
-	  <div class="modal-content">
-	  	<form action="{{ route('supplier.import') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-	    <div class="modal-header">
-	      <h5 id="exampleModalLabel" class="modal-title">{{__('db.Import Supplier')}}</h5>
-	      <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
-	    </div>
-	    <div class="modal-body">
-	      <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
-	       <p>{{__('db.The correct column order is')}} (name*, image, company_name*, vat_number, email*, phone_number*, address*, city*,state, postal_code, country) {{__('db.and you must follow this')}}.</p>
-           <p>{{__('db.To display Image it must be stored in')}} images/supplier {{__('db.directory')}}</p>
-	        <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>{{__('db.Upload CSV File')}} *</label>
-                        <input type="file" name="file" class="form-control" required>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label> {{__('db.Sample File')}}</label>
-                        <a href="sample_file/sample_supplier.csv" class="btn btn-info btn-block btn-md"><i class="dripicons-download"></i> {{__('db.Download')}}</a>
-                    </div>
-                </div>
-            </div>
-	        <input type="submit" value="{{__('db.submit')}}" class="btn btn-primary" id="submit-button">
-		</div>
-		</form>
-	  </div>
-	</div>
-</div>
+
+ @include('backend.supplier.modals.clear_due')
+@include('backend.supplier.modals.import')
 
 @endsection
 
@@ -233,9 +203,61 @@
         }
     });
 
-    $(".clear-due").on("click", function() {
-        var id = $(this).data('id').toString();
-        $("#clearDueModal input[name='supplier_id']").val(id);
+    // $(".clear-due").on("click", function() {
+    //     var id = $(this).data('id').toString();
+    //     $("#clearDueModal input[name='supplier_id']").val(id);
+    // });
+
+         // Clear due amount handling
+        $(document).on("click", ".clear-due", function() {
+            var id = $(this).data('id').toString();
+            $("#clearDueModal input[name='supplier_id']").val(id);
+            let formattedNumber = $(this).data('due'); 
+            let number = parseFloat(formattedNumber.toString().replace(/,/g, ''));
+            console.log(number);
+            $("#clearDueModal input[name='amount']").val(number);
+            $("#clearDueModal input[name='paying_amount']").val(number);
+        });
+   
+
+
+        $('select[name="paying_method"]').on("change", function() {
+        var id = $('select[name="paying_method"]').val();
+        $('input[name="cheque_no"]').attr('required', false);
+        $(".payment-form").off("submit");
+        if (id == 3) {
+            $.getScript( "public/vendor/stripe/checkout.js" );
+            $(".card-element").show();
+            $("#cheque").hide();
+        } else if (id == 'Cheque') {
+            $("#cheque").show();
+            $(".card-element").hide();
+            $('input[name="cheque_no"]').attr('required', true);
+        } else {
+            $(".card-element").hide();
+            $("#cheque").hide();
+        }
+    });
+
+    $('input[name="paying_amount"]').on("input", function() {
+        let change = parseFloat( $(this).val() - $('input[name="amount"]').val() ).toFixed({{$general_setting->decimal}});
+       $('#change').val(change);
+        $(".change").text(change);
+    });
+
+    $('input[name="amount"]').on("input", function() {
+        $('input[name="balance"]').val($('input[name="paying_amount"]').val());
+        if( $(this).val() > parseFloat($('input[name="paying_amount"]').val()) ) {
+            alert('Paying amount cannot be bigger than recieved amount');
+            $(this).val('');
+        }
+        else if( $(this).val() > parseFloat($('input[name="balance"]').val() ) ) {
+            alert('Paying amount cannot be bigger than due amount');
+            $(this).val('');
+        }
+        let change = parseFloat($('input[name="paying_amount"]').val() - $(this).val()).toFixed({{$general_setting->decimal}});
+        $(".change").text(change);
+        $('#change').val(change);
     });
 
 	function confirmDelete() {

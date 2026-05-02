@@ -273,11 +273,7 @@
                                                         @endif
                                                         <td class="net_unit_cost">{{ number_format((float)$product_purchase->net_unit_cost, $general_setting->decimal, '.', '')}} </td>
                                                         <td class="net_unit_margin">{{ number_format(
-                                                            (float)($product_purchase->net_unit_margin > 0 
-                                                                ? $product_purchase->net_unit_margin 
-                                                                : $product_data->profit_margin),
-                                                            $general_setting->decimal, '.', ''
-                                                        ) }} </td>
+                                                            (float)($product_purchase->net_unit_margin > 0  ? $product_purchase->net_unit_margin : $product_data->profit_margin), $general_setting->decimal, '.', '') }} </td>
                                                         <td class="net_unit_margin_type">{{$product_purchase->net_unit_margin_type}}</td>
                                                         <td class="net_unit_price">{{ number_format(
                                                             (float)($product_purchase->net_unit_price > 0 

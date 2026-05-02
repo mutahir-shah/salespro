@@ -14,8 +14,12 @@ use App\Mail\SupplierCreate;
 use App\Models\CashRegister;
 use Illuminate\Http\Request;
 use App\Models\CustomerGroup;
+use App\Models\PaymentAllocation;
+use App\Models\PaymentWithCheque;
+use App\Models\PaymentWithCreditCard;
 use App\Models\PurchaseProductReturn;
 use App\Models\ReturnPurchase;
+use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -36,12 +40,104 @@ class SupplierController extends Controller
             if (empty($all_permission))
                 $all_permission[] = 'dummy text';
             $lims_supplier_all = Supplier::where('is_active', true)->get();
-            return view('backend.supplier.index', compact('lims_supplier_all', 'all_permission'));
+
+            $lims_account_list = Account::where('is_active', true)->get();
+            //  $lims_cash_register_list = CashRegister::where('is_active', true)->get();
+            return view('backend.supplier.index', compact('lims_supplier_all', 'lims_account_list', 'all_permission'));
         } else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
     }
 
     public function clearDue(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $supplier           = Supplier::findOrFail($request->supplier_id);
+            $previous_balance   = $supplier->balance;
+            $totalPaymentAmount = $request->amount;
+            // Use Carbon instance, not a formatted string
+           
+            $created = Carbon::createFromFormat('Y-m-d', $request->created_at)->startOfDay();
+            // Create main payment record (make sure Payment::$fillable allows created_at/updated_at)
+            $paymentArray = [
+                'payment_reference' => 'ppr-' . date('Ymd') . '-' . date('His'),
+                'user_id'           => Auth::id(),
+                'purchase_id'       => null,
+                'cash_register_id'  => null,
+                'account_id'        => $request->account_id,
+                'amount'            => $totalPaymentAmount,
+                'change'            => $request->change,
+                'paying_method'     => $request->paying_method,
+                'payment_note'      => $request->note,
+                'created_at'        => $created,
+                'updated_at'        => $created,
+            ]; 
+            $payment = Payment::create($paymentArray);
+
+            $outstandingPurchases = Purchase::select('id', 'warehouse_id', 'grand_total', 'paid_amount', 'payment_status')
+                ->where('payment_status', 1)->where('supplier_id', $supplier->id)->orderBy('id') // or ->oldest()
+                ->get();
+
+            $remainingAmount = $totalPaymentAmount;
+            $warehouse_id = null;  // avoid undefined var
+            $purchase_id  = null;  // avoid undefined var
+
+            foreach ($outstandingPurchases as $purchase) {
+                if ($remainingAmount <= 0) break;
+
+                $outstandingBalance = $purchase->grand_total - $purchase->paid_amount;
+                $allocatedAmount    = min($remainingAmount, $outstandingBalance);
+               PaymentAllocation::create(['payment_id'=> $payment->id,'purchase_id'=> $purchase->id,'allocated_amount' => $allocatedAmount]);
+                $purchase->update([
+                    'paid_amount'    => $purchase->paid_amount + $allocatedAmount,
+                    'payment_status' => $this->determinePaymentStatus(
+                        $purchase->grand_total,
+                        $purchase->paid_amount + $allocatedAmount
+                    ),
+                ]);
+
+                $remainingAmount   -= $allocatedAmount;
+                $warehouse_id       = $purchase->warehouse_id;
+                $purchase_id        = $purchase->id;
+
+                $supplier->balance  = $previous_balance - $allocatedAmount;
+                $supplier->save();
+            }
+
+            $lims_cash_register_data = CashRegister::select('id')->where('user_id', Auth::id())->where('warehouse_id', $warehouse_id)->where('status', 1)->first();
+            $cash_register_id = $lims_cash_register_data ? $lims_cash_register_data->id : null;
+            // If you *really* want to keep the original updated_at, disable timestamps just for this save.
+            $payment->purchase_id      = $purchase_id;
+            $payment->cash_register_id = $cash_register_id;
+            // NOTE: You set account_id from request earlier, but here you overwrite with default account.
+            // If that's intentional, keep it. If not, remove these 2 lines.
+            $account_data         = Account::select('id')->where('is_default', 1)->first();
+            if ($account_data) {
+                $payment->account_id = $account_data->id;
+            }
+            $payment->timestamps = false; // do not touch updated_at
+            $payment->save();
+            $payment->timestamps = true;
+            // Handle remainingAmount if needed
+            if ($remainingAmount > 0) {
+                // TODO: credit / refund / log unallocated
+            }
+            DB::commit();
+            return redirect()->back()->with('message', $totalPaymentAmount . ' Due cleared successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    private function determinePaymentStatus($totalAmount, $paidAmount)
+    {
+        // paidAmount grand total amount
+        if ($paidAmount >= $totalAmount) return '2';
+        return '1';
+    }
+
+    public function clearDueOld(Request $request)
     {
         $lims_due_purchase_data = Purchase::select('id', 'warehouse_id', 'grand_total', 'paid_amount', 'payment_status')
             ->whereNull('deleted_at')
@@ -67,17 +163,19 @@ class SupplierController extends Controller
                 $paid_amount = $total_paid_amount;
                 $payment_status = 1;
             }
-            Payment::create([
+            $payment = [
                 'payment_reference' => 'ppr-' . date("Ymd") . '-' . date("his"),
                 'purchase_id' => $purchase_data->id,
                 'user_id' => Auth::id(),
                 'cash_register_id' => $cash_register_id,
                 'account_id' => $account_data->id,
                 'amount' => $paid_amount,
-                'change' => 0,
-                'paying_method' => 'Cash',
-                'payment_note' => $request->note
-            ]);
+                'change' => $request->change,
+                'paying_method' => $request->paying_method,
+                'payment_note' => $request->note,
+                'created_at' => $request->created_at,
+            ]; 
+            Payment::create($payment);
             $purchase_data->paid_amount += $paid_amount;
             $purchase_data->payment_status = $payment_status;
             $purchase_data->save();
@@ -85,6 +183,10 @@ class SupplierController extends Controller
         }
         return redirect()->back()->with('message', __('db.Due cleared successfully'));
     }
+
+
+
+
 
     public function create()
     {

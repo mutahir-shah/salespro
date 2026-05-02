@@ -105,7 +105,6 @@
     });
 
     $('#filter').click(function() {
-        table.ajax.reload();
-    });
+        table.ajax.reload();});
 </script>
 @endpush
