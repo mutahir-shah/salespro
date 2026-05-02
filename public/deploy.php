@@ -1,15 +1,20 @@
 <?php
 
-$secret = "shahge"; 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-if ($_GET['key'] !== $secret) {
+echo "<pre>";
+
+$secret = "shahge";
+
+if (!isset($_GET['key']) || $_GET['key'] !== $secret) {
     die("Access denied");
 }
-// composer install --no-dev &&
-echo shell_exec('
-cd /home/u472752505/domains/ismailfashionparadise.com/public_html/projects/posdemo &&
-git pull origin development &&
-php artisan migrate --force &&
-php artisan cache:clear &&
-php artisan config:cache
-2>&1');
+
+$output = shell_exec(
+'cd /home/USERNAME/public_html/projects/posdemo &&
+git pull origin development 2>&1'
+);
+
+echo $output;
