@@ -1,7 +1,6 @@
 <?php
 
-$secret = "shahge";
-echo $secret;exit;
+$secret = "shahge"; 
 
 if ($_GET['key'] !== $secret) {
     die("Access denied");
