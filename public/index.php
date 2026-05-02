@@ -1,5 +1,5 @@
 <?php
-exit;
+
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 use Dotenv\Dotenv;
