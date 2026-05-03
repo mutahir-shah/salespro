@@ -96,43 +96,6 @@ $authUser =  Auth::user()->role_id; ?>
                                         </div>
                                     </div>
 
-                                       @if(isset(auth()->user()->biller_id))
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{__('db.Biller')}} *</label>
-                                            @php
-                                                $userBillerId = auth()->user()->biller_id;
-                                            @endphp
-                                            <select id="biller_id" class="selectpicker form-control">
-                                                @foreach($lims_biller_list as $biller)
-                                                    @if($biller->id == $userBillerId)
-                                                        <option value="{{$biller->id}}" selected>{{$biller->name . ' (' . $biller->company_name . ')'}}</option>
-                                                    @endif
-                                                @endforeach
-                                            </select>
-                                            <!-- <input type="hidden" name="biller_id" value="{{$userBillerId}}" /> -->
-                                        </div>
-                                    </div>
-                                    @else
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{__('db.Biller')}} *</label>
-                                            @php
-                                            if($lims_pos_setting_data) {
-                                                $biller_id = $lims_pos_setting_data->biller_id;
-                                            }
-                                            else{
-                                                $biller_id = $lims_biller_list[0]->id;
-                                            }
-                                            @endphp
-                                            <select required id="biller_id" name="biller_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select Biller...">
-                                                @foreach($lims_biller_list as $biller)
-                                                <option value="{{$biller->id}}" @if($biller->id == $biller_id) selected @endif>{{$biller->name . ' (' . $biller->company_name . ')'}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    @endif
                                     @if(isset(auth()->user()->warehouse_id))
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -171,8 +134,44 @@ $authUser =  Auth::user()->role_id; ?>
                                     </div>
                                     @endif
                                     <x-validation-error fieldName="warehouse_id" />
-
                                     
+                                    @if(isset(auth()->user()->biller_id))
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Biller')}} *</label>
+                                            @php
+                                                $userBillerId = auth()->user()->biller_id;
+                                            @endphp
+                                            <select id="biller_id" class="selectpicker form-control">
+                                                @foreach($lims_biller_list as $biller)
+                                                    @if($biller->id == $userBillerId)
+                                                        <option value="{{$biller->id}}" selected>{{$biller->name . ' (' . $biller->company_name . ')'}}</option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                            <!-- <input type="hidden" name="biller_id" value="{{$userBillerId}}" /> -->
+                                        </div>
+                                    </div>
+                                    @else
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Biller')}} *</label>
+                                            @php
+                                            if($lims_pos_setting_data) {
+                                                $biller_id = $lims_pos_setting_data->biller_id;
+                                            }
+                                            else{
+                                                $biller_id = $lims_biller_list[0]->id;
+                                            }
+                                            @endphp
+                                            <select required id="biller_id" name="biller_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select Biller...">
+                                                @foreach($lims_biller_list as $biller)
+                                                <option value="{{$biller->id}}" @if($biller->id == $biller_id) selected @endif>{{$biller->name . ' (' . $biller->company_name . ')'}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    @endif                                    
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>
