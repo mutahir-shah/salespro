@@ -100,8 +100,8 @@ class SupplierController extends Controller
                 $warehouse_id       = $purchase->warehouse_id;
                 $purchase_id        = $purchase->id;
 
-                $supplier->opening_balance  = $previous_balance - $allocatedAmount;
-                $supplier->save();
+               // $supplier->opening_balance  = $previous_balance - $allocatedAmount;
+               // $supplier->save();
             }
 
             $lims_cash_register_data = CashRegister::select('id')->where('user_id', Auth::id())->where('warehouse_id', $warehouse_id)->where('status', 1)->first();
