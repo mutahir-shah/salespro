@@ -31,19 +31,22 @@ $authUser =  Auth::user()->role_id; ?>
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="row">
-@if (!config('database.connections.saleprosaas_landlord') && $authUser <= 2)
+
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{__('db.date')}}</label>
+                                            
                                             @can('change_sale_date')
+                                            <label>{{__('db.date')}}</label>
                                                 <input type="text" name="created_at" class="form-control date" placeholder="{{ __('db.Choose date') }}" value="{{date($general_setting->date_format,strtotime('now'))}}" />
                                             @else
-                                                <input type="text" name="created_at" class="form-control date" placeholder="{{ __('db.Choose date') }}" value="{{date($general_setting->date_format,strtotime('now'))}}" readonly/>
-                                            @endcan
+                                            <label>{{date($general_setting->date_format,strtotime('now'))}}</label>
+                                                <input type="hidden" name="created_at" class="form-control date" placeholder="{{ __('db.Choose date') }}" value="{{date($general_setting->date_format,strtotime('now'))}}" />
+                                           
+                                                @endcan
                                         </div>
                                     </div>
 
-@endif
+                                    
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{__('db.customer')}} *</label>
