@@ -11,12 +11,11 @@
     #product-results-container .product-img:hover{background-color: #7c5cc4;color: #FFF}
 </style>
 @endpush
-
 <x-error-message key="not_permitted" />
 <x-error-message key="error" />
-
-<?php $authUser = Auth::user()->role_id; ?>
-
+<?php
+use Illuminate\Support\Facades\Auth;
+$authUser =  Auth::user()->role_id; ?>
 <section id="pos-layout" class="forms hidden-print">
     <div class="container-fluid">
         <div class="row">
@@ -32,6 +31,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="row">
+@if (!config('database.connections.saleprosaas_landlord') && $authUser <= 2)
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{__('db.date')}}</label>
@@ -42,6 +42,8 @@
                                             @endcan
                                         </div>
                                     </div>
+
+@endif
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{__('db.customer')}} *</label>
@@ -98,14 +100,14 @@
                                             @php
                                                 $userBillerId = auth()->user()->biller_id;
                                             @endphp
-                                            <select id="biller_id" class="selectpicker form-control" disabled>
+                                            <select id="biller_id" class="selectpicker form-control">
                                                 @foreach($lims_biller_list as $biller)
                                                     @if($biller->id == $userBillerId)
                                                         <option value="{{$biller->id}}" selected>{{$biller->name . ' (' . $biller->company_name . ')'}}</option>
                                                     @endif
                                                 @endforeach
                                             </select>
-                                            <input type="hidden" name="biller_id" value="{{$userBillerId}}" />
+                                            <!-- <input type="hidden" name="biller_id" value="{{$userBillerId}}" /> -->
                                         </div>
                                     </div>
                                     @else
