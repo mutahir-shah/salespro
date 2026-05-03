@@ -347,7 +347,7 @@ class SupplierController extends Controller
                     'id'        => $p->id,
                     'date'      => $p->date ?? $p->created_at->format('Y-m-d'),
                     'type'      => 'Payment',
-                    'reference' => $p->payment_reference ?? '-',
+                    'reference' => $p->payment_reference.'('.$p->payment_note.')' ?? '-',
                     'debit'     => 0,
                     'credit'    => floatval($p->amount),
                 ];
@@ -556,7 +556,8 @@ class SupplierController extends Controller
                 'payments.payment_reference',
                 'payments.amount',
                 'payments.paying_method',
-                'payments.payment_at'
+                'payments.payment_at',
+                'payments.payment_note'
             )
             ->latest('payments.created_at')
             ->get()
@@ -568,6 +569,7 @@ class SupplierController extends Controller
                     'amount' => number_format($payment->amount, 2),
                     'paying_method' => ucfirst($payment->paying_method ?? '-'),
                     'payment_at' => $payment->payment_at ? date('Y-m-d H:i', strtotime($payment->payment_at)) : date('Y-m-d H:i', strtotime($payment->created_at)),
+                    'payment_note' => $payment->payment_note ?? '-'
                 ];
             });
 
