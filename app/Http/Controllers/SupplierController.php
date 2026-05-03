@@ -111,10 +111,10 @@ class SupplierController extends Controller
             $payment->cash_register_id = $cash_register_id;
             // NOTE: You set account_id from request earlier, but here you overwrite with default account.
             // If that's intentional, keep it. If not, remove these 2 lines.
-            $account_data         = Account::select('id')->where('is_default', 1)->first();
-            if ($account_data) {
-                $payment->account_id = $account_data->id;
-            }
+            // $account_data         = Account::select('id')->where('is_default', 1)->first();
+            // if ($account_data) {
+            //     $payment->account_id = $account_data->id;
+            // }
             $payment->timestamps = false; // do not touch updated_at
             $payment->save();
             $payment->timestamps = true;

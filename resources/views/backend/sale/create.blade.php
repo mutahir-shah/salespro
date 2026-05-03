@@ -379,7 +379,32 @@
                                             <input type="number" name="shipping_cost" value="0" class="form-control" step="any"/>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+
+                                        <?php $accountSelection = $role_has_permissions_list->where('name', 'account-selection')->first();?>
+                                    @if ($accountSelection)
+                                        <!-- New Account Selection Field -->
+                                        <div id="account-list" class="col-md-3 col-6">
+                                            <div class="form-group top-fields">
+                                                <label>{{__('db.Account')}}</label>
+                                                <select required name="account_id" id="account_id" class="selectpicker form-control" data-live-search="true">
+                                                    <option value="0" style="color: #A7B49E;">Select an Account</option>
+                                                    @foreach($lims_account_list as $account)
+                                                        <option value="{{ $account->id }}"
+                                                            @if(auth()->user()->account_id == $account->id)
+                                                                selected
+                                                            @elseif($account->is_default == 1)
+                                                                selected
+                                                            @endif
+                                                        >
+                                                            {{ $account->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div class="col-md-4 d-none">
                                         <div class="form-group">
                                             <label>{{__('db.Attach Document')}}</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
                                             <input type="file" name="document" class="form-control" />
@@ -462,31 +487,7 @@
                                             <x-validation-error fieldName="payment_status" />
                                         </div>
                                     </div>
-                                    <?php
-                                        $accountSelection = $role_has_permissions_list->where('name', 'account-selection')->first();
-                                    ?>
-                                    @if ($accountSelection)
-                                        <!-- New Account Selection Field -->
-                                        <div id="account-list" class="col-md-3 col-6" hidden>
-                                            <div class="form-group top-fields">
-                                                <label>{{__('db.Account')}}</label>
-                                                <select required name="account_id" id="account_id" class="selectpicker form-control" data-live-search="true">
-                                                    <option value="0" style="color: #A7B49E;">Select an Account</option>
-                                                    @foreach($lims_account_list as $account)
-                                                        <option value="{{ $account->id }}"
-                                                            @if(auth()->user()->account_id == $account->id)
-                                                                selected
-                                                            @elseif($account->is_default == 1)
-                                                                selected
-                                                            @endif
-                                                        >
-                                                            {{ $account->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    @endif
+                                
                                 </div>
                                 <div id="payment">
                                     <div class="row">
