@@ -770,9 +770,7 @@ class ReportController extends Controller
         if ($warehouse_id) {
             $product_sale_data->where('sales.warehouse_id', $warehouse_id);
         }
-        $product_sale_data = $product_sale_data
-            ->groupBy('product_sales.product_id', 'product_sales.product_batch_id')
-            ->get();
+        $product_sale_data = $product_sale_data->groupBy('product_sales.product_id', 'product_sales.product_batch_id')->get();
 
         config()->set('database.connections.mysql.strict', true);
         DB::reconnect();
@@ -860,9 +858,7 @@ class ReportController extends Controller
         $total_item = $total_item->count();
 
         // ================== PAYMENT RECEIVED QUERIES WITH WAREHOUSE FILTER ==================
-        $paymentSaleBase = DB::table('payments')
-            ->join('sales', 'payments.sale_id', '=', 'sales.id')
-            ->whereNotNull('payments.sale_id');
+        $paymentSaleBase = DB::table('payments')->join('sales', 'payments.sale_id', '=', 'sales.id')->whereNotNull('payments.sale_id');
 
         $paymentSaleBase = $this->dateFilter($paymentSaleBase, $start_date, $end_date, 'payments');
         $paymentSaleBase = $this->userFilter($paymentSaleBase, 'sales');
@@ -870,18 +866,14 @@ class ReportController extends Controller
 
         $payment_recieved_number = (clone $paymentSaleBase)->count();
         $payment_recieved = (clone $paymentSaleBase)->sum(DB::raw('payments.amount / payments.exchange_rate'));
-
         // Payment breakdown
         $methods = ['Credit Card', 'Cheque', 'Gift Card', 'Paypal', 'Deposit'];
-
         $paymentBreakdown = [];
-
         foreach ($methods as $method) {
             $paymentBreakdown[$method] = (clone $paymentSaleBase)
                 ->where('payments.paying_method', $method)
                 ->sum(DB::raw('payments.amount / payments.exchange_rate'));
         }
-
         $credit_card_payment_sale = $paymentBreakdown['Credit Card'];
         $cheque_payment_sale = $paymentBreakdown['Cheque'];
         $gift_card_payment_sale = $paymentBreakdown['Gift Card'];
@@ -889,11 +881,7 @@ class ReportController extends Controller
         $deposit_payment_sale = $paymentBreakdown['Deposit'];
 
         $cash_payment_sale = $payment_recieved - array_sum($paymentBreakdown);
-
-        $paymentPurchaseBase = DB::table('payments')
-            ->join('purchases', 'payments.purchase_id', '=', 'purchases.id')
-            ->whereNotNull('payments.purchase_id');
-
+        $paymentPurchaseBase = DB::table('payments')->join('purchases', 'payments.purchase_id', '=', 'purchases.id')->whereNotNull('payments.purchase_id');
         $paymentPurchaseBase = $this->dateFilter($paymentPurchaseBase, $start_date, $end_date, 'payments');
         $paymentPurchaseBase = $this->userFilter($paymentPurchaseBase, 'purchases');
         $paymentPurchaseBase = $this->warehouseFilter($paymentPurchaseBase, $warehouse_id, 'purchases');

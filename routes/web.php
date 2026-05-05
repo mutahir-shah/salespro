@@ -805,6 +805,8 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
     Route::post('attendance/delete/{date}/{employee_id}', [AttendanceController::class, 'delete'])->name('attendances.delete');
     Route::post('attendance/deletebyselection', [AttendanceController::class, 'deleteBySelection']);
     Route::post('attendance/importDeviceCsv', [AttendanceController::class, 'importDeviceCsv'])->name('attendances.importDeviceCsv');
+    Route::get('attendance/datatable', [AttendanceController::class, 'datatable'])->name('attendance.datatable');
+    
     Route::resource('attendance', AttendanceController::class);
 
     Route::controller(StockCountController::class)->group(function () {
