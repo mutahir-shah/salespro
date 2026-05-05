@@ -409,7 +409,7 @@
                 data-checkout="${data.checkout ?? ''}"
                 data-note="">
                 <i class="dripicons-pencil"></i>
-            </button>`;
+            </button> `;
 
                     var deleteBtn = `<form action="/attendance/delete/${data.date}/${data.employee_id}"
                 method="post" style="display:inline;">

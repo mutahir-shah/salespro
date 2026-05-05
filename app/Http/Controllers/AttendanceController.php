@@ -92,6 +92,7 @@ class AttendanceController extends Controller
         $query = Attendance::leftJoin('employees', 'employees.id', '=', 'attendances.employee_id')
             ->leftJoin('users', 'users.id', '=', 'attendances.user_id')
             ->select([
+                'attendances.id',
                 'attendances.date',
                 'attendances.employee_id',
                 'attendances.status',
