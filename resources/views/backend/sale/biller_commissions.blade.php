@@ -60,16 +60,15 @@
 </style>
 <x-success-message key="message" />
 <x-error-message key="error" />
-<section>
+<section class="forms">
     <div class="container-fluid">
         <div class="card mt-3">
             <div class="card-header">
                 <h3 class="card-title">{{__('Biller Commissions')}}</h3>
             </div>
             <div class="card-body">
-                <!-- Filter Section -->
-                <div class="filter-section">
-                    <form method="GET" class="form-inline" style="gap: 10px;">
+                <!-- Filter Section --> 
+                    <form method="GET">
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -102,7 +101,10 @@
                             </div>
                         </div>
                     </form>
-                </div>
+             
+                    
+
+
                 <!-- Statistics Section -->
                 @if($commissions->count() > 0)
                 <div class="stats-box">
