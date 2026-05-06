@@ -83,7 +83,7 @@ use Illuminate\Support\Facades\Auth;
                             <p class="italic">
                                 <small>{{ __('db.The field labels marked with * are required input fields') }}.</small>
                             </p>
-                           <form action="{{ route('exchange.store') }}" method="POST" enctype="multipart/form-data" id="payment-form">
+                            <form action="{{ route('exchange.store', @$lims_sale_data->id ?? null) }}" method="POST" enctype="multipart/form-data" id="payment-form">
                                 @csrf
 
                             <div class="row">
@@ -343,7 +343,31 @@ use Illuminate\Support\Facades\Auth;
                                         </div>
                                     </div>
 
-                                  
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group"><input type="hidden" name="total_qty" /></div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group"><input type="hidden" name="total_discount" /></div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group"><input type="hidden" name="total_tax" /></div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group"><input type="hidden" name="total_price" /></div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group"><input type="hidden" name="item" /><input
+                                                    type="hidden" name="order_tax" /></div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <input type="hidden" name="grand_total" class="exchage_grand_total" />
+                                                <input type="hidden" name="change_sale_status" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="row mt-3">
                                         <div class="col-md-4">
                                             <div class="form-group">
@@ -439,7 +463,13 @@ use Illuminate\Support\Facades\Auth;
                                         </tbody>
                                     </table>
 
-                                    <!-- QR Scanner --> 
+                                    <!-- QR Scanner -->
+                                    <div
+                                        style="width:100%;max-width:350px;position:fixed;top:5%;left:50%;transform:translateX(-50%);z-index:999">
+                                        <button type="button" class="btn btn-danger" id="closeScannerBtn"
+                                            style="display:none">X</button>
+                                        <div id="reader" style="width:100%;"></div>
+                                    </div>
 
                                     <!-- Hidden Inputs for Return/Exchange Data -->
                                     <input type="hidden" id="return-products-data" name="return_products_data"
@@ -531,7 +561,7 @@ use Illuminate\Support\Facades\Auth;
     <div style="width:100%;max-width:350px;position:fixed;top:5%;left:50%;transform:translateX(-50%);z-index:999">
         <button type="button" class="btn btn-danger" id="closeScannerBtn" style="display:none"> X </button>
         <div id="reader" style="width:100%;"></div>
-    </div> 
+    </div>
 @endsection
 
 @push('scripts')
@@ -588,9 +618,10 @@ use Illuminate\Support\Facades\Auth;
                 var warehouse_id = $('#warehouse_id').val();
                 if(!warehouse_id){
                     alert('Please select warehouse')
-                } 
+                }
+                search = btoa(search);
                 $.ajax({
-                    url: '{{ route('sales.search') }}?warehouse_id=' + warehouse_id + '&search=' + search,
+                    url: '{{ url('/sales/search') }}/' + warehouse_id + '/' + search,
                     type: 'GET',
                     success: function(data) {
                         $resultsContainer.empty();
@@ -835,7 +866,6 @@ use Illuminate\Support\Facades\Auth;
         @endif
 
         var currency = <?php echo json_encode($currency); ?>;
-       
         var currencyChange = false;
         var without_stock = <?php echo json_encode($general_setting->without_stock); ?>;
         var authUser = <?php echo json_encode($authUser); ?>;
@@ -988,36 +1018,38 @@ use Illuminate\Support\Facades\Auth;
             calculateExchangeBalance();
         }
 
-   function calculateExchangeBalance() {
-    var shippingCost = parseFloat($('input[name="shipping_cost"]').val()) || 0;
-    var grandTotal = newProductsTotal + shippingCost;
-    var balance = grandTotal - exchangeValue;
+        function calculateExchangeBalance() {
+            var shippingCost = parseFloat($('input[name="shipping_cost"]').val()) || 0;
+            var grandTotal = newProductsTotal + shippingCost;
+            var balance = grandTotal - exchangeValue;
 
-    $('#exchange-shipping').text(shippingCost.toFixed(decimal));
-    $('#new-grand-total').text(grandTotal.toFixed(decimal));
-    $('.exchage_grand_total').val(grandTotal.toFixed(decimal));
+            $('#exchange-shipping').text(shippingCost.toFixed(decimal));
+            $('#new-grand-total').text(grandTotal.toFixed(decimal));
+            $('.exchage_grand_total').val(grandTotal.toFixed(decimal));
 
-    var balanceDisplay = $('#balance-display');
-    var balanceStatus = $('#balance-status');
+            var balanceAmount = $('#amount');
+            var paymentType = $('#payment-type');
+            var balanceDisplay = $('#balance-display');
+            var balanceStatus = $('#balance-status');
 
-    balanceDisplay.text(Math.abs(balance).toFixed(decimal));
-    $('#amount').val(Math.abs(balance).toFixed(decimal));
+            balanceDisplay.text(Math.abs(balance).toFixed(decimal));
+            balanceAmount.val(Math.abs(balance).toFixed(decimal));
 
-    if (balance > 0) {
-        balanceDisplay.css('color', '#d32f2f');
-        balanceStatus.text('(Customer Pays)').css('color', '#d32f2f');
-        $('#payment-type').val('receive');
-    } else if (balance < 0) {
-        balanceDisplay.css('color', '#388e3c');
-        balanceStatus.text('(Refund to Customer)').css('color', '#388e3c');
-        $('#payment-type').val('pay');
-    } else {
-        balanceDisplay.css('color', '#1565c0');
-        balanceStatus.text('(No Balance)').css('color', '#1565c0');
-        $('#payment-type').val('none');
-    }
-    // ❌ REMOVED: calculateExchangeValue(); — was causing infinite loop
-}
+            if (balance > 0) {
+                balanceDisplay.css('color', '#d32f2f');
+                balanceStatus.text('(Customer Pays)').css('color', '#d32f2f');
+                paymentType.val('receive');
+            } else if (balance < 0) {
+                balanceDisplay.css('color', '#388e3c');
+                balanceStatus.text('(Refund to Customer)').css('color', '#388e3c');
+                paymentType.val('pay');
+            } else {
+                balanceDisplay.css('color', '#1565c0');
+                balanceStatus.text('(No Balance)').css('color', '#1565c0');
+            }
+            calculateExchangeValue();
+        }
+
         $(document).on('change', 'input.exchange-checkbox', function() {
             calculateExchangeValue();
         });
@@ -1373,11 +1405,11 @@ use Illuminate\Support\Facades\Auth;
         }
 
         function addNewProduct(data, tableSelector) {
-    if (tableSelector === 'table.return-order-list') {  // ✅
-        sale_type = 'return';
-    } else {
-        sale_type = 'new';
-    }
+            if (tableSelector === 'return-order-list') {
+                sale_type = 'return';
+            } else {
+                sale_type = 'new';
+            }
             console.log(tableSelector);
             $('.payment-btn').removeAttr('disabled');
             var newRow = $('<tr id=' + data[1] + '>');
@@ -1479,7 +1511,7 @@ use Illuminate\Support\Facades\Auth;
 
             product_price.splice(rowindex, 0, parseFloat(data[2] * currency['exchange_rate']) + parseFloat(data[2] *
                 currency['exchange_rate'] * customer_group_rate));
-alert(product_price+'exchange_rate='+currency['exchange_rate']+'customer_group_rate='+customer_group_rate+'data[2]='+data[2]);
+
             if (data[16])
                 wholesale_price.splice(rowindex, 0, parseFloat(data[16] * currency['exchange_rate']) + parseFloat(data[16] *
                     currency['exchange_rate'] * customer_group_rate));
@@ -1963,37 +1995,41 @@ alert(product_price+'exchange_rate='+currency['exchange_rate']+'customer_group_r
         }
 
         function calculateTotal() {
-    var total_qty = 0;
-    // WRONG: nested selector
-    // $("table.order-list table.return-order-list tbody .qty")
+            var total_qty = 0;
+            $("table.order-list table.return-order-list tbody .qty").each(function(index) {
+                if ($(this).val() == '') {
+                    total_qty += 0;
+                } else {
+                    total_qty += parseFloat($(this).val());
+                }
+            });
+            $("#total-qty").text(total_qty);
+            $('input[name="total_qty"]').val(total_qty);
 
-    // CORRECT: comma-separated selector for both tables
-    $("table.order-list tbody .qty, table.return-order-list tbody .qty").each(function(index) {
-        total_qty += parseFloat($(this).val()) || 0;
-    });
-    $('input[name="total_qty"]').last().val(total_qty);
+            var total_discount = 0;
+            $("table.order-list table.return-order-list tbody .discount-value").each(function() {
+                total_discount += parseFloat($(this).val());
+            });
+            $("#total-discount").text(total_discount.toFixed({{ $general_setting->decimal }}));
+            $('input[name="total_discount"]').val(total_discount.toFixed({{ $general_setting->decimal }}));
 
-    var total_discount = 0;
-    $("table.order-list tbody .discount-value, table.return-order-list tbody .discount-value").each(function() {
-        total_discount += parseFloat($(this).val()) || 0;
-    });
-    $('input[name="total_discount"]').last().val(total_discount.toFixed(decimal));
+            var total_tax = 0;
+            $(".tax-value").each(function() {
+                total_tax += parseFloat($(this).val());
+            });
+            $("#total-tax").text(total_tax.toFixed({{ $general_setting->decimal }}));
+            $('input[name="total_tax"]').val(total_tax.toFixed({{ $general_setting->decimal }}));
 
-    // Apply same fix to total_tax and total (sub-total) selectors
-    var total_tax = 0;
-    $(".tax-value").each(function() {
-        total_tax += parseFloat($(this).val()) || 0;
-    });
-    $('input[name="total_tax"]').last().val(total_tax.toFixed(decimal));
+            var total = 0;
+            $(".sub-total").each(function() {
+                total += parseFloat($(this).text());
+            });
+            $("#total").text(total.toFixed({{ $general_setting->decimal }}));
+            $('input[name="total_price"]').val(total.toFixed({{ $general_setting->decimal }}));
 
-    var total = 0;
-    $(".sub-total").each(function() {
-        total += parseFloat($(this).text()) || 0;
-    });
-    $('input[name="total_price"]').last().val(total.toFixed(decimal));
+            calculateGrandTotal();
+        }
 
-    calculateGrandTotal();
-}
         function calculateGrandTotal() {
             var item = $('table.order-list tbody tr:last').index();
             if (item == -1) {
@@ -2108,30 +2144,27 @@ alert(product_price+'exchange_rate='+currency['exchange_rate']+'customer_group_r
                 }
             }
         });
-$('#payment-form').on('submit', function(e) {
-    // WRONG
-    // $("table.order-list table.return-order-list tbody .qty")
 
-    // CORRECT
-    $("table.order-list tbody .qty, table.return-order-list tbody .qty").each(function(index) {
-        if ($(this).val() == '') {
-            alert('One of products has no quantity!');
-            e.preventDefault();
-        }
-    });
+        $('#payment-form').on('submit', function(e) {
+            var rownumber = $('table.order-list tbody tr:last').index();
+            $("table.order-list table.return-order-list tbody .qty").each(function(index) {
+                if ($(this).val() == '') {
+                    alert('One of products has no quantity!');
+                    e.preventDefault();
+                }
+            });
+            if (rownumber < 0) {
+                alert("Please insert product to order table!")
+                e.preventDefault();
+            } else if (parseFloat($('input[name="total_qty"]').val()) <= 0) {
+                alert('Product quantity is 0');
+                e.preventDefault();
+            } else {
+                $("#submit-button").prop('disabled', true);
+                $(".batch-no").prop('disabled', false);
+            }
+        });
 
-    var rownumber = $('table.order-list tbody tr:last').index();
-    if (rownumber < 0) {
-        alert("Please insert product to order table!");
-        e.preventDefault();
-    } else if (parseFloat($('input[name="total_qty"]').last().val()) <= 0) {
-        alert('Product quantity is 0');
-        e.preventDefault();
-    } else {
-        $("#submit-button").prop('disabled', true);
-        $(".batch-no").prop('disabled', false);
-    }
-});
         function toggleExchange(el) {
             const row = el.closest('tr');
             const exchangeInputs = row.querySelectorAll('input[name^="exchange["]');

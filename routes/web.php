@@ -270,6 +270,9 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::get('supplier-due/{id}', 'supplierDue')->name('supplier.due');
         Route::get('suppliers/{supplier_id}', 'supplierPayments')->name('suppliers.payments');
         Route::post('add_payment', 'addPayment')->name('purchase.add-payment');
+
+        Route::get('suppliers/supplier-inventory-report', 'supplierInventoryIndex')->name('supplier.inventory-report');
+        Route::get('/suppliers/supplier-report-data',  'getSupplierInventoryData')->name('supplier.supplier-data');
     });
     Route::resource('supplier', SupplierController::class);
 
@@ -368,7 +371,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
 
         Route::get('sales/getproducts/{warehouse_id}/{key}/{value}', 'getProducts');
 
-        Route::get('sales/search', 'search');
+        Route::get('sales/search', 'search')->name('sales.search');
 
         Route::get('sales/get_gift_card', 'getGiftCard');
         Route::get('sales/paypalSuccess', 'paypalSuccess');
@@ -539,8 +542,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
     });
 
     Route::resource('exchange', ExchangeController::class);
-    Route::get('/sale-exchange/search', [ExchangeController::class, 'searchByReference'])
-        ->name('sale.exchange.search');
+    Route::get('/sale-exchange/search', [ExchangeController::class, 'searchByReference'])->name('sale.exchange.search');
 
     Route::controller(ReturnPurchaseController::class)->group(function () {
         Route::prefix('return-purchase')->group(function () {
@@ -627,8 +629,8 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::get('new/category-stock', 'categoryStockPerProduct')->name('report.category.stock');
             Route::post('new/category-stock/datatable', 'categoryStockPerProductDatatable')->name('report.category.stock.datatable');
 
-            Route::get('supplier-inventory',[ReportController::class, 'supplierInventory'])->name('report.supplier.inventory');
-            Route::get('supplier-inventory-data',[ReportController::class, 'supplierInventoryData'])->name('report.supplier.inventory.data');
+            Route::get('supplier-inventory', [ReportController::class, 'supplierInventory'])->name('report.supplier.inventory');
+            Route::get('supplier-inventory-data', [ReportController::class, 'supplierInventoryData'])->name('report.supplier.inventory.data');
         });
     });
 
@@ -806,7 +808,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
     Route::post('attendance/deletebyselection', [AttendanceController::class, 'deleteBySelection']);
     Route::post('attendance/importDeviceCsv', [AttendanceController::class, 'importDeviceCsv'])->name('attendances.importDeviceCsv');
     Route::get('attendance/datatable', [AttendanceController::class, 'datatable'])->name('attendance.datatable');
-    
+
     Route::resource('attendance', AttendanceController::class);
 
     Route::controller(StockCountController::class)->group(function () {

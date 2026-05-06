@@ -5549,6 +5549,8 @@ class SaleController extends Controller
         $product_embed_code = null;
         if (preg_match('/^\d{13}$/', $search)) {
             $product_embed_code = $search;
+
+            dd($product_embed_code);
             $product = Product::where('is_embeded', true)
                 ->where(function ($q) use ($product_embed_code) {
                     $q->where('code', 'like', $product_embed_code . '%')

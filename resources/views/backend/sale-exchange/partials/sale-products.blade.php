@@ -19,6 +19,14 @@
         <input type="hidden" class="product-code" name="product_code[]" value="{{ $product->code }}">
         <input type="hidden" class="product-id" name="product_id[]" value="{{ $product->id }}">
         <input type="hidden" name="product_sale_id[]" value="{{ $product_sale->id }}">
+
+        {{-- Add this hidden field inside each <tr>, after the existing hidden inputs --}}
+<input type="hidden" class="product_type" name="product_type[]" value="standard">
+
+{{-- Also add sale-unit-operator and sale-unit-operation-value that JS arrays need --}}
+<input type="hidden" class="sale-unit-operator" value="{{ $unit->operator ?? '*' }}">
+<input type="hidden" class="sale-unit-operation-value" value="{{ $unit->operation_value ?? 1 }}">
+
     </td>
 
     {{-- Quantity --}}

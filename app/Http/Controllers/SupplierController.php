@@ -17,6 +17,7 @@ use App\Models\CustomerGroup;
 use App\Models\PaymentAllocation;
 use App\Models\PaymentWithCheque;
 use App\Models\PaymentWithCreditCard;
+use App\Models\Product;
 use App\Models\PurchaseProductReturn;
 use App\Models\ReturnPurchase;
 use Carbon\Carbon;
@@ -56,7 +57,7 @@ class SupplierController extends Controller
             $previous_balance   = $supplier->opening_balance;
             $totalPaymentAmount = $request->amount;
             // Use Carbon instance, not a formatted string
-           
+
             $created = Carbon::createFromFormat('Y-m-d', $request->created_at)->startOfDay();
             // Create main payment record (make sure Payment::$fillable allows created_at/updated_at)
             $paymentArray = [
@@ -71,7 +72,7 @@ class SupplierController extends Controller
                 'payment_note'      => $request->note,
                 'created_at'        => $created,
                 'updated_at'        => $created,
-            ]; 
+            ];
             $payment = Payment::create($paymentArray);
 
             $outstandingPurchases = Purchase::select('id', 'warehouse_id', 'grand_total', 'paid_amount', 'payment_status')
@@ -87,7 +88,7 @@ class SupplierController extends Controller
 
                 $outstandingBalance = $purchase->grand_total - $purchase->paid_amount;
                 $allocatedAmount    = min($remainingAmount, $outstandingBalance);
-               PaymentAllocation::create(['payment_id'=> $payment->id,'purchase_id'=> $purchase->id,'allocated_amount' => $allocatedAmount]);
+                PaymentAllocation::create(['payment_id' => $payment->id, 'purchase_id' => $purchase->id, 'allocated_amount' => $allocatedAmount]);
                 $purchase->update([
                     'paid_amount'    => $purchase->paid_amount + $allocatedAmount,
                     'payment_status' => $this->determinePaymentStatus(
@@ -100,8 +101,8 @@ class SupplierController extends Controller
                 $warehouse_id       = $purchase->warehouse_id;
                 $purchase_id        = $purchase->id;
 
-               // $supplier->opening_balance  = $previous_balance - $allocatedAmount;
-               // $supplier->save();
+                // $supplier->opening_balance  = $previous_balance - $allocatedAmount;
+                // $supplier->save();
             }
 
             $lims_cash_register_data = CashRegister::select('id')->where('user_id', Auth::id())->where('warehouse_id', $warehouse_id)->where('status', 1)->first();
@@ -174,7 +175,7 @@ class SupplierController extends Controller
                 'paying_method' => $request->paying_method,
                 'payment_note' => $request->note,
                 'created_at' => $request->created_at,
-            ]; 
+            ];
             Payment::create($payment);
             $purchase_data->paid_amount += $paid_amount;
             $purchase_data->payment_status = $payment_status;
@@ -347,7 +348,7 @@ class SupplierController extends Controller
                     'id'        => $p->id,
                     'date'      => $p->date ?? $p->created_at->format('Y-m-d'),
                     'type'      => 'Payment',
-                    'reference' => $p->payment_reference.'('.$p->payment_note.')' ?? '-',
+                    'reference' => $p->payment_reference . '(' . $p->payment_note . ')' ?? '-',
                     'debit'     => 0,
                     'credit'    => floatval($p->amount),
                 ];
@@ -574,5 +575,176 @@ class SupplierController extends Controller
             });
 
         return response()->json(['data' => $payments]);
+    }
+
+
+    public function supplierInventoryIndex()
+    {
+        $suppliers = Supplier::select('id', 'name')->get();
+        $products =  Product::select('id', 'name')->get();
+
+        return view('backend.supplier.supplier-report', compact('suppliers', 'products'));
+    }
+
+    public function getSupplierInventoryData(Request $request)
+    {
+        return $this->supplierInventoryReport($request);
+    }
+
+
+    public function supplierInventoryReport(Request $request)
+    {
+        $supplierId = $request->get('supplier_id');
+        $productId = $request->get('product_id');
+
+        $report = $this->generateSupplierInventoryReport($supplierId, $productId);
+
+        return response()->json([
+            'success' => true,
+            'data' => $report
+        ]);
+    }
+
+    private function generateSupplierInventoryReport($supplierId = null, $productId = null)
+    {
+        // Step 1: Get all relevant products (filtered or all)
+        $productsQuery = DB::table('products as p');
+        if ($productId) {
+            $productsQuery->where('p.id', $productId);
+        }
+        $products = $productsQuery->get();
+
+        $report = [];
+
+        foreach ($products as $product) {
+            // Step 2: Get ALL purchases for this product (needed for FIFO calculation)
+            $allProductPurchases = DB::table('product_purchases as pp')
+                ->join('purchases as pu', 'pu.id', '=', 'pp.purchase_id')
+                ->join('suppliers as s', 's.id', '=', 'pu.supplier_id')
+                ->where('pp.product_id', $product->id)
+                ->select([
+                    's.id as supplier_id',
+                    's.name as supplier_name',
+                    'pp.qty as purchased_qty',
+                    'pp.net_unit_cost',
+                    'pu.created_at as purchase_date'
+                ])
+                ->orderBy('pu.created_at', 'asc') // FIFO order
+                ->get();
+
+            if ($allProductPurchases->isEmpty()) {
+                continue;
+            }
+
+            // Step 3: Get current warehouse stock and total sold
+            $currentWarehouseQty = DB::table('product_warehouse')
+                ->where('product_id', $product->id)
+                ->sum('qty');
+
+            $totalSold = $this->getTotalSoldQuantity($product->id);
+            $totalPurchased = $allProductPurchases->sum('purchased_qty');
+
+            // Verify warehouse quantity consistency
+            $calculatedRemaining = $totalPurchased - $totalSold;
+            if ($calculatedRemaining != $currentWarehouseQty) {
+                // Use warehouse quantity as source of truth
+                $totalSold = $totalPurchased - $currentWarehouseQty;
+            }
+
+            // Step 4: Apply FIFO to determine remaining quantities per supplier
+            $soldQty = $totalSold;
+            $supplierData = [];
+
+            foreach ($allProductPurchases as $purchase) {
+                if (!isset($supplierData[$purchase->supplier_id])) {
+                    $supplierData[$purchase->supplier_id] = [
+                        'supplier_name' => $purchase->supplier_name,
+                        'total_purchased' => 0,
+                        'remaining_qty' => 0,
+                        'total_cost' => 0,
+                        'purchases' => []
+                    ];
+                }
+
+                $supplierData[$purchase->supplier_id]['total_purchased'] += $purchase->purchased_qty;
+                $supplierData[$purchase->supplier_id]['total_cost'] += ($purchase->purchased_qty * $purchase->net_unit_cost);
+
+                // Calculate remaining quantity using FIFO
+                if ($soldQty > 0) {
+                    if ($soldQty >= $purchase->purchased_qty) {
+                        // This entire purchase lot is sold
+                        $soldQty -= $purchase->purchased_qty;
+                        $remainingFromThisPurchase = 0;
+                    } else {
+                        // Partial quantity remaining from this purchase
+                        $remainingFromThisPurchase = $purchase->purchased_qty - $soldQty;
+                        $soldQty = 0;
+                    }
+                } else {
+                    // No more sold quantity to deduct
+                    $remainingFromThisPurchase = $purchase->purchased_qty;
+                }
+
+                $supplierData[$purchase->supplier_id]['remaining_qty'] += $remainingFromThisPurchase;
+            }
+
+            // Step 5: Build report for suppliers (apply supplier filter here)
+            foreach ($supplierData as $sId => $data) {
+                // Apply supplier filter
+                if ($supplierId && $sId != $supplierId) {
+                    continue;
+                }
+
+                // Only include suppliers with remaining quantity or purchases
+                if ($data['remaining_qty'] > 0 || $data['total_purchased'] > 0) {
+                    $weightedCost = $data['total_purchased'] > 0 ?
+                        $data['total_cost'] / $data['total_purchased'] : 0;
+
+                    $report[] = [
+                        'supplier_id' => $sId,
+                        'supplier_name' => $data['supplier_name'],
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'total_purchased' => $data['total_purchased'],
+                        'remaining_qty' => $data['remaining_qty'],
+                        'weighted_cost' => $weightedCost,
+                        'remaining_cost_value' => $data['remaining_qty'] * $weightedCost,
+                        'unit_price' => $product->price,
+                        'remaining_price_value' => $data['remaining_qty'] * $product->price
+                    ];
+                }
+            }
+        }
+
+        return $report;
+    }
+
+
+        private function getTotalSoldQuantity($productId)
+    {
+        // Calculate total sold quantity
+        // Assuming you have a sales/orders table structure
+        // Adjust this query based on your actual sales tracking tables
+
+        $soldQty = DB::table('product_sales as si')
+            ->where('si.product_id', $productId)
+            ->sum('si.qty');
+
+        return $soldQty ?? 0;
+
+        // Alternative if you don't have sales tracking:
+        // Calculate as: Total Purchased - Current Warehouse Stock
+        /*
+        $totalPurchased = DB::table('product_purchases as pp')
+            ->join('purchases as pu', 'pu.id', '=', 'pp.purchase_id')
+            ->where('pp.product_id', $productId)
+            ->sum('pp.qty');
+            
+        $currentStock = DB::table('product_warehouse')
+            ->where('product_id', $productId)
+            ->sum('qty');
+            
+        return max(0, $totalPurchased - $currentStock);
+        */
     }
 }
