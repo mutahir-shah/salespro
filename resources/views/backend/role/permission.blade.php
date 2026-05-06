@@ -1674,6 +1674,21 @@
 														</div>
 													</div>
 												</span>
+
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("supplier-inventory-report", $all_permission))
+															<input type="checkbox" value="1" id="supplier-inventory-report" name="supplier-inventory-report" checked>
+															@else
+															<input type="checkbox" value="1" id="supplier-inventory-report" name="supplier-inventory-report">
+															@endif
+															<label for="supplier-inventory-report" class="padding05">{{__('db.Supplier Inventory Report')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
 												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
@@ -2358,7 +2373,7 @@
 															<label for="total_supplier_dues_statistics" class="padding05">{{__('db.Total Supplier Dues')}} &nbsp;&nbsp;</label>
 														</div>
 													</div>
-												</span> 
+												</span>
 
 
 												<span>
@@ -2412,7 +2427,7 @@
 															<label for="payroll_amount_statistics" class="padding05">{{__('db.Payroll Amount')}} &nbsp;&nbsp;</label>
 														</div>
 													</div>
-												</span> 
+												</span>
 
 
 												<span>
@@ -2426,7 +2441,7 @@
 															<label for="total_billers_statistics" class="padding05">{{__('db.Total Billers')}} &nbsp;&nbsp;</label>
 														</div>
 													</div>
-												</span> 
+												</span>
 
 
 												<span>
@@ -2467,7 +2482,7 @@
 															<label for="total_customer_dues_statistics" class="padding05">{{__('db.Total Customer Dues')}} &nbsp;&nbsp;</label>
 														</div>
 													</div>
-												</span> 
+												</span>
 
 												<span>
 													<div aria-checked="false" aria-disabled="false">
@@ -2481,7 +2496,7 @@
 														</div>
 													</div>
 												</span>
-	<span>
+												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
 															@if(in_array("total_rent_statistics", $all_permission))
@@ -2495,7 +2510,7 @@
 												</span>
 
 
-													<span>
+												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
 															@if(in_array("total_bill_statistics", $all_permission))
@@ -2509,7 +2524,7 @@
 												</span>
 
 
-													<span>
+												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
 															@if(in_array("cash_flow_statistics", $all_permission))
@@ -2523,7 +2538,7 @@
 												</span>
 
 
-													<span>
+												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
 															@if(in_array("dougnut_statistics", $all_permission))
@@ -2537,7 +2552,7 @@
 												</span>
 
 
-													<span>
+												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
 															@if(in_array("yearly_report_statistics", $all_permission))
@@ -2551,8 +2566,8 @@
 												</span>
 
 
-												
-													<span>
+
+												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
 															@if(in_array("best_seller_april_statistics", $all_permission))
@@ -2566,7 +2581,7 @@
 												</span>
 
 
-													<span>
+												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
 															@if(in_array("best_seller_quantity_statistics", $all_permission))
@@ -2580,7 +2595,7 @@
 												</span>
 
 
-													<span>
+												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
 															@if(in_array("best_seller_price_statistics", $all_permission))
@@ -2592,10 +2607,10 @@
 														</div>
 													</div>
 												</span>
-												
 
-												</td>
-												</tr>
+
+											</td>
+										</tr>
 									</tbody>
 								</table>
 							</div>

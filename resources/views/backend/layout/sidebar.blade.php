@@ -693,6 +693,7 @@
                 <a id="supplier-report-link" class="{{ request()->is('report/supplier') ? 'active' : '' }}" href="">{{__('db.Supplier Report')}}</a>
             </li>
             @endcan
+
             @can('supplier-due-report')
             <li id="supplier-due-report-menu">
                 <form action="{{route('report.supplierDueByDate')}}" method="post" id="supplier-due-report-form">
@@ -703,6 +704,12 @@
                 </form>
             </li>
             @endcan
+            @can('supplier-inventory-report')
+            <li id="supplier-inventory-report-menu">
+                <a id="supplier-inventory-report-link" class="{{ request()->is('suppliers/report/supplier-inventory-report') ? 'active' : '' }}" href="{{route('supplier.inventory-report')}}">{{__('Supplier Inventory Report')}}</a>
+            </li>
+            @endcan
+
             @can('warehouse-report')
             <li id="warehouse-report-menu">
                 <a id="warehouse-report-link" class="{{ request()->is('report/warehouse_report') ? 'active' : '' }}">{{__('db.Warehouse Report')}}</a>
