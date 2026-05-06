@@ -1,17 +1,37 @@
 @extends('backend.layout.main')
 @section('content')
-
 <style type="text/css">
-    .btn-icon i{margin-right:5px}
-    .top-fields{margin-top:10px;position: relative;}
-    .top-fields label {font-size:11px;font-weight:600;margin-left:10px;padding:0 3px;position:absolute;top:-8px;z-index:9;}
-    .top-fields input{font-size:13px;height:45px}
+    .btn-icon i {
+        margin-right: 5px
+    }
+
+    .top-fields {
+        margin-top: 10px;
+        position: relative;
+    }
+
+    .top-fields label {
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 10px;
+        padding: 0 3px;
+        position: absolute;
+        top: -8px;
+        z-index: 9;
+    }
+
+    .top-fields input {
+        font-size: 13px;
+        height: 45px
+    }
+
     .filter-section {
         background: #f5f5f5;
         padding: 15px;
         border-radius: 5px;
         margin-bottom: 20px;
     }
+
     .stats-box {
         background: #fff;
         border: 1px solid #e3e6f0;
@@ -19,26 +39,27 @@
         border-radius: 5px;
         margin-bottom: 15px;
     }
+
     .stat-item {
         display: inline-block;
         margin-right: 30px;
     }
+
     .stat-label {
         font-size: 12px;
         color: #6c757d;
         text-transform: uppercase;
         font-weight: 600;
     }
+
     .stat-value {
         font-size: 24px;
         font-weight: bold;
         color: #28a745;
     }
 </style>
-
 <x-success-message key="message" />
 <x-error-message key="error" />
-
 <section>
     <div class="container-fluid">
         <div class="card mt-3">
@@ -58,9 +79,9 @@
                             <select name="biller_id" id="biller_id" class="form-control" style="margin-left: 8px;">
                                 <option value="">{{__('All Billers')}}</option>
                                 @foreach($billers as $biller)
-                                    <option value="{{ $biller->id }}" {{ $billerId == $biller->id ? 'selected' : '' }}>
-                                        {{ $biller->name }}
-                                    </option>
+                                <option value="{{ $biller->id }}" {{ $billerId == $biller->id ? 'selected' : '' }}>
+                                    {{ $biller->name }}
+                                </option>
                                 @endforeach
                             </select>
                         </div>
@@ -69,7 +90,6 @@
                         </button>
                     </form>
                 </div>
-
                 <!-- Statistics Section -->
                 @if($commissions->count() > 0)
                 <div class="stats-box">
@@ -87,7 +107,6 @@
                     </div>
                 </div>
                 @endif
-
                 <form id="pay-commissions-form" method="POST" action="{{ route('biller.commissions.pay') }}">
                     @csrf
                     <div class="table-responsive">
@@ -110,7 +129,7 @@
                                 <tr>
                                     <td>
                                         @if(!$commission->is_paid)
-                                            <input type="checkbox" name="commission_ids[]" value="{{ $commission->id }}" class="commission-checkbox" data-amount="{{ $commission->commission_amount }}" data-row-index="{{ $loop->index }}">
+                                        <input type="checkbox" name="commission_ids[]" value="{{ $commission->id }}" class="commission-checkbox" data-amount="{{ $commission->commission_amount }}" data-row-index="{{ $loop->index }}">
                                         @endif
                                     </td>
                                     <td>{{ $commission->sale->reference_no ?? 'N/A' }}</td>
@@ -121,9 +140,9 @@
                                     <td>{{ number_format($commission->paid_amount, 2) }}</td>
                                     <td>
                                         @if($commission->is_paid)
-                                            <span class="badge badge-success">{{__('Paid')}}</span>
+                                        <span class="badge badge-success">{{__('Paid')}}</span>
                                         @else
-                                            <span class="badge badge-warning">{{__('Unpaid')}}</span>
+                                        <span class="badge badge-warning">{{__('Unpaid')}}</span>
                                         @endif
                                     </td>
                                     <td>{{ $commission->calculated_at->format('Y-m-d H:i') }}</td>
@@ -169,71 +188,65 @@
     </div>
 </section>
 
-<script>
-$(document).ready(function() {
-    console.log('Document Ready - Initializing commission script');
-    
-    function calculateSelectedAmount() {
-        let total = 0;
-        let checkedCount = 0;
-        
-        $('.commission-checkbox:checked').each(function() {
-            // Try to get amount from data attribute first
-            let amount = parseFloat($(this).data('amount'));
-            
-            // If data attribute is not working, try to extract from the table cell
-            if (isNaN(amount) || amount === 0) {
-                let amountText = $(this).closest('tr').find('.commission-amount-cell').text().trim();
-                amountText = amountText.replace(/[^\d.-]/g, ''); // Remove non-numeric characters
-                amount = parseFloat(amountText);
-                console.log('Extracted from cell:', amountText, 'Parsed as:', amount);
-            }
-            
-            console.log('Checkbox amount:', amount, 'isNaN:', isNaN(amount));
-            if (!isNaN(amount) && amount > 0) {
-                total += amount;
-                checkedCount++;
-            }
-        });
-        
-        console.log('Total calculated:', total, 'Count:', checkedCount);
-        $('#selected-amount').text(total.toFixed(2));
-    }
-
-    // Initial calculation on page load
-    console.log('Commission checkboxes found:', $('.commission-checkbox').length);
-    calculateSelectedAmount();
-
-    $('#select-all').on('change', function() {
-        console.log('Select All clicked');
-        $('.commission-checkbox').prop('checked', $(this).prop('checked'));
-        calculateSelectedAmount();
-    });
-
-    $('.commission-checkbox').on('change', function() {
-        console.log('Individual checkbox changed');
-        calculateSelectedAmount();
-        
-        if ($('.commission-checkbox:checked').length === $('.commission-checkbox').length) {
-            $('#select-all').prop('checked', true);
-        } else {
-            $('#select-all').prop('checked', false);
-        }
-    });
-});
-
-function confirmPayment() {
-    const selectedAmount = $('#selected-amount').text();
-    const selectedCount = $('.commission-checkbox:checked').length;
-    
-    if (selectedCount === 0) {
-        alert('Please select at least one commission to pay');
-        return false;
-    }
-    
-    const confirmed = confirm(`Pay ${selectedCount} commission(s) with total amount: ${selectedAmount}?`);
-    return confirmed;
-}
-</script>
 
 @endsection
+
+@push('scripts')
+<script type="text/javascript">
+    $(document).ready(function() {
+        console.log('Document Ready - Initializing commission script');
+        function calculateSelectedAmount() {
+            let total = 0;
+            let checkedCount = 0;
+            $('.commission-checkbox:checked').each(function() {
+                // Try to get amount from data attribute first
+                let amount = parseFloat($(this).data('amount'));
+                // If data attribute is not working, try to extract from the table cell
+                if (isNaN(amount) || amount === 0) {
+                    let amountText = $(this).closest('tr').find('.commission-amount-cell').text().trim();
+                    amountText = amountText.replace(/[^\d.-]/g, ''); // Remove non-numeric characters
+                    amount = parseFloat(amountText);
+                    console.log('Extracted from cell:', amountText, 'Parsed as:', amount);
+                }
+
+                console.log('Checkbox amount:', amount, 'isNaN:', isNaN(amount));
+                if (!isNaN(amount) && amount > 0) {
+                    total += amount;
+                    checkedCount++;
+                }
+            });
+            console.log('Total calculated:', total, 'Count:', checkedCount);
+            $('#selected-amount').text(total.toFixed(2));
+        }
+        // Initial calculation on page load
+        console.log('Commission checkboxes found:', $('.commission-checkbox').length);
+        calculateSelectedAmount();
+        $('#select-all').on('change', function() {
+            console.log('Select All clicked');
+            $('.commission-checkbox').prop('checked', $(this).prop('checked'));
+            calculateSelectedAmount();
+        });
+        $('.commission-checkbox').on('change', function() {
+            console.log('Individual checkbox changed');
+            calculateSelectedAmount();
+            if ($('.commission-checkbox:checked').length === $('.commission-checkbox').length) {
+                $('#select-all').prop('checked', true);
+            } else {
+                $('#select-all').prop('checked', false);
+            }
+        });
+    });
+    function confirmPayment() {
+        const selectedAmount = $('#selected-amount').text();
+        const selectedCount = $('.commission-checkbox:checked').length;
+
+        if (selectedCount === 0) {
+            alert('Please select at least one commission to pay');
+            return false;
+        }
+        const confirmed = confirm(`Pay ${selectedCount} commission(s) with total amount: ${selectedAmount}?`);
+        return confirmed;
+    }
+</script>
+
+@endpush
