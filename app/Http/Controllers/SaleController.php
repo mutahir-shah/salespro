@@ -4696,14 +4696,10 @@ class SaleController extends Controller
     {
         $date = $request->input('date', date('Y-m-d'));
         $billerId = $request->input('biller_id', null);
-
         // Get all billers for dropdown
         $billers = Biller::orderBy('name')->get();
-
         // Build query
-        $query = BillerCommission::with(['sale', 'biller'])
-            ->whereDate('calculated_at', $date);
-
+        $query = BillerCommission::with(['sale', 'biller'])->whereDate('calculated_at', $date);
         // Apply biller filter if selected
         if ($billerId) {
             $query->where('biller_id', $billerId);

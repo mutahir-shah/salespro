@@ -70,24 +70,37 @@
                 <!-- Filter Section -->
                 <div class="filter-section">
                     <form method="GET" class="form-inline" style="gap: 10px;">
-                        <div class="form-group">
-                            <label for="date">{{__('Date')}}</label>
-                            <input type="date" name="date" id="date" value="{{ $date }}" class="form-control" style="margin-left: 8px;">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="date">{{__('Date')}}</label>
+                                    <div class="input-group">
+                                        <input type="date" name="date" id="date" value="{{ $date }}" class="form-control" style="margin-left: 8px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="biller_id">{{__('Biller')}}</label>
+                                    <div class="input-group">
+                                        <select name="biller_id" id="biller_id" class="form-control" style="margin-left: 8px;">
+                                            <option value="">{{__('All Billers')}}</option>
+                                            @foreach($billers as $biller)
+                                            <option value="{{ $biller->id }}" {{ $billerId == $biller->id ? 'selected' : '' }}>
+                                                {{ $biller->name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary" style="margin-left: 8px;">
+                                    <i class="dripicons-search"></i> {{__('Filter')}}
+                                </button>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="biller_id">{{__('Biller')}}</label>
-                            <select name="biller_id" id="biller_id" class="form-control" style="margin-left: 8px;">
-                                <option value="">{{__('All Billers')}}</option>
-                                @foreach($billers as $biller)
-                                <option value="{{ $biller->id }}" {{ $billerId == $biller->id ? 'selected' : '' }}>
-                                    {{ $biller->name }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="margin-left: 8px;">
-                            <i class="dripicons-search"></i> {{__('Filter')}}
-                        </button>
                     </form>
                 </div>
                 <!-- Statistics Section -->
@@ -195,6 +208,7 @@
 <script type="text/javascript">
     $(document).ready(function() {
         console.log('Document Ready - Initializing commission script');
+
         function calculateSelectedAmount() {
             let total = 0;
             let checkedCount = 0;
@@ -236,6 +250,7 @@
             }
         });
     });
+
     function confirmPayment() {
         const selectedAmount = $('#selected-amount').text();
         const selectedCount = $('.commission-checkbox:checked').length;
