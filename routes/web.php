@@ -271,8 +271,8 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::get('suppliers/{supplier_id}', 'supplierPayments')->name('suppliers.payments');
         Route::post('add_payment', 'addPayment')->name('purchase.add-payment');
 
-        Route::get('suppliers/supplier-inventory-report', 'supplierInventoryIndex')->name('supplier.inventory-report');
-        Route::get('/suppliers/supplier-report-data',  'getSupplierInventoryData')->name('supplier.supplier-data');
+        Route::get('suppliers/report/supplier-inventory-report', 'supplierInventoryIndex')->name('supplier.inventory-report');
+        Route::get('/suppliers/report/supplier-report-data',  'getSupplierInventoryData')->name('supplier.supplier-data');
     });
     Route::resource('supplier', SupplierController::class);
 

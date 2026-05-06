@@ -3,8 +3,8 @@
 @section('content')
 
 @php
-$selectedSupplierId = request()->get('supplier_id');
-$selectedProductId = request()->get('product_id');
+$selectedSupplierId = request()->input('supplier_id');
+$selectedProductId = request()->input('product_id');
 @endphp
 <section>
     <div class="container-fluid">
