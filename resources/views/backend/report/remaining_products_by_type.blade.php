@@ -3,18 +3,18 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-header mt-2">
-                <h3 class="text-center">{{trans('Products Report Remainign Packing Types')}}</h3>
+                <h3 class="text-center">{{trans('Products Report Remaining Packing Types')}}</h3>
             </div>
             <form id="report-form" action="{{ route('report.remainingproductsbytype') }}" method="GET">
                 <div class="row mb-3">
                     <div class="col-md-2 mt-4"></div>
                     <div class="col-md-4 mt-4">
                         <div class="form-group row">
-                            <label class="d-tc mt-2"><strong>{{trans('file.Choose Warehouse')}}</strong> &nbsp;</label>
+                            <label class="d-tc mt-2"><strong>{{trans('Choose Warehouse')}}</strong> &nbsp;</label>
                             <div class="d-tc">
                                 <input type="hidden" name="warehouse_id_hidden" value="{{$warehouse_id}}" />
                                 <select id="warehouse_id" name="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
-                                    <option value="0">{{trans('file.All Warehouse')}}</option>
+                                    <option value="0">{{trans('All Warehouse')}}</option>
                                     @foreach($lims_warehouse_list as $warehouse)
                                     <option value="{{$warehouse->id}}" {{ $warehouse_id ==$warehouse->id ?  'selected': '' }}>{{$warehouse->name}}</option>
                                     @endforeach
@@ -75,9 +75,9 @@
     $('#report-table').DataTable({
         "order": [],
         'language': {
-            'lengthMenu': '_MENU_ {{trans("file.records per page")}}',
-            "info": '<small>{{trans("file.Showing")}} _START_ - _END_ (_TOTAL_)</small>',
-            "search": '{{trans("file.Search")}}',
+            'lengthMenu': '_MENU_ {{trans("records per page")}}',
+            "info": '<small>{{trans("Showing")}} _START_ - _END_ (_TOTAL_)</small>',
+            "search": '{{trans("Search")}}',
             'paginate': {
                 'previous': '<i class="dripicons-chevron-left"></i>',
                 'next': '<i class="dripicons-chevron-right"></i>'
