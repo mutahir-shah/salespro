@@ -693,7 +693,7 @@
 
             @can('remainingproductsbytype')
             <li id="remainingproductsbytype-menu">
-                <a id="remainingproductsbytype-link" class="{{ request()->is('report/remainingproducts/bytype') ? 'active' : '' }}" href="{{route('report.remainingproductsbytype') }}">{{__('Category Stock Report')}}</a>
+                <a id="remainingproductsbytype-link" class="{{ request()->is('report/remainingproducts/bytype') ? 'active' : '' }}" href="{{route('report.remainingproductsbytype') }}">{{__('Products Type Report')}}</a>
             </li>
             @endcan
 
