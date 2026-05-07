@@ -5627,4 +5627,24 @@ class ReportController extends Controller
 
         return DataTables::of($query)->make(true);
     }
+
+
+    public function remainingProductsByType(Request $request)
+    {
+        $lims_warehouse_list = Warehouse::where('is_active', true)->get();
+        $warehouse_id = $request->input('warehouse_id');
+        // Query to fetch remaining products grouped by packing type
+        $categories = Product::select(
+            DB::raw('COALESCE(products.packing_type, "NoPacking") AS packing_type'),
+            DB::raw('SUM(product_warehouse.qty) AS total_remaining_products'),
+            DB::raw('SUM(product_warehouse.qty * products.cost) AS total_cost_value'),
+            DB::raw('SUM(product_warehouse.qty * products.price) AS total_price_value')
+        )->join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
+            // Apply filters only if provided
+            ->when($warehouse_id, function ($query) use ($warehouse_id) {
+                return $query->where('product_warehouse.warehouse_id', $warehouse_id);
+            })->groupBy('packing_type')->orderByDesc('total_remaining_products')->get();
+
+        return view('backend.report.remaining_products_by_type',compact('categories', 'lims_warehouse_list', 'warehouse_id'));
+    }
 }

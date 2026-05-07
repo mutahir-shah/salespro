@@ -1715,6 +1715,21 @@
 													</div>
 												</span>
 
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("remainingproductsbytype", $all_permission))
+															<input type="checkbox" value="1" id="remainingproductsbytype" name="remainingproductsbytype" checked>
+															@else
+															<input type="checkbox" value="1" id="remainingproductsbytype" name="remainingproductsbytype">
+															@endif
+															<label for="remainingproductsbytype" class="padding05">{{__('Products Type Report')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
+
 											</td>
 										</tr>
 										<tr class="addon-row">

@@ -629,8 +629,12 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::get('new/category-stock', 'categoryStockPerProduct')->name('report.category.stock');
             Route::post('new/category-stock/datatable', 'categoryStockPerProductDatatable')->name('report.category.stock.datatable');
 
-            Route::get('supplier-inventory', [ReportController::class, 'supplierInventory'])->name('report.supplier.inventory');
-            Route::get('supplier-inventory-data', [ReportController::class, 'supplierInventoryData'])->name('report.supplier.inventory.data');
+            Route::get('supplier-inventory',  'supplierInventory')->name('report.supplier.inventory');
+            Route::get('supplier-inventory-data', 'supplierInventoryData')->name('report.supplier.inventory.data');
+
+            Route::get('remainingproducts/bycategory', 'remainingProductsByCategory')->name('report.remainingproductsbycategory');
+            Route::get('categorystock/perproduct', 'categoryStockPerProduct')->name('report.categorystockperproduct');
+            Route::get('remainingproducts/bytype', 'remainingProductsByType')->name('report.remainingproductsbytype');
         });
     });
 

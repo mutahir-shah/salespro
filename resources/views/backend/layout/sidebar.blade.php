@@ -533,7 +533,9 @@
             @can('category_stock_report')
             @php $showReportMenu = true; @endphp
             @endcan
-
+            @can('remainingproductsbytype')
+            @php $showReportMenu = true; @endphp
+            @endcan
 
             @can('supplier-report')
             @php $showReportMenu = true; @endphp
@@ -685,6 +687,13 @@
             @can('category_stock_report')
             <li id="category-sale-report-menu">
                 <a id="category-sale-report-link" class="{{ request()->is('report/new/category-stock') ? 'active' : '' }}" href="{{route('report.category.stock') }}">{{__('Category Stock Report')}}</a>
+            </li>
+            @endcan
+
+
+            @can('remainingproductsbytype')
+            <li id="remainingproductsbytype-menu">
+                <a id="remainingproductsbytype-link" class="{{ request()->is('report/remainingproducts/bytype') ? 'active' : '' }}" href="{{route('report.remainingproductsbytype') }}">{{__('Category Stock Report')}}</a>
             </li>
             @endcan
 
