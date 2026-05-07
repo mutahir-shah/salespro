@@ -24,7 +24,7 @@
                     </div>
                     <div class="col-md-3 mt-4">
                         <div class="form-group">
-                            <button class="btn btn-primary" type="submit">{{trans('file.submit')}}</button>
+                            <button class="btn btn-primary" type="submit">{{trans('Submit')}}</button>
                         </div>
                     </div>
                 </div>
@@ -50,15 +50,15 @@
                     <td>{{ $category->packing_type }}</td>
                     <td>{{ $category->total_remaining_products }}</td>
                     <td>{{ $category->total_cost_value }}</td>
-                    <td>{{ $category->total_price_value }}</td>
-                    <td>{{ $category->total_price_value - $category->total_cost_value }}</td>
+                    <td>{{ round($category->total_price_value, 0) }}</td>
+                    <td>{{ round($category->total_price_value - $category->total_cost_value, 0) }}</td>
                 </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
                     <th class="not-exported"></th>
-                    <th>{{trans('file.Total')}}</th>
+                    <th>{{trans('Total')}}</th>
                     <th></th>
                     <th></th>
                     <th></th>
