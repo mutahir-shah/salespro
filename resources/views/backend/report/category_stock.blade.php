@@ -10,10 +10,10 @@
                 <h3 class="text-center">Category Stock Report</h3>
             </div>
 
-            {{-- FILTERS --}}
+            {{-- ================= FILTERS ================= --}}
             <div class="row mb-3 product-report-filter">
 
-                {{-- DATE FILTER --}}
+                {{-- DATE --}}
                 <div class="col-md-3 offset-md-2 mt-3">
                     <div class="form-group top-fields">
                         <label><strong>Choose Your Date</strong></label>
@@ -71,7 +71,7 @@
                     </div>
                 </div>
 
-                {{-- SUBMIT --}}
+                {{-- BUTTON --}}
                 <div class="col-md-12 text-center mt-3">
                     <button id="filterBtn" class="btn btn-primary">
                         Submit
@@ -83,7 +83,8 @@
         </div>
     </div>
 
-    {{-- TABLE --}}
+
+    {{-- ================= TABLE ================= --}}
     <div class="table-responsive">
         <table id="categoryStockTable"
             class="table table-hover"
@@ -113,8 +114,8 @@
     </div>
 
 </section>
-
 @endsection
+
 
 @push('scripts')
 
@@ -125,12 +126,8 @@
         }
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Date Range Picker
-    |--------------------------------------------------------------------------
-    */
 
+    // ================= DATE RANGE =================
     $('.daterangepicker-field').daterangepicker({
         locale: {
             format: 'DD/MM/YYYY'
@@ -140,16 +137,17 @@
         $('#ending_date').val(end.format('DD/MM/YYYY'));
     });
 
+    // set default dates on load
+    let picker = $('.daterangepicker-field').data('daterangepicker');
+    $('#starting_date').val(picker.startDate.format('DD/MM/YYYY'));
+    $('#ending_date').val(picker.endDate.format('DD/MM/YYYY'));
 
+
+    // refresh selectpicker
     $('.selectpicker').selectpicker('refresh');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATATABLE
-    |--------------------------------------------------------------------------
-    */
-
+    // ================= DATATABLE =================
     let table = $('#categoryStockTable').DataTable({
 
         processing: true,
@@ -159,7 +157,6 @@
             url: "{{ route('report.percategory.stock.datatable') }}",
             type: "POST",
             data: function(d) {
-
                 d.warehouse_id = $('#warehouse_id').val();
                 d.category_id = $('#category_id').val();
                 d.starting_date = $('#starting_date').val();
@@ -183,55 +180,44 @@
             },
             {
                 data: 'total_sales_price'
-            },
+            }
         ],
 
+        // ✅ FIXED ORDER COLUMN INDEX
         order: [
-            [5, 'desc']
+            [4, 'desc']
         ],
 
         dom: '<"row"lfB>rtip',
 
-        buttons: [
-            'excel',
-            'csv',
-            'pdf',
-            'print',
-            'colvis'
-        ],
+        buttons: ['excel', 'csv', 'pdf', 'print', 'colvis'],
+
+
+        // ================= FOOTER TOTALS =================
         drawCallback: function() {
 
             let api = this.api();
 
-            $(api.column(2).footer()).html(
-                api.column(2, {
-                    page: 'current'
-                }).data().sum().toFixed(2)
-            );
+            function columnSum(index) {
+                return api.column(index, {
+                        page: 'current'
+                    })
+                    .data()
+                    .reduce((a, b) => parseFloat(a) + parseFloat(b || 0), 0)
+                    .toFixed(2);
+            }
 
-            $(api.column(3).footer()).html(
-                api.column(3, {
-                    page: 'current'
-                }).data().sum().toFixed(2)
-            );
-
-            $(api.column(4).footer()).html(
-                api.column(4, {
-                    page: 'current'
-                }).data().sum().toFixed(2)
-            );
+            $(api.column(2).footer()).html(columnSum(2));
+            $(api.column(3).footer()).html(columnSum(3));
+            $(api.column(4).footer()).html(columnSum(4));
         }
+
     });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | FILTER RELOAD
-    |--------------------------------------------------------------------------
-    */
-
+    // ================= FILTER BUTTON =================
     $('#filterBtn').on('click', function() {
-        table.ajax.reload();
+        table.ajax.reload(null, false);
     });
 </script>
 
