@@ -1584,6 +1584,100 @@ class ReportController extends Controller
             )->make(true);
     }
 
+
+
+
+    public function categoryStock()
+    {
+        $start_date = $request->start_date ?? date('Y-m') . '-' . '01';
+        $end_date = $request->end_date ?? date('Y-m-d');
+        $warehouse_id = $data['warehouse_id'] ?? 0;
+        $category_id = $data['category_id'] ?? 0;
+        $lims_warehouse_list = Warehouse::where('is_active', true)->get();
+        return view(
+            'backend.report.category_stock',
+            compact('start_date', 'end_date', 'warehouse_id', 'category_id', 'lims_warehouse_list')
+        );
+    }
+
+    public function categoryStockSummaryDatatable(Request $request)
+    {
+        $warehouse_id = $request->warehouse_id;
+        $start_date = null;
+        $end_date   = null;
+
+        try {
+            if ($request->starting_date && $request->ending_date) {
+                $start_date = Carbon::createFromFormat('d/m/Y', $request->starting_date)->startOfDay();
+                $end_date   = Carbon::createFromFormat('d/m/Y', $request->ending_date)->endOfDay();
+            }
+        } catch (\Exception $e) {
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | CATEGORY SUMMARY QUERY
+    |--------------------------------------------------------------------------
+    */
+
+        $query = Product::query()
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
+
+            ->when(
+                $warehouse_id,
+                fn($q) => $q->where('pw.warehouse_id', $warehouse_id)
+            )
+
+            ->when(
+                $request->category_id,
+                fn($q) => $q->where('products.category_id', $request->category_id)
+            )
+
+            ->when(
+                $start_date && $end_date,
+                fn($q) => $q->whereBetween('pw.updated_at', [$start_date, $end_date])
+            )
+
+            ->where('pw.qty', '>', 0)
+
+            ->groupBy(
+                'categories.id',
+                'categories.name'
+            )
+
+            ->select([
+                'categories.id',
+                'categories.name as category_name',
+
+                DB::raw('SUM(pw.qty) as remaining_quantity'),
+
+                DB::raw('SUM(pw.qty * products.cost) as total_cost_price'),
+
+                DB::raw('SUM(pw.qty * products.price) as total_sales_price'),
+            ]);
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+
+            ->editColumn(
+                'remaining_quantity',
+                fn($r) => number_format($r->remaining_quantity, 2)
+            )
+
+            ->editColumn(
+                'total_cost_price',
+                fn($r) => number_format($r->total_cost_price, 2)
+            )
+
+            ->editColumn(
+                'total_sales_price',
+                fn($r) => number_format($r->total_sales_price, 2)
+            )
+
+            ->make(true);
+    }
+
     private function findImeis(string $product_id, string $variant_id = '0')
     {
         $imei_numbers = [];
@@ -5645,6 +5739,6 @@ class ReportController extends Controller
                 return $query->where('product_warehouse.warehouse_id', $warehouse_id);
             })->groupBy('packing_type')->orderByDesc('total_remaining_products')->get();
 
-        return view('backend.report.remaining_products_by_type',compact('categories', 'lims_warehouse_list', 'warehouse_id'));
+        return view('backend.report.remaining_products_by_type', compact('categories', 'lims_warehouse_list', 'warehouse_id'));
     }
 }

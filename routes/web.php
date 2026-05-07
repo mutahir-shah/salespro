@@ -629,6 +629,10 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::get('new/category-stock', 'categoryStockPerProduct')->name('report.category.stock');
             Route::post('new/category-stock/datatable', 'categoryStockPerProductDatatable')->name('report.category.stock.datatable');
 
+            Route::get('percategory/category-stock', 'categoryStock')->name('report.percategory.stock');
+            Route::post('percategory/category-stock/datatable', 'categoryStockSummaryDatatable')->name('report.percategory.stock.datatable');
+
+
             Route::get('supplier-inventory',  'supplierInventory')->name('report.supplier.inventory');
             Route::get('supplier-inventory-data', 'supplierInventoryData')->name('report.supplier.inventory.data');
 

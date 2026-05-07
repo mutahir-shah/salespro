@@ -24,7 +24,7 @@
                     </div>
                     <div class="col-md-3 mt-4">
                         <div class="form-group">
-                            <button class="btn btn-primary" type="submit">{{trans('Submit')}}</button>
+                            <button class="btn btn-primary" type="submit">{{trans('Search')}}</button>
                         </div>
                     </div>
                 </div>

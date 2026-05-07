@@ -1729,6 +1729,20 @@
 												</span>
 
 
+												<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("category_stock", $all_permission))
+															<input type="checkbox" value="1" id="category_stock" name="category_stock" checked>
+															@else
+															<input type="checkbox" value="1" id="category_stock" name="category_stock">
+															@endif
+															<label for="category_stock" class="padding05">{{__('Category Stock Report')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
+
 
 											</td>
 										</tr>
