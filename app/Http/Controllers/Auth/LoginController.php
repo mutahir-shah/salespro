@@ -54,7 +54,7 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-dd(csrf_token());
+
         $input = $request->all();
 
         $this->validate($request, [

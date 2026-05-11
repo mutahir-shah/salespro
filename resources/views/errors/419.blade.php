@@ -36,6 +36,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 offset-md-3  error-text text-center">
+                    @dd(csrf_token());
                     <i class="las la-binoculars"style="color:var(--theme-color);font-size: 90px;margin-bottom:30px"></i>
                     <h2 class="h1">{{__('db.Sorry this page is dead!')}}</h2>
                     <p class="lead">{{__('db.The page is expired due to session expiration Just refresh the page or hit the button below') }} <a href="{{ url()->previous() ?? url('/') }}" class="btn btn-primary">Go Back</a>
