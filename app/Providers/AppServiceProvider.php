@@ -163,12 +163,12 @@ class AppServiceProvider extends ServiceProvider
                 $maintenanceCheck();
             });
         } else {
-            if (empty(env('DB_DATABASE'))) {
-                if (!request()->is('install/*')) {
-                    redirect('/install/step-1')->send();
-                }
-                return;
-            }
+            // if (empty(env('DB_DATABASE'))) {
+            //     if (!request()->is('install/*')) {
+            //         redirect('/install/step-1')->send();
+            //     }
+            //     return;
+            // }
             $translationLogic();
             $permissionLogic();
             $maintenanceCheck();
