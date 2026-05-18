@@ -768,6 +768,30 @@
         calculateNewProductsTotal();
     }
 
+
+    function calculateExchangeValue() {
+    exchangeValue = 0;
+
+    $('input.exchange-checkbox:checked').each(function () {
+
+        var subtotalText = $(this)
+            .closest('tr')
+            .find('.sub-total')
+            .text();
+
+        // remove commas
+        subtotalText = subtotalText.replace(/,/g, '');
+
+        var subtotal = parseFloat(subtotalText) || 0;
+
+        exchangeValue += subtotal;
+    });
+
+    $('#exchange-value').text(exchangeValue.toFixed(decimal));
+
+    calculateNewProductsTotal();
+}
+
     function calculateNewProductsTotal() {
         newProductsTotal = 0;
         $('table.order-list tbody tr').each(function () {
