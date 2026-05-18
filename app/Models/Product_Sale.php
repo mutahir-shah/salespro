@@ -35,4 +35,14 @@ class Product_Sale extends Model
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'sale_unit_id');
+    }
+
+    public function productBatch()
+    {
+        return $this->belongsTo(ProductBatch::class, 'product_batch_id');
+    }
 }
