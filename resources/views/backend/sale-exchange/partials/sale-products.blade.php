@@ -1,102 +1,102 @@
 @foreach ($lims_product_sale_data as $key => $product_sale)
 @php
-    $product = DB::table('products')->find($product_sale->product_id);
-    if(!$product) continue;
+$product = DB::table('products')->find($product_sale->product_id);
+if(!$product) continue;
 
-    $qty = $product_sale->qty - $product_sale->return_qty;
+// FIX 1: Only show qty that hasn't already been returned
+$qty = $product_sale->qty - ($product_sale->return_qty ?? 0);
+if($qty <= 0) continue; // skip fully-returned items
 
-    $tax = DB::table('taxes')->where('rate', $product_sale->tax_rate)->first();
+    $tax=DB::table('taxes')->where('rate', $product_sale->tax_rate)->first();
     $unit = DB::table('units')->find($product_sale->sale_unit_id);
-@endphp
+    @endphp
 
-<tr>
-    {{-- Product name --}}
-    <td class="product-title">
-        <strong>{{ $product->name }}</strong><br>
-        <span>{{ $product->code }}</span>
+    <tr class="return-product-row">
+        {{-- Product name --}}
+        <td class="product-title">
+            <strong>{{ $product->name }}</strong><br>
+            <span>{{ $product->code }}</span>
 
-        {{-- hidden --}}
-        <input type="hidden" class="product-code" name="product_code[]" value="{{ $product->code }}">
-        <input type="hidden" class="product-id" name="product_id[]" value="{{ $product->id }}">
-        <input type="hidden" name="product_sale_id[]" value="{{ $product_sale->id }}">
+            <input type="hidden" class="product-code" name="product_code[]" value="{{ $product->code }}">
+            <input type="hidden" class="product-id" name="product_id[]" value="{{ $product->id }}">
+            <input type="hidden" class="product-sale-id" name="product_sale_id[]" value="{{ $product_sale->id }}">
+            <input type="hidden" class="product_type" name="product_type[]" value="{{ $product->type ?? 'standard' }}">
+            <input type="hidden" class="sale-unit-operator" value="{{ $unit->operator ?? '*' }}">
+            <input type="hidden" class="sale-unit-operation-value" value="{{ $unit->operation_value ?? 1 }}">
 
-        {{-- Add this hidden field inside each <tr>, after the existing hidden inputs --}}
-<input type="hidden" class="product_type" name="product_type[]" value="standard">
+            {{-- FIX 2: batch hidden so processReturnProduct() resolves batch stock correctly --}}
+            <input type="hidden" class="product-batch-id" name="product_batch_id[]" value="{{ $product_sale->product_batch_id ?? '' }}">
+        </td>
 
-{{-- Also add sale-unit-operator and sale-unit-operation-value that JS arrays need --}}
-<input type="hidden" class="sale-unit-operator" value="{{ $unit->operator ?? '*' }}">
-<input type="hidden" class="sale-unit-operation-value" value="{{ $unit->operation_value ?? 1 }}">
+        {{-- Quantity — use +/- buttons so the existing JS qty handlers fire correctly --}}
+        <td>
+            <div class="input-group" style="width:120px">
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default minus" style="padding:4px 8px">
+                        <i class="dripicons-minus"></i>
+                    </button>
+                </span>
+                <input type="text"
+                    name="qty[]"
+                    class="form-control qty numkey input-number"
+                    style="max-width:45px;text-align:center;font-size:13px;padding:0"
+                    step="any"
+                    value="{{ $qty }}"
+                    max="{{ $qty }}"
+                    required>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default plus" style="padding:4px 8px">
+                        <i class="dripicons-plus"></i>
+                    </button>
+                </span>
+            </div>
+        </td>
 
-    </td>
+        <td class="product-price">
+            {{ number_format($product_sale->net_unit_price, $general_setting->decimal) }}
+        </td>
 
-    {{-- Quantity --}}
-    <td>
-        <input type="number"
-            name="qty[]"
-            class="form-control qty"
-            value="{{ $qty }}"
-            max="{{ $qty }}"
-            onchange="checkQuantity(this.value, true, '.return-order-list')">
-    </td>
+        {{-- FIX 3: discount column shows total line discount, not per-unit --}}
+        <td class="discount">
+            {{ number_format($product_sale->discount * $qty, $general_setting->decimal) }}
+        </td>
 
-    {{-- Net unit price --}}
-    <td class="product-price">
-        {{ number_format($product_sale->net_unit_price, $general_setting->decimal) }}
-    </td>
+        <td class="tax">
+            {{ number_format($product_sale->tax, $general_setting->decimal) }}
+        </td>
 
-    {{-- Discount --}}
-    <td class="discount">
-        {{ number_format($product_sale->discount, $general_setting->decimal) }}
-    </td>
+        <td class="sub-total">
+            {{ number_format($product_sale->total, $general_setting->decimal) }}
+        </td>
 
-    {{-- Tax --}}
-    <td class="tax">
-        {{ number_format($product_sale->tax, $general_setting->decimal) }}
-    </td>
+        {{-- FIX 4: checked by default so exchange value populates immediately on load --}}
+        <td class="is-exchange text-center" style="vertical-align:middle">
+            <input type="checkbox"
+                id="exchange_{{ $product->code }}"
+                name="is_exchange[]"
+                class="exchange-checkbox"
+                checked
+                value="{{ $product->code }}"
+                onchange="calculateExchangeValue()"
+                style="width:18px;height:18px;cursor:pointer">
+        </td>
 
-    {{-- Subtotal --}}
-    <td class="sub-total">
-        {{ number_format($product_sale->total, $general_setting->decimal) }}
-    </td>
+        {{-- ===== ALL REQUIRED HIDDEN FIELDS ===== --}}
 
-    {{-- IS EXCHANGE --}}
-    <td class="is-exchange text-center">
-        <input type="checkbox"
-            name="is_exchange[]"
-            class="exchange-checkbox"
-            value="{{ $product->code }}"
-            onchange="calculateExchangeValue()"
-            style="width:18px;height:18px;cursor:pointer">
-    </td>
+        {{-- FIX 5 (was the #1 controller bug): value MUST be "return" — controller checks === 'return' --}}
+        <input type="hidden" name="type[]" value="return">
 
-    {{-- ===== REQUIRED HIDDEN FIELDS FOR JS ===== --}}
-    <input type="hidden" name="type[]" value="return">
+        <input type="hidden" class="sale-unit" name="sale_unit[]" value="{{ $unit->unit_name ?? 'n/a' }}">
+        <input type="hidden" class="net_unit_price" name="net_unit_price[]" value="{{ $product_sale->net_unit_price }}">
 
-    <input type="hidden" class="sale-unit"
-        name="sale_unit[]" value="{{ $unit->unit_name ?? 'n/a' }}">
+        {{-- FIX 3: discount[] must match what is displayed — total line discount --}}
+        <input type="hidden" class="discount-value" name="discount[]" value="{{ $product_sale->discount * $qty }}">
 
-    <input type="hidden" class="net_unit_price"
-        name="net_unit_price[]" value="{{ $product_sale->net_unit_price }}">
-
-    <input type="hidden" class="discount-value"
-        name="discount[]" value="{{ $product_sale->discount }}">
-
-    <input type="hidden" class="tax-rate"
-        name="tax_rate[]" value="{{ $product_sale->tax_rate }}">
-
-    <input type="hidden" class="tax-name"
-        value="{{ $tax->name ?? 'No Tax' }}">
-
-    <input type="hidden" class="tax-method"
-        value="{{ $product->tax_method ?? 1 }}">
-
-    <input type="hidden" class="tax-value"
-        name="tax[]" value="{{ $product_sale->tax }}">
-
-    <input type="hidden" class="subtotal-value"
-        name="subtotal[]" value="{{ $product_sale->total }}">
-
-    <input type="hidden" class="imei-number"
-        name="imei_number[]" value="{{ $product_sale->imei_number ?? '' }}">
-</tr>
-@endforeach
+        <input type="hidden" class="tax-rate" name="tax_rate[]" value="{{ $product_sale->tax_rate }}">
+        <input type="hidden" class="tax-name" value="{{ $tax->name ?? 'No Tax' }}">
+        <input type="hidden" class="tax-method" value="{{ $product->tax_method ?? 1 }}">
+        <input type="hidden" class="tax-value" name="tax[]" value="{{ $product_sale->tax }}">
+        <input type="hidden" class="subtotal-value" name="subtotal[]" value="{{ $product_sale->total }}">
+        <input type="hidden" class="imei-number" name="imei_number[]" value="{{ $product_sale->imei_number ?? '' }}">
+    </tr>
+    @endforeach
