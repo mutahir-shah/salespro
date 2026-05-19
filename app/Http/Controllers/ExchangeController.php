@@ -4,9 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use Illuminate\Http\Request;
-use App\Models\{SaleExchange, ProductExchange, Customer, Warehouse, Biller, CustomField, GeneralSetting, Product, Product_Sale, Product_Warehouse};
-use App\Models\{ProductBatch, ProductVariant, Sale, Tax, Unit};
-use Illuminate\Support\Facades\{Auth, DB, Log, Validator};
+use App\Models\SaleExchange;
+use App\Models\ProductExchange;
+use App\Models\Customer;
+use App\Models\Warehouse;
+use App\Models\Biller;
+use App\Models\CustomerGroup;
+use App\Models\CustomField;
+use App\Models\GeneralSetting;
+use App\Models\Product;
+use App\Models\Product_Sale;
+use App\Models\Product_Warehouse;
+use App\Models\ProductBatch;
+use App\Models\ProductVariant;
+use App\Models\Sale;
+use App\Models\Tax;
+use App\Models\Unit;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 
 class ExchangeController extends Controller
@@ -14,25 +31,28 @@ class ExchangeController extends Controller
     public function index(Request $request)
     {
         $role = Role::find(Auth::user()->role_id);
+
         if ($role->hasPermissionTo('returns-index')) {
             $permissions = Role::findByName($role->name)->permissions;
-            foreach ($permissions as $permission)
+            foreach ($permissions as $permission) {
                 $all_permission[] = $permission->name;
-            if (empty($all_permission))
+            }
+            if (empty($all_permission)) {
                 $all_permission[] = 'dummy text';
+            }
 
-            $warehouse_id = $request->input('warehouse_id', 0);
+            $warehouse_id = $request->input('warehouse_id') ?: 0;
 
             if ($request->input('starting_date')) {
                 $starting_date = $request->input('starting_date');
-                $ending_date   = $request->input('ending_date');
+                $ending_date = $request->input('ending_date');
             } else {
-                $starting_date = date("Y-m-d", strtotime('-1 year'));
-                $ending_date   = date("Y-m-d");
+                $starting_date = date("Y-m-d", strtotime(date('Y-m-d', strtotime('-1 year', strtotime(date('Y-m-d'))))));
+                $ending_date = date("Y-m-d");
             }
 
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
-            $general_setting     = GeneralSetting::latest()->first();
+            $general_setting = GeneralSetting::latest()->first();
 
             return view('backend.sale-exchange.index', compact(
                 'starting_date',
@@ -49,9 +69,13 @@ class ExchangeController extends Controller
 
     public function exchangeData(Request $request)
     {
-        $columns      = [1 => 'created_at', 2 => 'reference_no'];
+        $columns = [
+            1 => 'created_at',
+            2 => 'reference_no',
+        ];
+
         $warehouse_id = $request->input('warehouse_id');
-        $query        = SaleExchange::query();
+        $query = SaleExchange::query();
 
         if (Auth::user()->role_id > 2 && config('staff_access') == 'own') {
             $query->where('user_id', Auth::id());
@@ -64,15 +88,17 @@ class ExchangeController extends Controller
         $query->whereDate('created_at', '>=', $request->input('starting_date'))
             ->whereDate('created_at', '<=', $request->input('ending_date'));
 
-        $totalData     = $query->count();
+        $totalData = $query->count();
         $totalFiltered = $totalData;
-        $limit         = $request->input('length') != -1 ? $request->input('length') : $totalData;
-        $start         = $request->input('start');
-        $order         = 'sale_exchanges.' . $columns[$request->input('order.0.column')];
-        $dir           = $request->input('order.0.dir');
+
+        $limit = $request->input('length') != -1 ? $request->input('length') : $totalData;
+        $start = $request->input('start');
+        $order = 'sale_exchanges.' . $columns[$request->input('order.0.column')];
+        $dir = $request->input('order.0.dir');
 
         if (!empty($request->input('search.value'))) {
             $search = $request->input('search.value');
+
             $query->join('customers', 'sale_exchanges.customer_id', '=', 'customers.id')
                 ->join('billers', 'sale_exchanges.biller_id', '=', 'billers.id')
                 ->select('sale_exchanges.*')
@@ -83,127 +109,153 @@ class ExchangeController extends Controller
                         ->orWhere('billers.name', 'LIKE', "%{$search}%")
                         ->orWhereDate('sale_exchanges.created_at', '=', date('Y-m-d', strtotime(str_replace('/', '-', $search))));
                 });
+
             $totalFiltered = $query->count();
         }
 
         $exchanges = $query->with(['biller', 'customer', 'warehouse', 'user', 'sale'])
-            ->offset($start)->limit($limit)->orderBy($order, $dir)->get();
+            ->offset($start)
+            ->limit($limit)
+            ->orderBy($order, $dir)
+            ->get();
 
         $data = [];
-        foreach ($exchanges as $key => $exchange) {
-            $saleReference = ($exchange->sale_id && $exchange->sale) ? $exchange->sale->reference_no : 'N/A';
-            $data[] = [
-                'key'            => $key,
-                'date'           => date(config('date_format'), strtotime($exchange->created_at->toDateString())),
-                'reference_no'   => $exchange->reference_no,
-                'sale_reference' => $saleReference,
-                'warehouse'      => $exchange->warehouse->name,
-                'biller'         => $exchange->biller->name,
-                'customer'       => $exchange->customer->name,
-                'payment_type'   => $exchange->payment_type == 'pay'
-                    ? '<span class="badge badge-danger">Pay</span>'
-                    : '<span class="badge badge-success">Receive</span>',
-                'amount'         => number_format($exchange->amount, config('decimal')),
-                'options'        => $this->buildActionButtons($exchange, $request['all_permission']),
-                'exchange'       => json_encode([
-                    date(config('date_format'), strtotime($exchange->created_at->toDateString())),
-                    $exchange->reference_no,
-                    $exchange->warehouse->name,
-                    $exchange->biller->name,
-                    $exchange->biller->company_name ?? '',
-                    $exchange->biller->email,
-                    $exchange->biller->phone_number,
-                    $exchange->biller->address,
-                    $exchange->biller->city,
-                    $exchange->customer->name,
-                    $exchange->customer->phone_number,
-                    $exchange->customer->address,
-                    $exchange->customer->city,
-                    $exchange->id,
-                    $exchange->total_tax,
-                    $exchange->total_discount,
-                    $exchange->amount,
-                    $exchange->order_tax,
-                    $exchange->order_tax_rate,
-                    $exchange->grand_total,
-                    nl2br($exchange->exchange_note ?? ''),
-                    nl2br($exchange->staff_note ?? ''),
-                    $exchange->user->name,
-                    $exchange->user->email,
-                    $saleReference,
-                    $exchange->document,
-                    config('currency', 'BDT'),
-                    $exchange->exchange_rate ?? '',
-                    $exchange->payment_type ?? '',
-                ]),
-            ];
+        if ($exchanges->isNotEmpty()) {
+            foreach ($exchanges as $key => $exchange) {
+                $saleReference = 'N/A';
+                if ($exchange->sale_id && $exchange->sale) {
+                    $saleReference = $exchange->sale->reference_no;
+                }
+
+                $nestedData = [
+                    'key' => $key,
+                    'date' => date(config('date_format'), strtotime($exchange->created_at->toDateString())),
+                    'reference_no' => $exchange->reference_no,
+                    'sale_reference' => $saleReference,
+                    'warehouse' => $exchange->warehouse->name,
+                    'biller' => $exchange->biller->name,
+                    'customer' => $exchange->customer->name,
+                    'payment_type' => $exchange->payment_type == 'pay'
+                        ? '<span class="badge badge-danger">Pay</span>'
+                        : '<span class="badge badge-success">Receive</span>',
+                    'amount' => number_format($exchange->amount, config('decimal')),
+                    'options' => $this->buildActionButtons($exchange, $request['all_permission']),
+                    'exchange' => json_encode([
+                        date(config('date_format'), strtotime($exchange->created_at->toDateString())),
+                        $exchange->reference_no,
+                        $exchange->warehouse->name,
+                        $exchange->biller->name,
+                        $exchange->biller->company_name ?? '',
+                        $exchange->biller->email,
+                        $exchange->biller->phone_number,
+                        $exchange->biller->address,
+                        $exchange->biller->city,
+                        $exchange->customer->name,
+                        $exchange->customer->phone_number,
+                        $exchange->customer->address,
+                        $exchange->customer->city,
+                        $exchange->id,
+                        $exchange->total_tax,
+                        $exchange->total_discount,
+                        $exchange->amount,
+                        $exchange->order_tax,
+                        $exchange->order_tax_rate,
+                        $exchange->grand_total,
+                        nl2br($exchange->exchange_note ?? ''),
+                        nl2br($exchange->staff_note ?? ''),
+                        $exchange->user->name,
+                        $exchange->user->email,
+                        $saleReference,
+                        $exchange->document,
+                        config('currency', 'BDT'),
+                        $exchange->exchange_rate ?? '',
+                        $exchange->payment_type ?? '',
+                    ])
+                ];
+
+                $data[] = $nestedData;
+            }
         }
 
         return response()->json([
-            "draw"            => intval($request->input('draw')),
-            "recordsTotal"    => intval($totalData),
+            "draw" => intval($request->input('draw')),
+            "recordsTotal" => intval($totalData),
             "recordsFiltered" => intval($totalFiltered),
-            "data"            => $data,
+            "data" => $data
         ]);
     }
 
     private function buildActionButtons($exchange, $permissions)
     {
         $html = '<div class="btn-group">
-            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
-              ' . __("db.action") . ' <span class="caret"></span>
+            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' . __("db.action") . '
+              <span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
             </button>
-            <ul class="dropdown-menu edit-options dropdown-menu-right dropdown-default">
-                <li><button type="button" class="btn btn-link view"><i class="fa fa-eye"></i> ' . __('db.View') . '</button></li>';
+            <ul class="dropdown-menu edit-options dropdown-menu-right dropdown-default" user="menu">
+                <li>
+                    <button type="button" class="btn btn-link view"><i class="fa fa-eye"></i> ' . __('db.View') . '</button>
+                </li>';
 
         if (in_array("exchanges-edit", $permissions)) {
-            $html .= '<li><a href="' . route('exchange.edit', $exchange->id) . '" class="btn btn-link">
-                <i class="dripicons-document-edit"></i> ' . __('db.edit') . '</a></li>';
-        }
-        if (in_array("exchanges-delete", $permissions)) {
-            $html .= '<form action="' . route("exchange.destroy", $exchange->id) . '" method="POST" class="delete-form">'
-                . csrf_field() . method_field("DELETE")
-                . '<li><button type="submit" class="btn btn-link" onclick="return confirmDelete()">
-                    <i class="dripicons-trash"></i> ' . __("db.delete") . '
-                </button></li></form>';
+            $html .= '<li>
+                <a href="' . route('exchange.edit', $exchange->id) . '" class="btn btn-link"><i class="dripicons-document-edit"></i> ' . __('db.edit') . '</a>
+            </li>';
         }
 
-        return $html . '</ul></div>';
+        if (in_array("exchanges-delete", $permissions)) {
+            $html .= '<form action="' . route("exchange.destroy", $exchange->id) . '" method="POST" class="delete-form">' . csrf_field() . method_field("DELETE") . '
+                <li>
+                  <button type="submit" class="btn btn-link" onclick="return confirmDelete()"><i class="dripicons-trash"></i> ' . __("db.delete") . '</button>
+                </li></form>';
+        }
+
+        $html .= '</ul></div>';
+        return $html;
     }
 
     public function productExchange($id)
     {
         try {
-            $exchange     = SaleExchange::with(['products.product', 'products.saleUnit'])->findOrFail($id);
+            $exchange = SaleExchange::with(['products.product', 'products.saleUnit'])->findOrFail($id);
+
             $productsData = ['new' => [], 'returned' => []];
 
             foreach ($exchange->products as $item) {
-                $info = [
-                    'name'       => $item->product->name,
-                    'code'       => $item->product->code,
-                    'name_code'  => $item->product->name . ' [' . $item->product->code . ']',
-                    'batch_no'   => $item->product->batch_no ?? 'N/A',
-                    'qty'        => $item->qty,
-                    'unit_code'  => $item->saleUnit->unit_code ?? '',
+                $productInfo = [
+                    'name' => $item->product->name,
+                    'code' => $item->product->code,
+                    'name_code' => $item->product->name . ' [' . $item->product->code . ']',
+                    'batch_no' => $item->product->batch_no ?? 'N/A',
+                    'qty' => $item->qty,
+                    'unit_code' => $item->saleUnit->unit_code ?? '',
                     'unit_price' => number_format($item->net_unit_price, config('decimal')),
-                    'tax'        => number_format($item->tax, config('decimal')),
-                    'tax_rate'   => $item->tax_rate,
-                    'discount'   => number_format($item->discount, config('decimal')),
-                    'subtotal'   => number_format($item->total, config('decimal')),
-                    'type'       => $item->type,
+                    'tax' => number_format($item->tax, config('decimal')),
+                    'tax_rate' => $item->tax_rate,
+                    'discount' => number_format($item->discount, config('decimal')),
+                    'subtotal' => number_format($item->total, config('decimal')),
+                    'type' => $item->type,
                 ];
-                $productsData[$item->type === 'new' ? 'new' : 'returned'][] = $info;
+
+                if ($item->type === 'new') {
+                    $productsData['new'][] = $productInfo;
+                } else {
+                    $productsData['returned'][] = $productInfo;
+                }
             }
 
+            $newTotal = $exchange->products->where('type', 'new')->sum('total');
+            $returnedTotal = $exchange->products->where('type', 'returned')->sum('total');
+
             $productsData['totals'] = [
-                'new'            => number_format($exchange->products->where('type', 'new')->sum('total'), config('decimal')),
-                'returned'       => number_format($exchange->products->where('type', 'returned')->sum('total'), config('decimal')),
-                'tax'            => number_format($exchange->total_tax, config('decimal')),
-                'discount'       => number_format($exchange->total_discount, config('decimal')),
-                'amount'         => number_format($exchange->amount, config('decimal')),
-                'order_tax'      => number_format($exchange->order_tax, config('decimal')),
+                'new' => number_format($newTotal, config('decimal')),
+                'returned' => number_format($returnedTotal, config('decimal')),
+                'tax' => number_format($exchange->total_tax, config('decimal')),
+                'discount' => number_format($exchange->total_discount, config('decimal')),
+                'amount' => number_format($exchange->amount, config('decimal')),
+                'order_tax' => number_format($exchange->order_tax, config('decimal')),
                 'order_tax_rate' => $exchange->order_tax_rate,
-                'grand_total'    => number_format($exchange->grand_total, config('decimal')),
+                'grand_total' => number_format($exchange->grand_total, config('decimal')),
             ];
 
             return response()->json($productsData);
@@ -215,41 +267,57 @@ class ExchangeController extends Controller
 
     public function create(Request $request)
     {
+        // Get logged-in user's role
         $role = Role::find(Auth::user()->role_id);
+
+        // Check permission
         if (!$role->hasPermissionTo('exchange-add')) {
-            return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
+            return redirect()->back()
+                ->with('not_permitted', __('Sorry! You are not allowed to access this module'));
         }
 
-        $lims_customer_list  = Customer::where('is_active', true)->get();
-        $lims_account_list   = Account::latest()->get();
-        $lims_warehouse_list = Warehouse::where('is_active', true)->get();
-        $lims_biller_list    = Biller::where('is_active', true)->get();
-        $lims_tax_list       = Tax::where('is_active', true)->get();
-        $numberOfInvoice     = Sale::whereNull('deleted_at')->count();
-        $general_setting     = GeneralSetting::latest()->first();
-        $custom_fields       = CustomField::where('belongs_to', 'sale')->get();
+        // Load required data for the exchange page
+        $lims_customer_list   = Customer::where('is_active', true)->get();
+        $lims_account_list    = Account::latest()->get();
+        $lims_warehouse_list  = Warehouse::where('is_active', true)->get();
+        $lims_biller_list     = Biller::where('is_active', true)->get();
+        $lims_tax_list        = Tax::where('is_active', true)->get();
+        $numberOfInvoice      = Sale::whereNull('deleted_at')->count();
 
-        $lims_sale_data         = null;
-        $lims_product_sale_data = null;
+        // Default values
+        $lims_sale_data = null;
+        $lims_product_sale_data = collect([]);
 
-        if ($request->reference_no) {
-            $lims_sale_data = Sale::where('reference_no', $request->reference_no)->first();
-            if ($lims_sale_data) {
-                $lims_product_sale_data = Product_Sale::with(['product', 'unit', 'productBatch'])
-                    ->where('sale_id', $lims_sale_data->id)->get();
-            }
+        /**
+         * Handle optional inputs:
+         * 1. reference_no (from modal input)
+         * 2. sale_id (direct navigation)
+         */
+        if ($request->filled('reference_no')) {
+
+            // Find sale by reference number
+            $lims_sale_data = Sale::where('reference_no', $request->reference_no)
+                ->whereNull('deleted_at')
+                ->first();
+        } elseif ($request->filled('sale_id')) {
+
+            // Find sale by ID
+            $lims_sale_data = Sale::whereNull('deleted_at')
+                ->find($request->sale_id);
         }
 
-        $currency_exchange_rate = ($lims_sale_data && $lims_sale_data->exchange_rate)
-            ? $lims_sale_data->exchange_rate : 1;
+        // If sale found, load its products
+        if ($lims_sale_data) {
+            $lims_product_sale_data = Product_Sale::where('sale_id', $lims_sale_data->id)->get();
+        }
 
-        // BUG FIX #3: $currency must be a flat array — JS accesses currency['exchange_rate'] directly
-        $currency = [
-            'id'            => 1,
-            'exchange_rate' => (float) $currency_exchange_rate,
-            'symbol'        => $general_setting->currency_symbol ?? '$',
-        ];
+        // Currency exchange rate (default = 1 if no sale selected)
+        $currency_exchange_rate = $lims_sale_data->exchange_rate ?? 1;
 
+        // Custom fields for sale
+        $custom_fields = CustomField::where('belongs_to', 'sale')->get();
+
+        // Return exchange create view
         return view('backend.sale-exchange.create', compact(
             'lims_account_list',
             'lims_customer_list',
@@ -260,65 +328,42 @@ class ExchangeController extends Controller
             'lims_product_sale_data',
             'currency_exchange_rate',
             'custom_fields',
-            'numberOfInvoice',
-            'general_setting',
-            'currency'
+            'numberOfInvoice'
         ));
     }
 
     public function store(Request $request)
     {
-        // BUG FIX #5: sale_id is only set if the user actually searched — guard here
-        if (!$request->input('sale_id')) {
-            return redirect()->back()
-                ->with('not_permitted', 'Please search and select a sale reference before submitting.')
-                ->withInput();
-        }
-
         DB::beginTransaction();
         try {
-            $data = $request->except([
-                'document',
-                'total_sale_discount',
-                'type',
-                'product_id',
-                'product_code',
-                'product_batch_id',
-                'imei_number',
-                'qty',
-                'sale_unit',
-                'net_unit_price',
-                'discount',
-                'tax_rate',
-                'tax',
-                'subtotal',
-                'product_sale_id',
-                'is_exchange',
-                'return_note',
-                'customer_id_hidden',
-                'warehouse_id_hidden',
-                'biller_id_hidden',
-            ]);
-
-            $data['reference_no']   = 'exc-' . date("Ymd") . '-' . date("his");
+            $data = $request->except('document', 'total_sale_discount', 'type');
+            $data['reference_no'] = 'exc-' . date("Ymd") . '-' . date("his");
             $data['total_discount'] = $request->total_sale_discount ?? 0;
-            $data['user_id']        = Auth::id();
-            $data['exchange_note']  = $request->return_note ?? null;
+            $data['user_id'] = Auth::id();
 
-            $lims_sale_data = Sale::whereNull('deleted_at')->find($request->input('sale_id'));
-            if (!$lims_sale_data) {
-                DB::rollBack();
-                return redirect()->back()
-                    ->with('not_permitted', 'Original sale not found.')
-                    ->withInput();
+            $lims_sale_data = null;
+
+            if (!empty($data['sale_id']) && is_numeric($data['sale_id'])) {
+                $lims_sale_data = Sale::whereNull('deleted_at')
+                    ->select('id', 'warehouse_id', 'customer_id', 'biller_id')
+                    ->find($data['sale_id']);
             }
 
-            $data['customer_id']  = $lims_sale_data->customer_id;
-            $data['warehouse_id'] = $lims_sale_data->warehouse_id;
-            $data['biller_id']    = $lims_sale_data->biller_id;
+            $data['sale_id'] = $lims_sale_data ? $lims_sale_data->id : 0;
 
-            // Document upload
-            $document = $request->file('document');
+            $validator = Validator::make($data, [
+                'customer_id' => 'required|exists:customers,id',
+                'warehouse_id' => 'required|exists:warehouses,id',
+                'biller_id' => 'required|exists:billers,id',
+                'product_id' => 'required|array|min:1',
+            ]);
+
+            if ($validator->fails()) {
+                DB::rollBack();
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            $document = $request->document;
             if ($document) {
                 $v = Validator::make(
                     ['extension' => strtolower($document->getClientOriginalExtension())],
@@ -326,70 +371,71 @@ class ExchangeController extends Controller
                 );
                 if ($v->fails()) {
                     DB::rollBack();
-                    return redirect()->back()->withErrors($v->errors())->withInput();
+                    return redirect()->back()->withErrors($v->errors());
                 }
-                $ext          = $document->getClientOriginalExtension();
+                $ext = pathinfo($document->getClientOriginalName(), PATHINFO_EXTENSION);
                 $documentName = date("Ymdhis");
-                $documentName = config('database.connections.saleprosaas_landlord')
-                    ? $this->getTenantId() . '_' . $documentName . '.' . $ext
-                    : $documentName . '.' . $ext;
+
+                if (!config('database.connections.saleprosaas_landlord')) {
+                    $documentName = $documentName . '.' . $ext;
+                } else {
+                    $documentName = $this->getTenantId() . '_' . $documentName . '.' . $ext;
+                }
+
                 $document->move(public_path('documents/exchange'), $documentName);
                 $data['document'] = $documentName;
             }
 
             $lims_exchange_data = SaleExchange::create($data);
 
-            // All product line arrays
-            $type_array       = $request->input('type', []);
-            $product_ids      = $request->input('product_id', []);
-            $product_codes    = $request->input('product_code', []);
-            $product_batch_id = $request->input('product_batch_id', []);
-            $imei_number      = $request->input('imei_number', []);
-            $qty              = $request->input('qty', []);
-            $sale_unit        = $request->input('sale_unit', []);
-            $net_unit_price   = $request->input('net_unit_price', []);
-            $discount         = $request->input('discount', []);
-            $tax_rate         = $request->input('tax_rate', []);
-            $tax              = $request->input('tax', []);
-            $total            = $request->input('subtotal', []);
-            $product_sale_id  = $request->input('product_sale_id', []);
-            $is_exchange      = $request->input('is_exchange', []); // codes of checked checkboxes
+            $type_array = $request->type ?? [];
+            $product_id = $data['product_id'] ?? [];
+            $product_batch_id = $data['product_batch_id'] ?? [];
+            $imei_number = $data['imei_number'] ?? [];
+            $product_code = $data['product_code'] ?? [];
+            $qty = $data['qty'] ?? [];
+            $sale_unit = $data['sale_unit'] ?? [];
+            $net_unit_price = $data['net_unit_price'] ?? [];
+            $discount = $data['discount'] ?? [];
+            $tax_rate = $data['tax_rate'] ?? [];
+            $tax = $data['tax'] ?? [];
+            $total = $data['subtotal'] ?? [];
+            $product_sale_id = $data['product_sale_id'] ?? [];
+            $is_exchange = $request->is_exchange ?? [];
 
-            $new_count      = 0;
-            $returned_count = 0;
+            $new_products_count = 0;
+            $returned_products_count = 0;
 
-            foreach ($product_ids as $index => $id) {
-                // BUG FIX #1: partial emits type="return", NOT "returned"
+            foreach ($product_id as $index => $id) {
                 $product_type = $type_array[$index] ?? 'new';
 
                 if ($product_type === 'return') {
-                    $code = $product_codes[$index] ?? null;
-                    if (!$code || !in_array($code, $is_exchange)) {
-                        continue; // unchecked — do not return stock
+                    $product_code_value = $product_code[$index] ?? null;
+                    $should_return = $product_code_value && in_array($product_code_value, $is_exchange);
+
+                    if ($should_return) {
+                        $original_sale_id = $product_sale_id[$index] ?? null;
+                        $original_product_sale = $original_sale_id ? Product_Sale::find($original_sale_id) : null;
+
+                        $this->processReturnProduct(
+                            $id,
+                            $index,
+                            $lims_exchange_data->id,
+                            $data['warehouse_id'],
+                            $qty,
+                            $sale_unit,
+                            $net_unit_price,
+                            $discount,
+                            $tax_rate,
+                            $tax,
+                            $total,
+                            $product_code,
+                            $product_batch_id,
+                            $imei_number,
+                            $original_product_sale
+                        );
+                        $returned_products_count++;
                     }
-
-                    $original_ps = !empty($product_sale_id[$index])
-                        ? Product_Sale::find($product_sale_id[$index])
-                        : null;
-
-                    $this->processReturnProduct(
-                        $id,
-                        $index,
-                        $lims_exchange_data->id,
-                        $data['warehouse_id'],
-                        $qty,
-                        $sale_unit,
-                        $net_unit_price,
-                        $discount,
-                        $tax_rate,
-                        $tax,
-                        $total,
-                        $product_codes,
-                        $product_batch_id,
-                        $imei_number,
-                        $original_ps
-                    );
-                    $returned_count++;
                 } elseif ($product_type === 'new') {
                     $this->processNewProduct(
                         $id,
@@ -403,27 +449,42 @@ class ExchangeController extends Controller
                         $tax_rate,
                         $tax,
                         $total,
-                        $product_codes,
+                        $product_code,
                         $product_batch_id,
                         $imei_number
                     );
-                    $new_count++;
+                    $new_products_count++;
                 }
             }
 
             DB::commit();
-
-            return redirect('exchange')->with(
-                'message',
-                "Exchange created — {$new_count} new product(s), {$returned_count} returned product(s)."
-            );
+            $message = "Exchange created successfully with {$new_products_count} new product(s) and {$returned_products_count} returned product(s)";
+            return redirect('exchange')->with('message', $message);
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Exchange Store Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            return redirect()->back()
-                ->with('not_permitted', 'Something went wrong: ' . $e->getMessage())
-                ->withInput();
+            Log::error('Exchange Store Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'data' => $request->all()
+            ]);
+            return redirect()->back()->with('not_permitted', 'Something went wrong: ' . $e->getMessage());
         }
+    }
+
+    private function sanitizeDecimal($value, $decimals = null): float
+    {
+        $decimals = $decimals ?? config('decimal', 2);
+
+        if ($value === null || $value === '' || $value === 'NaN' || $value === 'null' || $value === 'undefined') {
+            return 0.00;
+        }
+
+        $numeric = floatval($value);
+
+        if (is_nan($numeric) || !is_finite($numeric)) {
+            return 0.00;
+        }
+
+        return round($numeric, $decimals);
     }
 
     private function processNewProduct(
@@ -442,77 +503,96 @@ class ExchangeController extends Controller
         $product_batch_id,
         $imei_number
     ) {
-        $product      = Product::findOrFail($product_id);
-        $sale_unit_id = 0;
-        $quantity     = (float) $qty[$index];
+        $lims_product_data = Product::find($product_id);
 
-        if (!empty($sale_unit[$index]) && $sale_unit[$index] !== 'n/a') {
-            $unit = Unit::where('unit_name', $sale_unit[$index])->first();
-            if ($unit) {
-                $sale_unit_id = $unit->id;
-                $quantity     = $unit->operator === '*'
-                    ? $quantity * $unit->operation_value
-                    : $quantity / $unit->operation_value;
+        if (!$lims_product_data) {
+            throw new \Exception("Product not found: {$product_id}");
+        }
+
+        $sale_unit_id = 0;
+        $quantity = floatval($qty[$index] ?? 0);
+
+        if (!empty($sale_unit[$index]) && $sale_unit[$index] != 'n/a') {
+            $lims_sale_unit_data = Unit::where('unit_name', $sale_unit[$index])->first();
+            if ($lims_sale_unit_data) {
+                $sale_unit_id = $lims_sale_unit_data->id;
+                if ($lims_sale_unit_data->operator == '*') {
+                    $quantity = floatval($qty[$index]) * floatval($lims_sale_unit_data->operation_value);
+                } elseif ($lims_sale_unit_data->operator == '/') {
+                    $quantity = floatval($qty[$index]) / floatval($lims_sale_unit_data->operation_value);
+                }
             }
         }
 
-        $product->qty -= $quantity;
-        $product->save();
+        $lims_product_data->qty -= $quantity;
+        $lims_product_data->save();
 
-        $warehouseRecord = null;
+        $lims_product_warehouse_data = null;
 
-        if ($product->is_variant) {
-            $variant = ProductVariant::select('id', 'variant_id', 'qty')
-                ->FindExactProductWithCode($product_id, $product_code[$index])
+        if ($lims_product_data->is_variant) {
+            $lims_product_variant_data = ProductVariant::select('id', 'variant_id', 'qty')
+                ->FindExactProductWithCode($product_id, $product_code[$index] ?? '')
                 ->first();
-            if ($variant) {
-                $variant->qty -= $quantity;
-                $variant->save();
-                $warehouseRecord = Product_Warehouse::FindProductWithVariant(
+
+            if ($lims_product_variant_data) {
+                $lims_product_variant_data->qty -= $quantity;
+                $lims_product_variant_data->save();
+                $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant(
                     $product_id,
-                    $variant->variant_id,
+                    $lims_product_variant_data->variant_id,
                     $warehouse_id
                 )->first();
             }
         } elseif (!empty($product_batch_id[$index])) {
-            $batch = ProductBatch::find($product_batch_id[$index]);
-            if ($batch) {
-                $batch->qty -= $quantity;
-                $batch->save();
+            $lims_product_batch_data = ProductBatch::find($product_batch_id[$index]);
+            if ($lims_product_batch_data) {
+                $lims_product_batch_data->qty -= $quantity;
+                $lims_product_batch_data->save();
             }
-            $warehouseRecord = Product_Warehouse::where([
+            $lims_product_warehouse_data = Product_Warehouse::where([
                 ['product_batch_id', $product_batch_id[$index]],
-                ['warehouse_id', $warehouse_id],
+                ['warehouse_id', $warehouse_id]
             ])->first();
         } else {
-            $warehouseRecord = Product_Warehouse::FindProductWithoutVariant($product_id, $warehouse_id)->first();
+            $lims_product_warehouse_data = Product_Warehouse::FindProductWithoutVariant(
+                $product_id,
+                $warehouse_id
+            )->first();
         }
 
-        if ($warehouseRecord) {
-            $warehouseRecord->qty -= $quantity;
-            if (!empty($imei_number[$index]) && !str_contains($imei_number[$index], 'null')) {
-                $toRemove = explode(',', $imei_number[$index]);
-                $existing = explode(',', $warehouseRecord->imei_number ?? '');
-                foreach ($toRemove as $imei) {
-                    $pos = array_search(trim($imei), $existing);
-                    if ($pos !== false) unset($existing[$pos]);
+        if ($lims_product_warehouse_data) {
+            $lims_product_warehouse_data->qty -= $quantity;
+
+            if (!empty($imei_number[$index]) && !str_contains($imei_number[$index], "null")) {
+                $imei_numbers = explode(",", $imei_number[$index]);
+                $all_imei_numbers = explode(",", $lims_product_warehouse_data->imei_number ?? '');
+                foreach ($imei_numbers as $number) {
+                    if (($j = array_search($number, $all_imei_numbers)) !== false) {
+                        unset($all_imei_numbers[$j]);
+                    }
                 }
-                $warehouseRecord->imei_number = implode(',', array_filter($existing));
+                $lims_product_warehouse_data->imei_number = implode(",", array_filter($all_imei_numbers));
             }
-            $warehouseRecord->save();
+            $lims_product_warehouse_data->save();
         }
+
+        $netUnitPrice = $this->sanitizeDecimal($net_unit_price[$index] ?? 0);
+        $discountVal = $this->sanitizeDecimal($discount[$index] ?? 0);
+        $taxRateVal = $this->sanitizeDecimal($tax_rate[$index] ?? 0);
+        $taxVal = $this->sanitizeDecimal($tax[$index] ?? 0);
+        $totalVal = $this->sanitizeDecimal($total[$index] ?? 0);
 
         ProductExchange::create([
-            'exchange_id'    => $exchange_id,
-            'product_id'     => $product_id,
-            'qty'            => $qty[$index],
-            'sale_unit_id'   => $sale_unit_id,
-            'net_unit_price' => $net_unit_price[$index],
-            'discount'       => $discount[$index],
-            'tax_rate'       => $tax_rate[$index],
-            'tax'            => $tax[$index],
-            'total'          => $total[$index],
-            'type'           => 'new',
+            'exchange_id' => $exchange_id,
+            'product_id' => $product_id,
+            'qty' => $quantity,
+            'sale_unit_id' => $sale_unit_id,
+            'net_unit_price' => $netUnitPrice,
+            'discount' => $discountVal,
+            'tax_rate' => $taxRateVal,
+            'tax' => $taxVal,
+            'total' => $totalVal,
+            'type' => 'new',
         ]);
     }
 
@@ -533,94 +613,135 @@ class ExchangeController extends Controller
         $imei_number,
         $original_product_sale = null
     ) {
-        $product      = Product::findOrFail($product_id);
-        $sale_unit_id = 0;
-        $quantity     = (float) $qty[$index];
+        $lims_product_data = Product::find($product_id);
 
-        if (!empty($sale_unit[$index]) && $sale_unit[$index] !== 'n/a') {
-            $unit = Unit::where('unit_name', $sale_unit[$index])->first();
-            if ($unit) {
-                $sale_unit_id = $unit->id;
-                $quantity     = $unit->operator === '*'
-                    ? $quantity * $unit->operation_value
-                    : $quantity / $unit->operation_value;
+        if (!$lims_product_data) {
+            throw new \Exception("Product not found: {$product_id}");
+        }
+
+        $sale_unit_id = 0;
+        $quantity = floatval($qty[$index] ?? 0);
+
+        if (!empty($sale_unit[$index]) && $sale_unit[$index] != 'n/a') {
+            $lims_sale_unit_data = Unit::where('unit_name', $sale_unit[$index])->first();
+            if ($lims_sale_unit_data) {
+                $sale_unit_id = $lims_sale_unit_data->id;
+                if ($lims_sale_unit_data->operator == '*') {
+                    $quantity = floatval($qty[$index]) * floatval($lims_sale_unit_data->operation_value);
+                } elseif ($lims_sale_unit_data->operator == '/') {
+                    $quantity = floatval($qty[$index]) / floatval($lims_sale_unit_data->operation_value);
+                }
             }
         }
 
-        $product->qty += $quantity;
-        $product->save();
+        $lims_product_data->qty += $quantity;
+        $lims_product_data->save();
 
-        $variant_id      = $original_product_sale->variant_id ?? null;
-        $batch_id        = $product_batch_id[$index] ?? ($original_product_sale->product_batch_id ?? null);
-        $warehouseRecord = null;
+        $lims_product_warehouse_data = null;
+        $variant_id = $original_product_sale->variant_id ?? null;
+        $batch_id = $product_batch_id[$index] ?? ($original_product_sale->product_batch_id ?? null);
 
-        if ($product->is_variant && $variant_id) {
-            $variant = ProductVariant::find($variant_id);
-            if ($variant) {
-                $variant->qty += $quantity;
-                $variant->save();
+        if ($lims_product_data->is_variant && $variant_id) {
+            $lims_product_variant_data = ProductVariant::find($variant_id);
+            if ($lims_product_variant_data) {
+                $lims_product_variant_data->qty += $quantity;
+                $lims_product_variant_data->save();
             }
-            $warehouseRecord = Product_Warehouse::FindProductWithVariant(
+            $lims_product_warehouse_data = Product_Warehouse::FindProductWithVariant(
                 $product_id,
                 $variant_id,
                 $warehouse_id
             )->first();
         } elseif ($batch_id) {
-            $batch = ProductBatch::find($batch_id);
-            if ($batch) {
-                $batch->qty += $quantity;
-                $batch->save();
+            $lims_product_batch_data = ProductBatch::find($batch_id);
+            if ($lims_product_batch_data) {
+                $lims_product_batch_data->qty += $quantity;
+                $lims_product_batch_data->save();
             }
-            $warehouseRecord = Product_Warehouse::where([
+            $lims_product_warehouse_data = Product_Warehouse::where([
                 ['product_batch_id', $batch_id],
-                ['warehouse_id', $warehouse_id],
+                ['warehouse_id', $warehouse_id]
             ])->first();
         } else {
-            $warehouseRecord = Product_Warehouse::FindProductWithoutVariant($product_id, $warehouse_id)->first();
+            $lims_product_warehouse_data = Product_Warehouse::FindProductWithoutVariant(
+                $product_id,
+                $warehouse_id
+            )->first();
         }
 
-        if ($warehouseRecord) {
-            $warehouseRecord->qty += $quantity;
-            if (!empty($imei_number[$index]) && !str_contains($imei_number[$index], 'null')) {
-                $warehouseRecord->imei_number = $warehouseRecord->imei_number
-                    ? $warehouseRecord->imei_number . ',' . $imei_number[$index]
-                    : $imei_number[$index];
+        if ($lims_product_warehouse_data) {
+            $lims_product_warehouse_data->qty += $quantity;
+
+            if (!empty($imei_number[$index]) && !str_contains($imei_number[$index], "null")) {
+                if ($lims_product_warehouse_data->imei_number) {
+                    $lims_product_warehouse_data->imei_number .= ',' . $imei_number[$index];
+                } else {
+                    $lims_product_warehouse_data->imei_number = $imei_number[$index];
+                }
             }
-            $warehouseRecord->save();
+            $lims_product_warehouse_data->save();
         }
+
+        $netUnitPrice = $this->sanitizeDecimal($net_unit_price[$index] ?? 0);
+        $discountVal = $this->sanitizeDecimal($discount[$index] ?? 0);
+        $taxRateVal = $this->sanitizeDecimal($tax_rate[$index] ?? 0);
+        $taxVal = $this->sanitizeDecimal($tax[$index] ?? 0);
+        $totalVal = $this->sanitizeDecimal($total[$index] ?? 0);
 
         ProductExchange::create([
-            'exchange_id'    => $exchange_id,
-            'product_id'     => $product_id,
-            'qty'            => $qty[$index],
-            'sale_unit_id'   => $sale_unit_id,
-            'net_unit_price' => $net_unit_price[$index],
-            'discount'       => $discount[$index],
-            'tax_rate'       => $tax_rate[$index],
-            'tax'            => $tax[$index],
-            'total'          => $total[$index],
-            'type'           => 'returned',
+            'exchange_id' => $exchange_id,
+            'product_id' => $product_id,
+            'qty' => $quantity,
+            'sale_unit_id' => $sale_unit_id,
+            'net_unit_price' => $netUnitPrice,
+            'discount' => $discountVal,
+            'tax_rate' => $taxRateVal,
+            'tax' => $taxVal,
+            'total' => $totalVal,
+            'type' => 'returned',
         ]);
     }
 
     public function searchByReference(Request $request)
     {
         $role = Role::find(Auth::user()->role_id);
-        if (!$role->hasPermissionTo('exchange-add')) {
-            return response()->json(['status' => false, 'message' => __('db.Sorry! You are not allowed')]);
-        }
-        if (!$request->ajax()) {
-            return response()->json(['status' => false, 'message' => 'Invalid request']);
-        }
-        $lims_sale_data = Sale::where('reference_no', trim($request->reference))->first();
-        if (!$lims_sale_data) {
-            return response()->json(['status' => false, 'message' => 'Reference number not found']);
-        }
-        $lims_product_sale_data = Product_Sale::with(['product', 'unit', 'productBatch'])->where('sale_id', $lims_sale_data->id)->get();
-        $general_setting = GeneralSetting::latest()->first();
-        $html = view('backend.sale-exchange.partials.sale-products',compact('lims_product_sale_data', 'general_setting', 'lims_sale_data'))->render();
 
-        return response()->json(['status'  => true,'html'    => $html,'sale_id' => $lims_sale_data->id, // BUG FIX #5: send back to JS to update hidden input
-        ]);
+        if (!$role->hasPermissionTo('exchange-add')) {
+            return response()->json([
+                'status' => false,
+                'message' => __('db.Sorry! You are not allowed')
+            ]);
+        }
+
+        if ($request->ajax()) {
+            $lims_sale_data = Sale::where('reference_no', $request->reference)->first();
+
+            if (!$lims_sale_data) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Reference number not found'
+                ]);
+            }
+
+            $lims_product_sale_data = Product_Sale::where('sale_id', $lims_sale_data->id)->get();
+            $general_setting = GeneralSetting::latest()->first();
+
+            $html = view(
+                'backend.sale-exchange.partials.sale-products',
+                compact('lims_product_sale_data', 'general_setting')
+            )->render();
+
+            return response()->json([
+                'status' => true,
+                'html' => $html
+            ]);
+        }
+    }
+
+    public function getCustomerGroup($id)
+    {
+        $lims_customer_data = Customer::find($id);
+        $lims_customer_group_data = CustomerGroup::find($lims_customer_data->customer_group_id);
+        return $lims_customer_group_data->percentage;
     }
 }
