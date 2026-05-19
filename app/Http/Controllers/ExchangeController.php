@@ -609,32 +609,18 @@ class ExchangeController extends Controller
         if (!$role->hasPermissionTo('exchange-add')) {
             return response()->json(['status' => false, 'message' => __('db.Sorry! You are not allowed')]);
         }
-
         if (!$request->ajax()) {
             return response()->json(['status' => false, 'message' => 'Invalid request']);
         }
-
         $lims_sale_data = Sale::where('reference_no', trim($request->reference))->first();
-
         if (!$lims_sale_data) {
             return response()->json(['status' => false, 'message' => 'Reference number not found']);
         }
-
-        $lims_product_sale_data = Product_Sale::with(['product', 'unit', 'productBatch'])
-            ->where('sale_id', $lims_sale_data->id)
-            ->get();
-
+        $lims_product_sale_data = Product_Sale::with(['product', 'unit', 'productBatch'])->where('sale_id', $lims_sale_data->id)->get();
         $general_setting = GeneralSetting::latest()->first();
+        $html = view('backend.sale-exchange.partials.sale-products',compact('lims_product_sale_data', 'general_setting', 'lims_sale_data'))->render();
 
-        $html = view(
-            'backend.sale-exchange.partials.sale-products',
-            compact('lims_product_sale_data', 'general_setting', 'lims_sale_data')
-        )->render();
-
-        return response()->json([
-            'status'  => true,
-            'html'    => $html,
-            'sale_id' => $lims_sale_data->id, // BUG FIX #5: send back to JS to update hidden input
+        return response()->json(['status'  => true,'html'    => $html,'sale_id' => $lims_sale_data->id, // BUG FIX #5: send back to JS to update hidden input
         ]);
     }
 }

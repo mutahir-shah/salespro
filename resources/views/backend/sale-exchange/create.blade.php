@@ -561,6 +561,31 @@
     // ─────────────────────────────────────────────
     // HELPERS
     // ─────────────────────────────────────────────
+
+
+
+    function initializeReturnRows() {
+
+    window.unit_operator = [];
+    window.unit_operation_value = [];
+    window.product_price = [];
+
+    $('.return-product-row').each(function (index) {
+
+        const row = $(this);
+
+        unit_operator[index] =
+            row.data('unit-operator') || '*';
+
+        unit_operation_value[index] =
+            row.data('unit-value') || 1;
+
+        product_price[index] =
+            parseFloat(row.data('product-price')) || 0;
+    });
+
+    console.log('✅ Return rows initialized');
+}
     function clearResults(type = 'new') {
         if (type === 'return') {
             $saleProductResults.empty().css('padding', '0');
@@ -582,7 +607,7 @@
     // DOCUMENT READY
     // ─────────────────────────────────────────────
     $(document).ready(function () {
-
+        initializeReturnRows();
         calculateTotal();
         $('#product-search-input').focus();
 
@@ -1104,29 +1129,21 @@
 
    function unitConversion() {
 
-    // safety check
-    if (!unit_operator[rowindex] || !unit_operation_value[rowindex]) {
-        console.warn('Unit conversion data missing for row:', rowindex);
-        return;
+    if (!unit_operator[rowindex]) {
+        unit_operator[rowindex] = '*';
     }
 
-    var sep = unit_operator[rowindex].indexOf(',');
+    if (!unit_operation_value[rowindex]) {
+        unit_operation_value[rowindex] = 1;
+    }
 
-    var row_op = (sep > -1)
-        ? unit_operator[rowindex].substring(0, sep)
-        : unit_operator[rowindex];
-
-    var row_val = (sep > -1)
-        ? unit_operation_value[rowindex].substring(
-            0,
-            unit_operation_value[rowindex].indexOf(',')
-        )
-        : unit_operation_value[rowindex];
+    var row_op = unit_operator[rowindex];
+    var row_val = parseFloat(unit_operation_value[rowindex]);
 
     row_product_price =
         (row_op === '*')
-            ? product_price[rowindex] * parseFloat(row_val)
-            : product_price[rowindex] / parseFloat(row_val);
+            ? product_price[rowindex] * row_val
+            : product_price[rowindex] / row_val;
 }
 
     function calculateRowProductData(quantity, tableSelector = 'table.order-list') {

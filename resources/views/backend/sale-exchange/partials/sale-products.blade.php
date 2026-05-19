@@ -2,16 +2,17 @@
 @php
 $product = DB::table('products')->find($product_sale->product_id);
 if(!$product) continue;
-
 // FIX 1: Only show qty that hasn't already been returned
 $qty = $product_sale->qty - ($product_sale->return_qty ?? 0);
 if($qty <= 0) continue; // skip fully-returned items
-
     $tax=DB::table('taxes')->where('rate', $product_sale->tax_rate)->first();
     $unit = DB::table('units')->find($product_sale->sale_unit_id);
     @endphp
 
-    <tr class="return-product-row">
+    <tr class="return-product-row"
+    data-unit-operator="{{ $unit->operator ?? '*' }}"
+    data-unit-value="{{ $unit->operation_value ?? 1 }}"
+    data-product-price="{{ $product_sale->net_unit_price }}">
         {{-- Product name --}}
         <td class="product-title">
             <strong>{{ $product->name }}</strong><br>
@@ -53,8 +54,10 @@ if($qty <= 0) continue; // skip fully-returned items
         </td>
 
         <td class="product-price">
-            {{ number_format($product_sale->net_unit_price, $general_setting->decimal) }}
-        </td>
+    <span class="product-price-text">
+        {{ number_format($product_sale->net_unit_price, $general_setting->decimal) }}
+    </span>
+</td>
 
         {{-- FIX 3: discount column shows total line discount, not per-unit --}}
         <td class="discount">
@@ -66,8 +69,10 @@ if($qty <= 0) continue; // skip fully-returned items
         </td>
 
         <td class="sub-total">
-            {{ number_format($product_sale->total, $general_setting->decimal) }}
-        </td>
+    <span class="sub-total-text">
+        {{ number_format($product_sale->total, $general_setting->decimal) }}
+    </span>
+</td>
 
         {{-- FIX 4: checked by default so exchange value populates immediately on load --}}
         <td class="is-exchange text-center" style="vertical-align:middle">
