@@ -608,6 +608,31 @@
     // ─────────────────────────────────────────────
     $(document).ready(function () {
         initializeReturnRows();
+
+
+         $('#product-table tbody tr.product-row').each(function(index) {
+
+        let row = $(this);
+
+        // force same indexing as POS
+        rowindex = index;
+
+        // Initialize arrays expected by POS
+        unit_operator[rowindex] =
+            row.data('unit-operator') || '*';
+
+        unit_operation_value[rowindex] =
+            parseFloat(row.data('unit-operation-value')) || 1;
+
+        product_price[rowindex] =
+            parseFloat(
+                row.find('.net_unit_price').val()
+            ) || 0;
+
+        console.log('Initialized row:', rowindex);
+    });
+
+
         calculateTotal();
         $('#product-search-input').focus();
 
@@ -1127,24 +1152,16 @@
         calculateRowProductData(sale_qty, tableSelector);
     }
 
-   function unitConversion() {
+  function unitConversion() {
 
-    if (!unit_operator[rowindex]) {
+    if(typeof unit_operator[rowindex] === 'undefined'){
+        console.warn('Fixing missing operator for row', rowindex);
         unit_operator[rowindex] = '*';
     }
 
-    if (!unit_operation_value[rowindex]) {
+    if(typeof unit_operation_value[rowindex] === 'undefined'){
         unit_operation_value[rowindex] = 1;
     }
-
-    var row_op = unit_operator[rowindex];
-    var row_val = parseFloat(unit_operation_value[rowindex]);
-
-    row_product_price =
-        (row_op === '*')
-            ? product_price[rowindex] * row_val
-            : product_price[rowindex] / row_val;
-}
 
     function calculateRowProductData(quantity, tableSelector = 'table.order-list') {
         var current_product_type = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val();

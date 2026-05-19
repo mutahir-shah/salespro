@@ -9,10 +9,10 @@ if($qty <= 0) continue; // skip fully-returned items
     $unit = DB::table('units')->find($product_sale->sale_unit_id);
     @endphp
 
-    <tr class="return-product-row"
-    data-unit-operator="{{ $unit->operator ?? '*' }}"
-    data-unit-value="{{ $unit->operation_value ?? 1 }}"
-    data-product-price="{{ $product_sale->net_unit_price }}">
+   <tr class="product-row return-product-row"
+    data-unit-operator="{{ $product_sale->unit_operator ?? '*' }}"
+    data-unit-operation-value="{{ $product_sale->unit_operation_value ?? 1 }}"
+    data-price="{{ $product_sale->net_unit_price }}">
         {{-- Product name --}}
         <td class="product-title">
             <strong>{{ $product->name }}</strong><br>
@@ -27,6 +27,12 @@ if($qty <= 0) continue; // skip fully-returned items
 
             {{-- FIX 2: batch hidden so processReturnProduct() resolves batch stock correctly --}}
             <input type="hidden" class="product-batch-id" name="product_batch_id[]" value="{{ $product_sale->product_batch_id ?? '' }}">
+
+            <input type="hidden" class="unit-operator"
+       value="{{ $product_sale->unit_operator ?? '*' }}">
+
+<input type="hidden" class="unit-operation-value"
+       value="{{ $product_sale->unit_operation_value ?? 1 }}">
         </td>
 
         {{-- Quantity — use +/- buttons so the existing JS qty handlers fire correctly --}}
