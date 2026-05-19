@@ -586,7 +586,10 @@
             String(row.data('unit-operation-value') || '1');
 
         product_price[index] =
-            parseFloat(row.data('price')) || 0;
+            parseFloat(row.data('price'))
+            || parseFloat(row.find('.product_price').val())
+            || parseFloat(row.find('.net_unit_price').val())
+            || 0;
 
         product_discount[index] =
             parseFloat(row.find('.discount-value').val()) || 0;
@@ -821,10 +824,12 @@
             success: function (res) {
                 if (res.status) {
                     $('#sale-product-table tbody').html(res.html);
+                    initializeReturnRows();
                     // FIX: update hidden sale_id with the one returned from controller
                     $('#sale_id_input').val(res.sale_id);
                     $('#sale-reference-display').html('<strong>' + reference + '</strong>');
                     calculateExchangeValue();
+                    calculateTotal();
                 } else {
                     alert(res.message);
                 }
@@ -1139,6 +1144,8 @@
                 if (typeof product_price[arrayIndex] === 'undefined' || isNaN(product_price[arrayIndex])) {
                     product_price[arrayIndex] = parseFloat(
                         $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_price').val()
+                    ) || parseFloat(
+                        $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').val()
                     );
                 }
                 if (typeof product_price[arrayIndex] === 'undefined' || isNaN(product_price[arrayIndex])) {
