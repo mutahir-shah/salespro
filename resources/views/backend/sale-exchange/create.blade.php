@@ -758,37 +758,19 @@
     // ─────────────────────────────────────────────
     // EXCHANGE CALCULATION
     // ─────────────────────────────────────────────
-    function calculateExchangeValue() {
-        exchangeValue = 0;
-        $('input.exchange-checkbox:checked').each(function () {
-            var subtotal = parseFloat($(this).closest('tr').find('.sub-total').text()) || 0;
-            exchangeValue += subtotal;
-        });
-        $('#exchange-value').text(exchangeValue.toFixed(decimal));
-        calculateNewProductsTotal();
-    }
-
 
     function calculateExchangeValue() {
     exchangeValue = 0;
 
     $('input.exchange-checkbox:checked').each(function () {
 
-        var subtotalText = $(this)
-            .closest('tr')
-            .find('.sub-total')
-            .text();
-
+        var subtotalText = $(this).closest('tr').find('.sub-total').text();
         // remove commas
         subtotalText = subtotalText.replace(/,/g, '');
-
         var subtotal = parseFloat(subtotalText) || 0;
-
         exchangeValue += subtotal;
     });
-
     $('#exchange-value').text(exchangeValue.toFixed(decimal));
-
     calculateNewProductsTotal();
 }
 
@@ -1120,15 +1102,32 @@
         calculateRowProductData(sale_qty, tableSelector);
     }
 
-    function unitConversion() {
-        var sep = unit_operator[rowindex].indexOf(',');
-        var row_op  = (sep > -1) ? unit_operator[rowindex].substring(0, sep) : unit_operator[rowindex];
-        var row_val = (sep > -1) ? unit_operation_value[rowindex].substring(0, unit_operation_value[rowindex].indexOf(',')) : unit_operation_value[rowindex];
+   function unitConversion() {
 
-        row_product_price = (row_op == '*')
+    // safety check
+    if (!unit_operator[rowindex] || !unit_operation_value[rowindex]) {
+        console.warn('Unit conversion data missing for row:', rowindex);
+        return;
+    }
+
+    var sep = unit_operator[rowindex].indexOf(',');
+
+    var row_op = (sep > -1)
+        ? unit_operator[rowindex].substring(0, sep)
+        : unit_operator[rowindex];
+
+    var row_val = (sep > -1)
+        ? unit_operation_value[rowindex].substring(
+            0,
+            unit_operation_value[rowindex].indexOf(',')
+        )
+        : unit_operation_value[rowindex];
+
+    row_product_price =
+        (row_op === '*')
             ? product_price[rowindex] * parseFloat(row_val)
             : product_price[rowindex] / parseFloat(row_val);
-    }
+}
 
     function calculateRowProductData(quantity, tableSelector = 'table.order-list') {
         var current_product_type = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val();
