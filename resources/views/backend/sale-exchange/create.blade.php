@@ -586,6 +586,14 @@
 
     console.log('✅ Return rows initialized');
 }
+
+    function getGlobalRowIndex(localIndex, tableSelector) {
+        if (tableSelector === 'table.order-list') {
+            return localIndex + $('table.return-order-list tbody tr').length;
+        }
+        return localIndex;
+    }
+
     function clearResults(type = 'new') {
         if (type === 'return') {
             $saleProductResults.empty().css('padding', '0');
@@ -933,7 +941,7 @@
         var flag          = true;
         var tableSelector = (product_type === 'return') ? 'table.return-order-list' : 'table.order-list';
 
-        $('.product-code').each(function (i) {
+        $(tableSelector + ' .product-code').each(function (i) {
             if ($(this).val().trim() == item_code) {
                 rowindex = i;
                 if (data.imei && data.imei != 'null' && data.imei != '') {
@@ -975,7 +983,8 @@
                 if (pre_qty > 0) {
                     var qty = data[15];
                     $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ') .qty').val(qty);
-                    product_price[rowindex] = parseFloat(data[2] * currency['exchange_rate'])
+                    var arrayIndex = getGlobalRowIndex(rowindex, tableSelector);
+                    product_price[arrayIndex] = parseFloat(data[2] * currency['exchange_rate'])
                         + parseFloat(data[2] * currency['exchange_rate'] * customer_group_rate);
                     checkDiscount(String(qty), true, tableSelector);
 
@@ -996,6 +1005,9 @@
 
         temp_unit_name = (data[6] || 'n/a,').split(',');
         pos = -1; // new row, not pre-existing
+
+        var basePrice = parseFloat(data[2] * currency['exchange_rate'])
+            + parseFloat(data[2] * currency['exchange_rate'] * customer_group_rate);
 
         var cols = '';
 
@@ -1051,7 +1063,7 @@
         cols += '<input type="hidden" class="product-code"             name="product_code[]"    value="' + data[1] + '"/>';
         cols += '<input type="hidden" class="product-id"               name="product_id[]"      value="' + data[9] + '"/>';
         cols += '<input type="hidden" class="product_type"             name="product_type[]"    value="' + data[20] + '"/>';
-        cols += '<input type="hidden" class="product_price" />';
+        cols += '<input type="hidden" class="product_price" value="' + basePrice + '" />';
         cols += '<input type="hidden" class="sale-unit"                name="sale_unit[]"       value="' + (temp_unit_name[0] || 'n/a') + '"/>';
         cols += '<input type="hidden" class="net_unit_price"           name="net_unit_price[]" />';
         cols += '<input type="hidden" class="discount-value"           name="discount[]" />';
@@ -1069,24 +1081,22 @@
         var newRow = $('<tr>').append(cols);
         $(tableSelector + ' tbody').prepend(newRow);
         rowindex = newRow.index();
+        var globalIndex = getGlobalRowIndex(rowindex, tableSelector);
 
-        var basePrice = parseFloat(data[2] * currency['exchange_rate'])
-            + parseFloat(data[2] * currency['exchange_rate'] * customer_group_rate);
-
-        product_price.splice(rowindex, 0, basePrice);
-        wholesale_price.splice(rowindex, 0, data[16]
+        product_price.splice(globalIndex, 0, basePrice);
+        wholesale_price.splice(globalIndex, 0, data[16]
             ? parseFloat(data[16] * currency['exchange_rate']) + parseFloat(data[16] * currency['exchange_rate'] * customer_group_rate)
             : 0);
-        cost.splice(rowindex, 0, parseFloat(data[17] * currency['exchange_rate']) || 0);
-        product_discount.splice(rowindex, 0, 0);
-        tax_rate.splice(rowindex, 0, parseFloat(data[3]) || 0);
-        tax_name.splice(rowindex, 0, data[4]);
-        tax_method.splice(rowindex, 0, data[5]);
-        unit_name.splice(rowindex, 0, data[6]);
-        unit_operator.splice(rowindex, 0, data[7]);
-        unit_operation_value.splice(rowindex, 0, String(data[8] || '1'));
-        is_imei.splice(rowindex, 0, data[13]);
-        is_variant.splice(rowindex, 0, data[14]);
+        cost.splice(globalIndex, 0, parseFloat(data[17] * currency['exchange_rate']) || 0);
+        product_discount.splice(globalIndex, 0, 0);
+        tax_rate.splice(globalIndex, 0, parseFloat(data[3]) || 0);
+        tax_name.splice(globalIndex, 0, data[4]);
+        tax_method.splice(globalIndex, 0, data[5]);
+        unit_name.splice(globalIndex, 0, data[6]);
+        unit_operator.splice(globalIndex, 0, data[7]);
+        unit_operation_value.splice(globalIndex, 0, String(data[8] || '1'));
+        is_imei.splice(globalIndex, 0, data[13]);
+        is_variant.splice(globalIndex, 0, data[14]);
 
         checkQuantity(data[15], true, tableSelector);
         checkDiscount(data[15], true, tableSelector);
@@ -1098,6 +1108,7 @@
     function checkDiscount(qty, flag, tableSelector = 'table.order-list', price = 0) {
         var customer_id = $('#customer_id').val();
         var warehouse_id = $('#warehouse_id').val();
+        var arrayIndex = getGlobalRowIndex(rowindex, tableSelector);
         var product_id  = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ') .product-id').val();
 
         $.ajax({
@@ -1105,13 +1116,16 @@
             url: '{{ url('/') }}/sales/check-discount?qty=' + qty + '&customer_id=' + customer_id
                 + '&product_id=' + product_id + '&warehouse_id=' + warehouse_id,
             success: function (data) {
-                if (!product_price[rowindex] || isNaN(product_price[rowindex])) {
-                    product_price[rowindex] = parseFloat(
+                if (typeof product_price[arrayIndex] === 'undefined' || isNaN(product_price[arrayIndex])) {
+                    product_price[arrayIndex] = parseFloat(
                         $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_price').val()
-                    ) || 0;
+                    );
                 }
-                product_price[rowindex] = parseFloat(product_price[rowindex] * currency['exchange_rate'])
-                    + parseFloat(product_price[rowindex] * currency['exchange_rate'] * customer_group_rate);
+                if (typeof product_price[arrayIndex] === 'undefined' || isNaN(product_price[arrayIndex])) {
+                    product_price[arrayIndex] = 0;
+                }
+                product_price[arrayIndex] = parseFloat(product_price[arrayIndex] * currency['exchange_rate'])
+                    + parseFloat(product_price[arrayIndex] * currency['exchange_rate'] * customer_group_rate);
 
                 // data[2] = discount amount — update display total
                 var productDiscount = parseFloat($('#discount').text()) || 0;
@@ -1132,8 +1146,18 @@
 
         if (without_stock == 'no') {
             if (product_type && (product_type.trim() == 'standard' || product_type.trim() == 'combo')) {
-                var operator        = (unit_operator[rowindex] || '*,').split(',');
-                var operation_value = String(unit_operation_value[rowindex] || '1').split(',');
+                var $row = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')');
+                var arrayIndex = getGlobalRowIndex(rowindex, tableSelector);
+                var operatorString  = unit_operator[arrayIndex];
+                if (typeof operatorString === 'undefined') {
+                    operatorString = $row.find('.sale-unit-operator').val() || '*';
+                }
+                var operationValue  = unit_operation_value[arrayIndex];
+                if (typeof operationValue === 'undefined') {
+                    operationValue = $row.find('.sale-unit-operation-value').val() || '1';
+                }
+                var operator        = String(operatorString || '*,').split(',');
+                var operation_value = String(operationValue || '1').split(',');
                 var total_qty       = (operator[0] == '*') ? sale_qty * operation_value[0] : sale_qty / operation_value[0];
 
                 if (total_qty > max_qty && !isNaN(max_qty)) {
@@ -1152,35 +1176,42 @@
         calculateRowProductData(sale_qty, tableSelector);
     }
 
-   function unitConversion() {
+function unitConversion(tableSelector = 'table.order-list') {
+        var arrayIndex = getGlobalRowIndex(rowindex, tableSelector);
+        var $row = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')');
 
-    if(typeof unit_operator[rowindex] === 'undefined'){
-        console.warn('Fixing missing operator for row', rowindex);
-        unit_operator[rowindex] = '*';
-    }
+        if (typeof unit_operator[arrayIndex] === 'undefined') {
+            var fallbackOperator = $row.find('.sale-unit-operator').val();
+            unit_operator[arrayIndex] = fallbackOperator || '*';
+        }
 
-    if(typeof unit_operation_value[rowindex] === 'undefined'){
-        unit_operation_value[rowindex] = '1';
-    }
+        if (typeof unit_operation_value[arrayIndex] === 'undefined') {
+            var fallbackValue = $row.find('.sale-unit-operation-value').val();
+            unit_operation_value[arrayIndex] = String(fallbackValue || '1');
+        }
 
-    var row_op = unit_operator[rowindex];
-    var row_val = parseFloat(unit_operation_value[rowindex]);
+        var row_op = unit_operator[arrayIndex] || '*';
+        var row_val = parseFloat(unit_operation_value[arrayIndex]);
+        if (isNaN(row_val)) {
+            row_val = parseFloat($row.find('.sale-unit-operation-value').val()) || 1;
+        }
 
-    row_product_price =
-        (row_op === '*')
-            ? product_price[rowindex] * row_val
-            : product_price[rowindex] / row_val;
+        row_product_price =
+            (row_op === '*')
+                ? product_price[arrayIndex] * row_val
+                : product_price[arrayIndex] / row_val;
 }
 
     function calculateRowProductData(quantity, tableSelector = 'table.order-list') {
+        var arrayIndex = getGlobalRowIndex(rowindex, tableSelector);
         var current_product_type = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val();
 
-        if (current_product_type && current_product_type.trim() === 'standard') unitConversion();
-        else row_product_price = product_price[rowindex] || 0;
+        if (current_product_type && current_product_type.trim() === 'standard') unitConversion(tableSelector);
+        else row_product_price = product_price[arrayIndex] || 0;
 
-        var disc      = parseFloat(product_discount[rowindex]) || 0;
-        var t_rate    = parseFloat(tax_rate[rowindex]) || 0;
-        var t_method  = tax_method[rowindex];
+        var disc      = parseFloat(product_discount[arrayIndex]) || 0;
+        var t_rate    = parseFloat(tax_rate[arrayIndex]) || 0;
+        var t_method  = tax_method[arrayIndex];
         var net_unit_price, taxAmt, sub_total, sub_total_unit;
 
         if (t_method == 1) {
@@ -1215,19 +1246,21 @@
     $(document).on('click', 'table .plus', function () {
         rowindex = $(this).closest('tr').index();
         var tableSelector = $(this).closest('table').hasClass('return-order-list') ? 'table.return-order-list' : 'table.order-list';
+        var globalIndex = getGlobalRowIndex(rowindex, tableSelector);
         var qty     = parseFloat($(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ') .qty').val()) || 0;
         var max_qty = parseFloat($(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ') .qty').attr('max'));
         if (!isNaN(max_qty) && qty >= max_qty) { alert('Quantity cannot exceed available stock (' + max_qty + ').'); return; }
         qty++;
-        is_variant[rowindex] ? checkQuantity(String(qty), true, tableSelector) : checkDiscount(qty, true, tableSelector);
+        is_variant[globalIndex] ? checkQuantity(String(qty), true, tableSelector) : checkDiscount(qty, true, tableSelector);
     });
 
     $(document).on('click', 'table .minus', function () {
         rowindex = $(this).closest('tr').index();
         var tableSelector = $(this).closest('table').hasClass('return-order-list') ? 'table.return-order-list' : 'table.order-list';
+        var globalIndex = getGlobalRowIndex(rowindex, tableSelector);
         var qty = parseFloat($(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ') .qty').val()) - 1;
         if (qty < 1) { qty = 1; return; }
-        is_variant[rowindex] ? checkQuantity(String(qty), true, tableSelector) : checkDiscount(qty, '3', tableSelector);
+        is_variant[globalIndex] ? checkQuantity(String(qty), true, tableSelector) : checkDiscount(qty, '3', tableSelector);
     });
 
     // ─────────────────────────────────────────────
@@ -1235,17 +1268,19 @@
     // ─────────────────────────────────────────────
     $(document).on('click', 'table tbody .ibtnDel', function () {
         rowindex = $(this).closest('tr').index();
-        product_price.splice(rowindex, 1);
-        wholesale_price.splice(rowindex, 1);
-        product_discount.splice(rowindex, 1);
-        tax_rate.splice(rowindex, 1);
-        tax_name.splice(rowindex, 1);
-        tax_method.splice(rowindex, 1);
-        unit_name.splice(rowindex, 1);
-        unit_operator.splice(rowindex, 1);
-        unit_operation_value.splice(rowindex, 1);
-        is_imei.splice(rowindex, 1);
-        is_variant.splice(rowindex, 1);
+        var tableSelector = $(this).closest('table').hasClass('return-order-list') ? 'table.return-order-list' : 'table.order-list';
+        var globalIndex = getGlobalRowIndex(rowindex, tableSelector);
+        product_price.splice(globalIndex, 1);
+        wholesale_price.splice(globalIndex, 1);
+        product_discount.splice(globalIndex, 1);
+        tax_rate.splice(globalIndex, 1);
+        tax_name.splice(globalIndex, 1);
+        tax_method.splice(globalIndex, 1);
+        unit_name.splice(globalIndex, 1);
+        unit_operator.splice(globalIndex, 1);
+        unit_operation_value.splice(globalIndex, 1);
+        is_imei.splice(globalIndex, 1);
+        is_variant.splice(globalIndex, 1);
         $(this).closest('tr').remove();
         calculateTotal();
         calculateNewProductsTotal();
@@ -1267,9 +1302,10 @@
             tableSelector = 'table.return-order-list';
 
         var product_type_val = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val();
+        var arrayIndex = getGlobalRowIndex(rowindex, tableSelector);
 
         // Populate IMEI list if needed
-        if (is_imei[rowindex]) {
+        if (is_imei[arrayIndex]) {
             var imeis = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.imei-number').val();
             if (imeis) {
                 var imeiArr  = [...new Set(imeis.split(','))];
@@ -1284,29 +1320,29 @@
 
         // Price option
         $('#editModal select[name=price_option]').empty()
-            .append('<option value="' + product_price[rowindex] + '">' + product_price[rowindex] + '</option>');
-        if (wholesale_price[rowindex] > 0)
-            $('#editModal select[name=price_option]').append('<option value="' + wholesale_price[rowindex] + '">' + wholesale_price[rowindex] + '</option>');
+            .append('<option value="' + product_price[arrayIndex] + '">' + product_price[arrayIndex] + '</option>');
+        if (wholesale_price[arrayIndex] > 0)
+            $('#editModal select[name=price_option]').append('<option value="' + wholesale_price[arrayIndex] + '">' + wholesale_price[arrayIndex] + '</option>');
 
         $('#modal_header').text($(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ') td:first').text().trim());
         $('input[name="edit_qty"]').val($(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.qty').val());
-        $('input[name="edit_discount"]').val(parseFloat(product_discount[rowindex] || 0).toFixed(decimal));
+        $('input[name="edit_discount"]').val(parseFloat(product_discount[arrayIndex] || 0).toFixed(decimal));
 
         var tax_name_all = <?php echo json_encode($tax_name_all); ?>;
-        $('select[name="edit_tax_rate"]').val(tax_name_all.indexOf(tax_name[rowindex]));
+        $('select[name="edit_tax_rate"]').val(tax_name_all.indexOf(tax_name[arrayIndex]));
 
         if (product_type_val == 'standard') {
-            unitConversion();
-            temp_unit_name            = (unit_name[rowindex] || '').split(',').filter(Boolean);
-            temp_unit_operator        = (unit_operator[rowindex] || '').split(',').filter(Boolean);
-            temp_unit_operation_value = (unit_operation_value[rowindex] || '').split(',').filter(Boolean);
+            unitConversion(tableSelector);
+            temp_unit_name            = (unit_name[arrayIndex] || '').split(',').filter(Boolean);
+            temp_unit_operator        = (unit_operator[arrayIndex] || '').split(',').filter(Boolean);
+            temp_unit_operation_value = (unit_operation_value[arrayIndex] || '').split(',').filter(Boolean);
             $('select[name="edit_unit"]').empty();
             temp_unit_name.forEach(function (v, k) {
                 $('select[name="edit_unit"]').append('<option data-operator="' + temp_unit_operator[k] + '" data-operation-value="' + temp_unit_operation_value[k] + '" value="' + k + '">' + v + '</option>');
             });
             $('#edit_unit').show();
         } else {
-            row_product_price = product_price[rowindex];
+            row_product_price = product_price[arrayIndex];
             $('#edit_unit').hide();
         }
 
@@ -1317,6 +1353,7 @@
     $('button[name="update_btn"]').on('click', function () {
         var tableSelector = ($('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').length > 0)
             ? 'table.order-list' : 'table.return-order-list';
+        var arrayIndex = getGlobalRowIndex(rowindex, tableSelector);
 
         var edit_qty        = parseFloat($('input[name="edit_qty"]').val());
         var edit_discount   = parseFloat($('input[name="edit_discount"]').val());
@@ -1326,16 +1363,16 @@
         if (edit_qty < 1)                    { edit_qty = 1; $('input[name="edit_qty"]').val(1); }
 
         var tax_rate_all    = <?php echo json_encode($tax_rate_all); ?>;
-        tax_rate[rowindex]  = parseFloat(tax_rate_all[$('select[name="edit_tax_rate"]').val()]);
-        tax_name[rowindex]  = $('select[name="edit_tax_rate"] option:selected').text();
+        tax_rate[arrayIndex]  = parseFloat(tax_rate_all[$('select[name="edit_tax_rate"]').val()]);
+        tax_name[arrayIndex]  = $('select[name="edit_tax_rate"] option:selected').text();
 
         var ptype = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val();
-        product_discount[rowindex] = edit_discount;
+        product_discount[arrayIndex] = edit_discount;
 
         if (ptype == 'standard') {
             var row_op  = $('#edit_unit select').find(':selected').data('operator');
             var row_val = $('#edit_unit select').find(':selected').data('operation-value');
-            product_price[rowindex] = (row_op == '*') ? edit_unit_price * row_val : edit_unit_price / row_val;
+            product_price[arrayIndex] = (row_op == '*') ? edit_unit_price * row_val : edit_unit_price / row_val;
 
             var position = $('select[name="edit_unit"]').val();
             var tmp_op   = temp_unit_operator[position];
@@ -1346,14 +1383,14 @@
             temp_unit_name.unshift($('select[name="edit_unit"] option:selected').text());
             temp_unit_operator.unshift(tmp_op); temp_unit_operation_value.unshift(tmp_val);
 
-            unit_name[rowindex]            = temp_unit_name.join(',') + ',';
-            unit_operator[rowindex]        = temp_unit_operator.join(',') + ',';
-            unit_operation_value[rowindex] = temp_unit_operation_value.join(',') + ',';
+            unit_name[arrayIndex]            = temp_unit_name.join(',') + ',';
+            unit_operator[arrayIndex]        = temp_unit_operator.join(',') + ',';
+            unit_operation_value[arrayIndex] = temp_unit_operation_value.join(',') + ',';
         } else {
-            product_price[rowindex] = edit_unit_price;
+            product_price[arrayIndex] = edit_unit_price;
         }
 
-        if (is_imei[rowindex]) {
+        if (is_imei[arrayIndex]) {
             var imeis = '';
             $('#editModal .imei-numbers').each(function (i) { imeis += (i ? ',' : '') + $(this).val(); });
             $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.imei-number').val(imeis);
