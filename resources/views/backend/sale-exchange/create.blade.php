@@ -578,7 +578,7 @@
             row.data('unit-operator') || '*';
 
         unit_operation_value[index] =
-            row.data('unit-value') || 1;
+            String(row.data('unit-operation-value') || '1');
 
         product_price[index] =
             parseFloat(row.data('product-price')) || 0;
@@ -622,7 +622,7 @@
             row.data('unit-operator') || '*';
 
         unit_operation_value[rowindex] =
-            parseFloat(row.data('unit-operation-value')) || 1;
+            String(row.data('unit-operation-value') || '1');
 
         product_price[rowindex] =
             parseFloat(
@@ -1084,7 +1084,7 @@
         tax_method.splice(rowindex, 0, data[5]);
         unit_name.splice(rowindex, 0, data[6]);
         unit_operator.splice(rowindex, 0, data[7]);
-        unit_operation_value.splice(rowindex, 0, data[8]);
+        unit_operation_value.splice(rowindex, 0, String(data[8] || '1'));
         is_imei.splice(rowindex, 0, data[13]);
         is_variant.splice(rowindex, 0, data[14]);
 
@@ -1133,7 +1133,7 @@
         if (without_stock == 'no') {
             if (product_type && (product_type.trim() == 'standard' || product_type.trim() == 'combo')) {
                 var operator        = (unit_operator[rowindex] || '*,').split(',');
-                var operation_value = (unit_operation_value[rowindex] || '1,').split(',');
+                var operation_value = String(unit_operation_value[rowindex] || '1').split(',');
                 var total_qty       = (operator[0] == '*') ? sale_qty * operation_value[0] : sale_qty / operation_value[0];
 
                 if (total_qty > max_qty && !isNaN(max_qty)) {
@@ -1160,7 +1160,7 @@
     }
 
     if(typeof unit_operation_value[rowindex] === 'undefined'){
-        unit_operation_value[rowindex] = 1;
+        unit_operation_value[rowindex] = '1';
     }
 
     var row_op = unit_operator[rowindex];
