@@ -569,6 +569,11 @@
     window.unit_operator = [];
     window.unit_operation_value = [];
     window.product_price = [];
+    window.product_discount = [];
+    window.tax_rate = [];
+    window.tax_name = [];
+    window.tax_method = [];
+    window.unit_name = [];
 
     $('.return-product-row').each(function (index) {
 
@@ -581,7 +586,22 @@
             String(row.data('unit-operation-value') || '1');
 
         product_price[index] =
-            parseFloat(row.data('product-price')) || 0;
+            parseFloat(row.data('price')) || 0;
+
+        product_discount[index] =
+            parseFloat(row.find('.discount-value').val()) || 0;
+
+        tax_rate[index] =
+            parseFloat(row.find('.tax-rate').val()) || 0;
+
+        tax_name[index] =
+            row.find('.tax-name').val() || '';
+
+        tax_method[index] =
+            parseFloat(row.find('.tax-method').val()) || 1;
+
+        unit_name[index] =
+            row.find('.sale-unit').val() || '';
     });
 
     console.log('✅ Return rows initialized');
