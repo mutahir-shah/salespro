@@ -6,5 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Courier extends Model
 {
-    protected $fillable = ["name", "api_key", "secret_key", "phone_number", "address", "is_active"];
+     protected $fillable = [
+        "name",
+        "type",
+        "phone_number",
+        "address",
+        "is_active",
+        // Steadfast
+        "api_key",
+        "secret_key",
+        // Pathao
+        "client_id",
+        "client_secret",
+        "username",
+        "password",
+        "base_url",
+    ];
 }

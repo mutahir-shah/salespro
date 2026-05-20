@@ -161,7 +161,7 @@
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-                <p class="italic"><small>{{__($db_str.'The field labels marked with * are required input fields')}}.</small></p>
+                <p class="italic"><small>{{__($db_str.'The field labels marked with are required input fields')}}.</small></p>
                 <form>
                     <div class="form-group">
                         <label>Purchase Code *</label>
@@ -180,14 +180,14 @@
 <div id="installeCommerceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
     <div role="document" class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('ecommerce.install') }}" method="POST">
+            <form action="{{ $isLandlord ? route('saas.ecommerce.install') : route('ecommerce.install') }}" method="POST">
                 @csrf
             <div class="modal-header">
                 <h5 class="modal-title">Install eCommerce Add-on</h5>
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-                <p class="italic"><small>{{__($db_str.'The field labels marked with * are required input fields')}}.</small></p>
+                <p class="italic"><small>{{__($db_str.'The field labels marked with are required input fields')}}.</small></p>
                 <form>
                     <div class="form-group">
                         <label>Purchase Code *</label>
@@ -206,14 +206,14 @@
 <div id="installApiModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
     <div role="document" class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('api.install') }}" method="POST">
+            <form action="{{ $isLandlord ? route('saas.api.install') : route('api.install') }}" method="POST">
                 @csrf
             <div class="modal-header">
                 <h5 class="modal-title">Install API Add-on</h5>
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-                <p class="italic"><small>{{__($db_str.'The field labels marked with * are required input fields')}}.</small></p>
+                <p class="italic"><small>{{__($db_str.'The field labels marked with are required input fields')}}.</small></p>
                 <form>
                     <div class="form-group">
                         <label>Purchase Code *</label>
@@ -232,14 +232,14 @@
 <div id="installWooCommerceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
     <div role="document" class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('woocommerce.install') }}" method="POST">
+            <form action="{{ $isLandlord ? route('saas.woocommerce.install') : route('woocommerce.install') }}" method="POST">
                 @csrf
             <div class="modal-header">
                 <h5 class="modal-title">Install WooCommerce Add-on</h5>
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-                <p class="italic"><small>{{__($db_str.'The field labels marked with * are required input fields')}}.</small></p>
+                <p class="italic"><small>{{__($db_str.'The field labels marked with are required input fields')}}.</small></p>
                 <form>
                     <div class="form-group">
                         <label>Purchase Code *</label>

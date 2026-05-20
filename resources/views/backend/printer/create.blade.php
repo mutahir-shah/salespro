@@ -87,7 +87,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('db.The field labels marked with * are required input fields') }}.</small>
+                            <small>{{ __('db.The field labels marked with are required input fields') }}.</small>
                         </p>
                         <p class="text-danger">{{ __('db.When you assign a receipt printer to this warehouse, browser printing will be turned off. Receipts will be printed using the assigned printer, following the template you set in the invoice settings') }}</p>
                         <div class="form-group">
@@ -164,7 +164,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                         <div class="form-group">
                             <input type="hidden" name="printer_id">
                             <label>{{ __('db.name') }} *</label>

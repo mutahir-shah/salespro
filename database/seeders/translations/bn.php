@@ -130,7 +130,7 @@ return array (
   21 => 
   array (
     'locale' => 'bn',
-    'key' => 'The field labels marked with * are required input fields',
+    'key' => 'The field labels marked with are required input fields',
     'value' => '* দ্বারা চিহ্নিত ফিল্ড লেবেলগুলি প্রয়োজনীয় ইনপুট ক্ষেত্র',
   ),
   22 => 

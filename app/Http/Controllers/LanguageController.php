@@ -30,77 +30,89 @@ class LanguageController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'language' => 'required|unique:languages,language',
-            'name' => 'required|string|max:255',
-        ]);
+        if(env('USER_VERIFIED')) {
+            $request->validate([
+                'language' => 'required|unique:languages,language',
+                'name' => 'required|string|max:255',
+            ]);
 
-        $language = Language::create([
-            'language' => $request->language,
-            'name' => $request->name,
-        ]);
-
-        // forget cached values
-        Language::forgetCachedLanguage();
-        Translation::forgetCachedTranslations();
-
-        return response()->json([
-            'success' => 'Language added successfully.',
-            'language' => $language
-        ]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'language' => 'required|string',
-        ]);
-
-        try {
-            Language::where('id', $id)->update([
-                'name' => $request->name,
+            $language = Language::create([
                 'language' => $request->language,
+                'name' => $request->name,
             ]);
 
             // forget cached values
             Language::forgetCachedLanguage();
             Translation::forgetCachedTranslations();
-            
-            return response()->json(['success' => 'Language updated successfully.']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to update the language. Please try again.'], 500);
+
+            return response()->json([
+                'success' => 'Language added successfully.',
+                'language' => $language
+            ]);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        if(env('USER_VERIFIED')) {
+            $request->validate([
+                'name' => 'required|string',
+                'language' => 'required|string',
+            ]);
+
+            try {
+                Language::where('id', $id)->update([
+                    'name' => $request->name,
+                    'language' => $request->language,
+                ]);
+
+                // forget cached values
+                Language::forgetCachedLanguage();
+                Translation::forgetCachedTranslations();
+                
+                return response()->json(['success' => 'Language updated successfully.']);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Failed to update the language. Please try again.'], 500);
+            }
         }
     }
 
     public function switchLanguage($id)
     {
-        Language::setDefaultLanguage($id);
+        if (env('USER_VERIFIED')) {
+            Language::setDefaultLanguage($id);
+        } else {
+            $language = Language::findOrFail($id);
+            setcookie('language', $language->language, 0, '/');
+        }
 
         return back()->withSuccess('Language switched successfully');
     }
 
     public function setDefault($id)
     {
-        Language::setDefaultLanguage($id);
-        
-        return response()->json(['success' => 'Default language updated.']);
+        if(env('USER_VERIFIED')) {        
+            Language::setDefaultLanguage($id);
+            return response()->json(['success' => 'Default language updated.']);
+        }
     }
 
     public function destroy($id)
     {
-        $language = Language::findOrFail($id);
-        if (!isset($language)) {
-            return response()->json(['error' => 'Language not found!']);
-        }
-        if ($language->is_default) {
-            return response()->json(['error' => 'You can not delete default language!']);
-        }
+        if(env('USER_VERIFIED')) {
+            $language = Language::findOrFail($id);
+            if (!isset($language)) {
+                return response()->json(['error' => 'Language not found!']);
+            }
+            if ($language->is_default) {
+                return response()->json(['error' => 'You can not delete default language!']);
+            }
 
-        Translation::where('locale', $language->locale)->delete();
+            Translation::where('locale', $language->locale)->delete();
 
-        $language->delete();
-        Cache::forget('default_language');
-        return response()->json(['success' => 'Language deleted successfully.']);
+            $language->delete();
+            Cache::forget('default_language');
+            return response()->json(['success' => 'Language deleted successfully.']);
+        }
     }
 }

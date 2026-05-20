@@ -34,7 +34,7 @@
 <div id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
   <div role="document" class="modal-dialog">
     <div class="modal-content">
-        <form action="" method="POST" files="true" id="editCategoryForm">
+        <form action="" method="POST" enctype="multipart/form-data" id="editCategoryForm">
             @csrf
             @method('PUT')
       <div class="modal-header">
@@ -42,7 +42,7 @@
         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
       </div>
       <div class="modal-body">
-        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
         <div class="row">
             <div class="col-md-6 form-group">
                 <label>{{__('db.name')}} *</label>
@@ -133,7 +133,7 @@
           <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-            <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+            <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
            <p>{{__('db.The correct column order is')}} (name*, parent_category) {{__('db.and you must follow this')}}.</p>
             <div class="row">
                 <div class="col-md-6">

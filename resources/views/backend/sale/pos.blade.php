@@ -20,7 +20,7 @@
     .pos-page [class=row] {margin-left:-10px;margin-right:-10px}
     .pos-page [class*=col-] {padding: 0 7px}
     .pos-page #myTable [class*=col-] {padding: .5rem}
-    .pos-page #myTable tr th {background: #d6deff;color:#303030}
+    .pos-page #myTable tr th {background: #f8f9fa;color:#303030}
     .product-btns{margin:0 -5px}
     .edit-product{white-space: break-spaces;font-size:13px;font-weight:500;text-align:left;padding:0 0!important}
     .edit-product i{color:#00cec9}
@@ -49,17 +49,21 @@
     .ui-helper-hidden-accessible{display:none!important}
     .btn-custom{font-size:13px;}
     #register-details-modal table tr td {padding: .35rem 0}
-    .totals .totals-title {color: #303030;}
+    .totals strong {font-size:14px;line-height: 2}
+    .totals .totals-title {color: #303030;font-size:14px}
     .date-choice.dropdown-toggle::after {display: none}
     .country-phone-group .bootstrap-select{display: none !important}
     .product-img{margin-bottom:0;padding:15px 7px 0;text-align:center}
     .category-img img,.product-img img{height:50px;max-width:100%;width:auto}
     .transaction-list{height:48vh;overflow-y:auto;width:100%}
-    .table-container{height:calc(100vh - 120px);overflow-y:auto}
+    .table-container{height:calc(100vh - 160px);overflow-y:auto}
     nav.navbar .nav-item {margin-left: 13px}
     nav.navbar .nav-item:first-child {margin-left: 0}
 
-    @media (max-width: 500px) {
+    @media (max-width: 575px) {
+        nav.navbar .dropdown-menu {
+            left: 0;
+        }
         .product-grid > div {width: calc(100%/3 - 10px);}
     }
     @media (max-width: 375px) {
@@ -112,29 +116,29 @@
     .loader{display: block;max-width: 100% !important; min-width: 100% !important;text-align: center;vertical-align: middle;width: 100% !important; margin-top: 50px}
     .product-grid .loader{margin-top: 25%;}
 
-    .loader svg path,.loader svg rect{fill: #7c5cc4;}
+    .loader svg path,.loader svg rect{fill: #303030;}
     nav.navbar {margin-bottom: 10px;}
     nav.navbar a.menu-btn {display: flex;justify-content: center;align-items: center;}
     nav.navbar a {align-items: center;display: flex;}
     .right-sidebar li a svg{margin-right: 10px}
-    .nav-menu svg {width: 20px;height: 20px; stroke: #7c5cc4;vertical-align: middle}
+    .nav-menu svg {width: 20px;height: 20px; stroke: #303030;vertical-align: middle}
     .btn svg {vertical-align: middle; width: 16px}
     button.close svg {vertical-align: middle; width: 26px}
     .bootstrap-select.btn-group > .dropdown-toggle{height: 37px}
 
     .dropdown-toggle-no-arrow::after{display:none!important}
     .calculator{background-color:#fff;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,.2);width:240px}
-    .calculator .display{width:100%;height:50px;background-color:#f5f5f5;border:2px solid #7c5cc4;font-size:1.5em;text-align:right;padding:0 10px;margin-bottom:10px;border-radius:5px}
+    .calculator .display{width:100%;height:50px;background-color:#f5f5f5;border:2px solid #303030;font-size:1.5em;text-align:right;padding:0 10px;margin-bottom:10px;border-radius:5px}
     .calculator .buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
     .calculator .btn{height:40px;font-size:1em;border:none;border-radius:5px;cursor:pointer;transition:background-color .2s}
     .calculator .btn.number{background-color:#fff;color:#000;border:1px solid #ddd}
     .calculator .btn.operator{background-color:#f0f0f0;color:#000}
     .calculator .btn.action.ac{background-color:#d63031;color:#fff}
     .calculator .btn.action.ce{background-color:#e28d02;color:#fff}
-    .calculator .btn.equals{background-color:#7c5cc4;color:#fff;grid-column:span 2}
-    #product-results-container{background:#f5f6f7;position: absolute;overflow: hidden;max-height: 300px;overflow-y: auto;top:40px;width:100%;z-index:999999}
-    #product-results-container .product-img{border-radius: 3px; color: #7c5cc4;font-size:13px;padding-top:7px;padding-bottom:7px;text-align:left}
-    #product-results-container .product-img:hover{background-color: #7c5cc4;color: #FFF}
+    .calculator .btn.equals{background-color:#303030;color:#fff;grid-column:span 2}
+    #product-results-container{background:#f5f6f7;position: absolute;overflow: hidden;max-height: 300px;overflow-y: auto;top:50px;width:100%;z-index:999999}
+    #product-results-container .product-img{border-radius: 3px; color: #303030;font-size:13px;padding-top:7px;padding-bottom:7px;text-align:left}
+    #product-results-container .product-img:hover{background-color: #303030;color: #FFF}
     #shortcut-list .dropdown-item {font-size: 13px;padding: 6px 10px;}#shortcut-list .badge {font-size: 11px;}
     #customer-display.inactive svg{
         stroke:#9ca3af;
@@ -202,23 +206,15 @@
                         <ul class="nav-menu list-unstyled d-flex flex-md-row align-items-md-center">
                             <!-- //keyboard shortcuts -->
                             <li class="nav-item d-none d-lg-block dropdown">
-                                <a class="dropdown-toggle-no-arrow" type="button" data-toggle="dropdown" aria-expanded="false" role="button"><svg width="22" height="23" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M6.44141 7.95293C5.99958 7.95293 5.64141 8.3111 5.64141 8.75293C5.64141 9.19476 5.99958 9.55293 6.44141 9.55293H6.45141C6.89323 9.55293 7.25141 9.19476 7.25141 8.75293C7.25141 8.3111 6.89323 7.95293 6.45141 7.95293H6.44141Z" fill="#323544"/>
-                                <path d="M5.63945 12.1279C5.63945 11.6861 5.99763 11.3279 6.43945 11.3279H6.44945C6.89128 11.3279 7.24945 11.6861 7.24945 12.1279C7.24945 12.5698 6.89128 12.9279 6.44945 12.9279H6.43945C5.99763 12.9279 5.63945 12.5698 5.63945 12.1279Z" fill="#323544"/>
-                                <path d="M10.1445 7.95293C9.7027 7.95293 9.34453 8.3111 9.34453 8.75293C9.34453 9.19476 9.7027 9.55293 10.1445 9.55293H10.1545C10.5964 9.55293 10.9545 9.19476 10.9545 8.75293C10.9545 8.3111 10.5964 7.95293 10.1545 7.95293H10.1445Z" fill="#323544"/>
-                                <path d="M9.3582 12.1279C9.3582 11.6861 9.71638 11.3279 10.1582 11.3279H10.1682C10.61 11.3279 10.9682 11.6861 10.9682 12.1279C10.9682 12.5698 10.61 12.9279 10.1682 12.9279H10.1582C9.71638 12.9279 9.3582 12.5698 9.3582 12.1279Z" fill="#323544"/>
-                                <path d="M8 14.7529C7.58579 14.7529 7.25 15.0887 7.25 15.5029C7.25 15.9171 7.58579 16.2529 8 16.2529H16C16.4142 16.2529 16.75 15.9171 16.75 15.5029C16.75 15.0887 16.4142 14.7529 16 14.7529H8Z" fill="#323544"/>
-                                <path d="M13.0457 8.75293C13.0457 8.3111 13.4039 7.95293 13.8457 7.95293H13.8557C14.2975 7.95293 14.6557 8.3111 14.6557 8.75293C14.6557 9.19476 14.2975 9.55293 13.8557 9.55293H13.8457C13.4039 9.55293 13.0457 9.19476 13.0457 8.75293Z" fill="#323544"/>
-                                <path d="M17.5479 7.95293C17.106 7.95293 16.7479 8.3111 16.7479 8.75293C16.7479 9.19476 17.106 9.55293 17.5479 9.55293H17.5579C17.9997 9.55293 18.3579 9.19476 18.3579 8.75293C18.3579 8.3111 17.9997 7.95293 17.5579 7.95293H17.5479Z" fill="#323544"/>
-                                <path d="M13.0369 12.1279C13.0369 11.6861 13.3951 11.3279 13.8369 11.3279H13.8469C14.2887 11.3279 14.6469 11.6861 14.6469 12.1279C14.6469 12.5698 14.2887 12.9279 13.8469 12.9279H13.8369C13.3951 12.9279 13.0369 12.5698 13.0369 12.1279Z" fill="#323544"/>
-                                <path d="M17.5557 11.3279C17.1138 11.3279 16.7557 11.6861 16.7557 12.1279C16.7557 12.5698 17.1138 12.9279 17.5557 12.9279H17.5657C18.0075 12.9279 18.3657 12.5698 18.3657 12.1279C18.3657 11.6861 18.0075 11.3279 17.5657 11.3279H17.5557Z" fill="#323544"/>
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M4.25 4.62793C3.00736 4.62793 2 5.63529 2 6.87793V17.3779C2 18.6206 3.00736 19.6279 4.25 19.6279H19.7501C20.9927 19.6279 22.0001 18.6206 22.0001 17.3779V6.87793C22.0001 5.63529 20.9927 4.62793 19.7501 4.62793H4.25ZM3.5 6.87793C3.5 6.46372 3.83579 6.12793 4.25 6.12793H19.7501C20.1643 6.12793 20.5001 6.46372 20.5001 6.87793V17.3779C20.5001 17.7921 20.1643 18.1279 19.7501 18.1279H4.25C3.83579 18.1279 3.5 17.7921 3.5 17.3779V6.87793Z" fill="none" stroke="#323544" stroke-width="0.9"/></svg></a>
+                                <a class="dropdown-toggle-no-arrow" type="button" data-toggle="dropdown" aria-expanded="false" role="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-keyboard"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M2 8a2 2 0 0 1 2 -2h16a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-16a2 2 0 0 1 -2 -2l0 -8" /><path d="M6 10l0 .01" /><path d="M10 10l0 .01" /><path d="M14 10l0 .01" /><path d="M18 10l0 .01" /><path d="M6 14l0 .01" /><path d="M18 14l0 .01" /><path d="M10 14l4 .01" /></svg>
+                                </a>
 
                                 <div class="dropdown-menu dropdown-menu-right p-2" aria-labelledby="shortcutDropdown" style="min-width: 260px; max-height: 350px; overflow-y: auto;">
 
                                     <div id="shortcut-list"></div>
 
-                                </div>                  
+                                </div>
                             </li>
                             <!-- //mobile collapse -->
                             <li class="nav-item d-md-none">
@@ -276,7 +272,7 @@
                                 <a id="btnFullscreen" data-toggle="tooltip" title="Full Screen"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg></a>
                             </li>
                             <!-- //Customer Display Screen -->
-                            <li class="nav-item">
+                            <li class="nav-item d-none d-lg-block">
                                 <a id="customer-display"
                                 class="inactive"
                                 href="{{route('sales.customerDisplay')}}"
@@ -305,30 +301,6 @@
                             <!-- //cash register -->
                             <li class="nav-item d-none d-lg-block">
                                 <a href="" id="register-details-btn" data-id="" data-toggle="tooltip" title="{{__('db.Cash Register Details')}}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z" /></svg></a>
-                            </li>
-                            @endif
-                            <?php
-                            $today_sale_permission = $permission_list->where('name', 'today_sale')->first();
-                            $today_sale_permission_active = DB::table('role_has_permissions')->where([
-                                ['permission_id', $today_sale_permission->id],
-                                ['role_id', Auth::user()->role_id]
-                            ])->first();
-
-                            $today_profit_permission = $permission_list->where('name', 'today_profit')->first();
-                            $today_profit_permission_active = DB::table('role_has_permissions')->where([
-                                ['permission_id', $today_profit_permission->id],
-                                ['role_id', Auth::user()->role_id]
-                            ])->first();
-                            ?>
-
-                            @if($today_sale_permission_active)
-                            <li class="nav-item d-none d-lg-block">
-                                <a href="" id="today-sale-btn" data-toggle="tooltip" title="{{__('db.Today Sale')}}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg></a>
-                            </li>
-                            @endif
-                            @if($today_profit_permission_active)
-                            <li class="nav-item d-none d-lg-block">
-                                <a href="" id="today-profit-btn" data-toggle="tooltip" title="{{__('db.Today Profit')}}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></a>
                             </li>
                             @endif
                             @if(($alert_product + count(\Auth::user()->unreadNotifications)) > 0)
@@ -372,6 +344,30 @@
                                     @if($add_payment_permission)
                                     <li>
                                         <a href="" class="add-supplier-payment" data-toggle="modal" data-target="#add-supplier-payment"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg> {{__('db.Add Payment')}}</a>
+                                    </li>
+                                    @endif
+                                    <?php
+                                    $today_sale_permission = $permission_list->where('name', 'today_sale')->first();
+                                    $today_sale_permission_active = DB::table('role_has_permissions')->where([
+                                        ['permission_id', $today_sale_permission->id],
+                                        ['role_id', Auth::user()->role_id]
+                                    ])->first();
+
+                                    $today_profit_permission = $permission_list->where('name', 'today_profit')->first();
+                                    $today_profit_permission_active = DB::table('role_has_permissions')->where([
+                                        ['permission_id', $today_profit_permission->id],
+                                        ['role_id', Auth::user()->role_id]
+                                    ])->first();
+                                    ?>
+
+                                    @if($today_sale_permission_active)
+                                    <li>
+                                        <a href="" id="today-sale-btn" title="{{__('db.Today Sale')}}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>{{__('db.Today Sale')}}</a>
+                                    </li>
+                                    @endif
+                                    @if($today_profit_permission_active)
+                                    <li>
+                                        <a href="" id="today-profit-btn" title="{{__('db.Today Profit')}}"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>{{__('db.Today Profit')}}</a>
                                     </li>
                                     @endif
                                     <?php
@@ -429,7 +425,7 @@
                         <div class="row ml-2 mr-2 px-2">
                             <div class="col-7">Choose category</div>
                             <div class="col-5 text-right">
-                                <span class="btn btn-default btn-sm btn-close">
+                                <span class="btn btn-light btn-sm btn-close">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
                                 </span>
                             </div>
@@ -454,7 +450,7 @@
                         <div class="row ml-2 mr-2 px-2">
                             <div class="col-7">Choose brand</div>
                             <div class="col-5 text-right">
-                                <span class="btn btn-default btn-sm btn-close">
+                                <span class="btn btn-light btn-sm btn-close">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
                                 </span>
                             </div>
@@ -479,7 +475,7 @@
                         <div class="row ml-2 mr-2 px-2">
                             <div class="col-7"></div>
                             <div class="col-5 text-right">
-                                <span class="btn btn-default btn-sm btn-close">
+                                <span class="btn btn-light btn-sm btn-close">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
                                 </span>
                             </div>
@@ -545,182 +541,182 @@
                 ['permissions.name', 'customers-add'],
                 ['role_id', \Auth::user()->role_id] ])->first();
                 @endphp
-                <div class="card">
-                    <div class="col-12">
+                <div class="card mb-2 px-2">
+                    <div class="d-flex align-items-center flex-wrap">
 
-                        <div class="d-flex align-items-center">
+                        <button type="button" class="btn btn-light btn-md mr-2 date-choice dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-week"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M7 14h.013" /><path d="M10.01 14h.005" /><path d="M13.01 14h.005" /><path d="M16.015 14h.005" /><path d="M13.015 17h.005" /><path d="M7.01 17h.005" /><path d="M10.01 17h.005" /></svg>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <div class="input-group">
+                                @can('change_sale_date')
+                                    <input type="text"
+                                        name="created_at"
+                                        class="form-control date"
+                                        placeholder="{{ __('db.Choose date') }}"
+                                        value="{{date($general_setting->date_format,strtotime('now'))}}" />
+                                @else
+                                    <input type="text"
+                                        name="created_at"
+                                        class="form-control date"
+                                        placeholder="{{ __('db.Choose date') }}"
+                                        value="{{date($general_setting->date_format,strtotime('now'))}}"
+                                        readonly/>
+                                @endcan
+                            </div>
+                        </div>
 
-                            <button type="button" class="btn btn-default btn-md mr-2 date-choice dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar4" viewBox="0 0 16 16">
-                                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 2a1 1 0 0 0-1 1v1h14V3a1 1 0 0 0-1-1zm13 3H1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1z"/>
+                        @if(isset(auth()->user()->warehouse_id))
+                        <input type="hidden" id="warehouse_id" name="warehouse_id" value="{{auth()->user()->warehouse_id}}" />
+                        @else
+                        <div data-toggle="tooltip" title="" data-original-title="{{__('db.Warehouse')}}">
+                            <button type="button" class="btn btn-light btn-md mr-2" data-toggle="collapse" data-target="#warehousePanel" aria-expanded="false">
+                                <svg style="width: 18px; height: 18px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                                 </svg>
                             </button>
-                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                <div class="input-group">
-                                    @can('change_sale_date')
-                                        <input type="text"
-                                            name="created_at"
-                                            class="form-control date"
-                                            placeholder="{{ __('db.Choose date') }}"
-                                            value="{{date($general_setting->date_format,strtotime('now'))}}" />
-                                    @else
-                                        <input type="text"
-                                            name="created_at"
-                                            class="form-control date"
-                                            placeholder="{{ __('db.Choose date') }}"
-                                            value="{{date($general_setting->date_format,strtotime('now'))}}"
-                                            readonly/>
-                                    @endcan
+                        </div>
+                        @endif
+
+                        @if(isset(auth()->user()->biller_id))
+                        <input type="hidden" id="biller_id" name="biller_id" value="{{auth()->user()->biller_id}}" />
+                        @else
+                        <div data-toggle="tooltip" title="" data-original-title="{{__('db.Biller')}}">
+                            <button type="button" class="btn btn-light btn-md mr-2" data-toggle="collapse" data-target="#billerPanel" aria-expanded="false">
+                                <svg style="width: 18px; height: 18px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                            </button>
+                        </div>
+                        @endif
+
+                        <div data-toggle="tooltip" title="" data-original-title="{{__('db.Currency')}}">
+                            <button type="button" class="btn btn-light btn-md mr-2" data-toggle="collapse" data-target="#currencyPanel" aria-expanded="false">
+                                <svg style="width: 18px; height: 18px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="form-group top-fields mr-2" style="margin: 7px 0">
+                            <label>{{__('db.customer')}}</label>
+                            <div class="input-group pos">
+                                @php
+                                $deposit = [];
+                                $points = [];
+                                if(isset($lims_sale_data) && !empty($lims_sale_data) && $lims_sale_data->customer_id) {
+                                    $customer_id = $lims_sale_data->customer_id;
+                                }
+                                elseif($lims_pos_setting_data) {
+                                    $customer_id = $lims_pos_setting_data->customer_id;
+                                }
+                                else{
+                                $customer_id = $lims_customer_list[0]->id;
+                                }
+                                @endphp
+                                <select required name="customer_id" id="customer_id" class="selectpicker form-control" data-live-search="true" title="Select..." style="width: 100px">
+                                    @foreach($lims_customer_list as $customer)
+                                        <option
+                                            data-points="{{ $customer->points }}"
+                                            data-deposit="{{ $customer->deposit }}"
+                                            data-credit-limit="{{ $customer->credit_limit }}"
+                                            data-pay_term_no="{{ $customer->pay_term_no }}"
+                                            data-pay_term_period="{{ $customer->pay_term_period }}"
+                                            data-type="{{ $customer->type }}"
+                                            value="{{ $customer->id }}"
+                                            @if($customer->id == $customer_id) selected @endif>
+                                            {{ $customer->name }} <span>({{ $customer->wa_number ?? $customer->phone_number }})</span>
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @if($customer_active)
+                                <button type="button" class="btn btn-light btn-sm" data-toggle="modal" data-target="#addCustomer"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></button>
+                                @endif
+                                <x-validation-error fieldName="customer_id" />
+                            </div>
+                        </div>
+
+                        @if(!in_array('restaurant',explode(',',$general_setting->modules)))
+                        <!-- Price type -->
+                        <div class="form-group top-fields mr-2" style="margin: 7px 0">
+                            <label>{{__('db.Price Option')}}</label>
+                            <select id="price_type" class="form-control selectpicker"  style="width: 100px">
+                                <option value="retail" {{ $price_type == 'retail' ? 'selected' : '' }}>Retail</option>
+                                <option value="wholesale" {{ $price_type == 'wholesale' ? 'selected' : '' }}>Wholesale</option>
+                            </select>
+                        </div>
+                        @endif
+
+                        @if(in_array('restaurant',explode(',',$general_setting->modules)))
+                            <div class="form-group top-fields mr-2">
+                                <label>{{__('db.Service')}}</label>
+                                @php
+                                if(isset($lims_sale_data) && !empty($lims_sale_data) && $lims_sale_data->service_id) {
+                                    $service_id = $lims_sale_data->service_id;
+                                }
+                                @endphp
+                                @if(!empty($service_id))
+                                <div class="input-group pos">
+                                    <select required id="service_id" name="service_id" class="selectpicker form-control" title="Select service...">
+                                        <option value="1" @if($service_id == 1) selected @endif>{{__('db.Dine In')}}</option>
+                                        <option value="2" @if($service_id == 2) selected @endif>{{__('db.Take Away')}}</option>
+                                        <option value="3" @if($service_id == 3) selected @endif>{{__('db.Delivery')}}</option>
+                                    </select>
                                 </div>
-                            </div>
-
-                            @if(isset(auth()->user()->warehouse_id))
-                            <input type="hidden" id="warehouse_id" name="warehouse_id" value="{{auth()->user()->warehouse_id}}" />
-                            @else
-                            <div data-toggle="tooltip" title="" data-original-title="{{__('db.Warehouse')}}">
-                                <button type="button" class="btn btn-default btn-md mr-2" data-toggle="collapse" data-target="#warehousePanel" aria-expanded="false">
-                                    <svg style="width: 18px; height: 18px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                                    </svg>
-                                </button>
-                            </div>
-                            @endif
-
-                            @if(isset(auth()->user()->biller_id))
-                            <input type="hidden" id="biller_id" name="biller_id" value="{{auth()->user()->biller_id}}" />
-                            @else
-                            <div data-toggle="tooltip" title="" data-original-title="{{__('db.Biller')}}">
-                                <button type="button" class="btn btn-default btn-md mr-2" data-toggle="collapse" data-target="#billerPanel" aria-expanded="false">
-                                    <svg style="width: 18px; height: 18px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                    </svg>
-                                </button>
-                            </div>
-                            @endif
-
-                            <div data-toggle="tooltip" title="" data-original-title="{{__('db.Currency')}}">
-                                <button type="button" class="btn btn-default btn-md mr-2" data-toggle="collapse" data-target="#currencyPanel" aria-expanded="false">
-                                    <svg style="width: 18px; height: 18px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                </button>
+                                @else
+                                <div class="input-group pos">
+                                    <select required id="service_id" name="service_id" class="selectpicker form-control" title="Select service...">
+                                        <option value="1" selected>{{__('db.Dine In')}}</option>
+                                        <option value="2">{{__('db.Take Away')}}</option>
+                                        <option value="3">{{__('db.Delivery')}}</option>
+                                    </select>
+                                </div>
+                                @endif
                             </div>
 
                             <div class="form-group top-fields mr-2">
-                                <label>{{__('db.customer')}}</label>
+                                <label>{{__('db.Table')}}</label>
                                 <div class="input-group pos">
                                     @php
-                                    $deposit = [];
-                                    $points = [];
-                                    if(isset($lims_sale_data) && !empty($lims_sale_data) && $lims_sale_data->customer_id) {
-                                        $customer_id = $lims_sale_data->customer_id;
-                                    }
-                                    elseif($lims_pos_setting_data) {
-                                        $customer_id = $lims_pos_setting_data->customer_id;
-                                    }
-                                    else{
-                                    $customer_id = $lims_customer_list[0]->id;
+                                    if(isset($lims_sale_data) && !empty($lims_sale_data) && !empty($lims_sale_data->table_id)) {
+                                        $table_id = $lims_sale_data->table_id;
                                     }
                                     @endphp
-                                    <select required name="customer_id" id="customer_id" class="selectpicker form-control" data-live-search="true" title="Select..." style="width: 100px">
-                                        @foreach($lims_customer_list as $customer)
-                                            @php
-                                            $deposit[$customer->id] = $customer->deposit - $customer->expense;
-
-                                            $points[$customer->id] = $customer->points;
-                                            @endphp
-                                            <option data-points={{ $customer->points }} data-credit-limit="{{$customer->credit_limit}}" data-pay_term_no="{{ $customer->pay_term_no }}" data-pay_term_period="{{ $customer->pay_term_period }}" value="{{$customer->id}}" @if($customer->id == $customer_id) selected @endif>{{$customer->name}} <span class="d-none">({{$customer->phone_number ?? $customer->wa_number}})</span></option>
+                                    <select required id="table_id" name="table_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select table...">
+                                        @foreach($lims_table_list as $table)
+                                        <option value="{{$table->id}}" @if(!empty($table_id) && $table->id == $table_id) selected @endif>
+                                            {{$table->name}} at {{$table->floor}} ( ðŸ‘¤ {{$table->number_of_person}})
+                                        </option>
                                         @endforeach
                                     </select>
-                                    @if($customer_active)
-                                    <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#addCustomer"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></button>
-                                    @endif
-                                    <x-validation-error fieldName="customer_id" />
                                 </div>
                             </div>
 
-                            @if(!in_array('restaurant',explode(',',$general_setting->modules)))
-                            <!-- Price type -->
                             <div class="form-group top-fields mr-2">
-                                <label>{{__('db.Price Option')}}</label>
-                                <select id="price_type" class="form-control selectpicker"  style="width: 100px">
-                                    <option value="retail" {{ $price_type == 'retail' ? 'selected' : '' }}>Retail</option>
-                                    <option value="wholesale" {{ $price_type == 'wholesale' ? 'selected' : '' }}>Wholesale</option>
-                                </select>
-                            </div>
-                            @endif
-
-                            @if(in_array('restaurant',explode(',',$general_setting->modules)))
-                                <div class="form-group top-fields mr-2">
-                                    <label>{{__('db.Service')}}</label>
+                                <label>{{__('db.Waiter')}}</label>
+                                <div class="input-group pos">
                                     @php
-                                    if(isset($lims_sale_data) && !empty($lims_sale_data) && $lims_sale_data->service_id) {
-                                        $service_id = $lims_sale_data->service_id;
+                                    if(isset($lims_sale_data) && !empty($lims_sale_data) && !empty($lims_sale_data->waiter_id)) {
+                                        $waiter_id = $lims_sale_data->waiter_id;
                                     }
                                     @endphp
-                                    @if(!empty($service_id))
-                                    <div class="input-group pos">
-                                        <select required id="service_id" name="service_id" class="selectpicker form-control" title="Select service...">
-                                            <option value="1" @if($service_id == 1) selected @endif>{{__('db.Dine In')}}</option>
-                                            <option value="2" @if($service_id == 2) selected @endif>{{__('db.Take Away')}}</option>
-                                            <option value="3" @if($service_id == 3) selected @endif>{{__('db.Delivery')}}</option>
-                                        </select>
-                                    </div>
-                                    @else
-                                    <div class="input-group pos">
-                                        <select required id="service_id" name="service_id" class="selectpicker form-control" title="Select service...">
-                                            <option value="1" selected>{{__('db.Dine In')}}</option>
-                                            <option value="2">{{__('db.Take Away')}}</option>
-                                            <option value="3">{{__('db.Delivery')}}</option>
-                                        </select>
-                                    </div>
-                                    @endif
-                                </div>
-
-                                <div class="form-group top-fields mr-2">
-                                    <label>{{__('db.Table')}}</label>
-                                    <div class="input-group pos">
-                                        @php
-                                        if(isset($lims_sale_data) && !empty($lims_sale_data) && !empty($lims_sale_data->table_id)) {
-                                            $table_id = $lims_sale_data->table_id;
-                                        }
-                                        @endphp
-                                        <select required id="table_id" name="table_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select table...">
-                                            @foreach($lims_table_list as $table)
-                                            <option value="{{$table->id}}" @if(!empty($table_id) && $table->id == $table_id) selected @endif>
-                                                {{$table->name}} at {{$table->floor}} ( ðŸ‘¤ {{$table->number_of_person}})
+                                    <select required id="waiter_id" name="waiter_id" class="selectpicker form-control" title="Select waiter...">
+                                        @if(auth()->user()->service_staff == 1)
+                                        <option value="{{auth()->user()->id}}" selected >{{auth()->user()->name}}</option>
+                                        @else
+                                            @foreach($waiter_list as $waiter)
+                                            <option value="{{$waiter->id}}" @if(!empty($waiter_id) && $waiter->id == $waiter_id) selected @endif>
+                                                {{$waiter->name}}
                                             </option>
                                             @endforeach
-                                        </select>
-                                    </div>
+                                        @endif
+                                    </select>
                                 </div>
+                            </div>
+                        @endif
 
-                                <div class="form-group top-fields mr-2">
-                                    <label>{{__('db.Waiter')}}</label>
-                                    <div class="input-group pos">
-                                        @php
-                                        if(isset($lims_sale_data) && !empty($lims_sale_data) && !empty($lims_sale_data->waiter_id)) {
-                                            $waiter_id = $lims_sale_data->waiter_id;
-                                        }
-                                        @endphp
-                                        <select required id="waiter_id" name="waiter_id" class="selectpicker form-control" title="Select waiter...">
-                                            @if(auth()->user()->service_staff == 1)
-                                            <option value="{{auth()->user()->id}}" selected >{{auth()->user()->name}}</option>
-                                            @else
-                                                @foreach($waiter_list as $waiter)
-                                                <option value="{{$waiter->id}}" @if(!empty($waiter_id) && $waiter->id == $waiter_id) selected @endif>
-                                                    {{$waiter->name}}
-                                                </option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </div>
-                                </div>
-                            @endif
-
-                            <a class="btn btn-primary btn-md more-options" data-toggle="collapse" href="#moreOptions" role="button" aria-expanded="false" aria-controls="moreOptions"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg></a>
-                        </div>
+                        <a class="btn btn-primary btn-md more-options" data-toggle="collapse" href="#moreOptions" role="button" aria-expanded="false" aria-controls="moreOptions"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg></a>
                     </div>
                     <div id="pos-collapse">
                         <div id="warehousePanel" class="collapse pos-panel" data-parent="#pos-collapse">
@@ -889,130 +885,130 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        @if($lims_pos_setting_data->is_table && !in_array('restaurant',explode(',',$general_setting->modules)))
-                        <div class="col-12 pl-0 pr-0">
-                            <div class="form-group">
-                                <select required id="table_id" name="table_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select table...">
-                                    @foreach($lims_table_list as $table)
-                                    <option value="{{$table->id}}">{{$table->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                    @if($lims_pos_setting_data->is_table && !in_array('restaurant',explode(',',$general_setting->modules)))
+                    <div class="col-12 pl-0 pr-0">
+                        <div class="form-group">
+                            <select required id="table_id" name="table_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select table...">
+                                @foreach($lims_table_list as $table)
+                                <option value="{{$table->id}}">{{$table->name}}</option>
+                                @endforeach
+                            </select>
                         </div>
+                    </div>
+                    @endif
+                </div>
+
+                <div class="search-box form-group mb-2" style="border: 1px solid #ddd;border-radius: 10px;box-shadow: rgba(37, 83, 185, 0.1) 0px 2px 6px 0px;position:relative">
+                    <div class="input-group pos align-items-center px-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-search icon-search-icon"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path><path d="M21 21l-6 -6"></path></svg>
+                        <input style="border:none;height: 46px;" type="text" name="product_code_name" id="product-search-input" placeholder="Scan/Search product by name/code/IMEI" class="form-control" autofocus />
+                        <button type="button" class="btn btn-primary" onclick="barcode()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upc" viewBox="0 0 16 16"><path d="M3 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0z"/></svg></button>
+                    </div>
+                    <div id="product-results-container">
+
+                    </div>
+                    <div id="no-results-message" style="background-color: #f5f6f7;color: #666; margin-top: 5px;padding: 3px 5px; display: none;">No results found</div>
+                </div>
+                <div class="table-responsive transaction-list" style="background:#FFF; border-radius: 10px; box-shadow: rgba(37, 83, 185, 0.1) 0px 2px 6px 0px;">
+                    <table id="myTable" class="table table-hover table-striped order-list table-fixed">
+                        <thead class="d-none d-md-block">
+                            <tr>
+                                <th class="col-sm-5 col-6">{{__('db.product')}}</th>
+                                <th class="col-sm-2">{{__('db.Price')}}</th>
+                                <th class="col-sm-3 text-center">{{__('db.Quantity')}}</th>
+                                <th class="col-sm-2">{{__('db.Subtotal')}}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-id">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row" style="display: none;">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <input type="hidden" name="total_qty" value="0" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <input type="hidden" name="total_discount" value="{{number_format(0, $general_setting->decimal, '.', '')}}" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <input type="hidden" name="total_tax" value="{{number_format(0, $general_setting->decimal, '.', '')}}" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <input type="hidden" name="total_price" value="{{number_format(0, $general_setting->decimal, '.', '')}}" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <input type="hidden" name="item" value="0" />
+                            <input type="hidden" name="order_tax" value="{{number_format(0, $general_setting->decimal, '.', '')}}" />
+                        </div>
+                        <x-validation-error fieldName="item" />
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <input type="hidden" name="grand_total" value="{{number_format(0, $general_setting->decimal, '.', '')}}"/>
+                            <input type="hidden" name="used_points" />
+
+                            @if(in_array('restaurant',explode(',',$general_setting->modules)))
+                            <input type="hidden" name="sale_status" value="5" />
+                            @else
+                            <input type="hidden" name="sale_status" value="1" />
+                            @endif
+                            <x-validation-error fieldName="sale_status" />
+
+                            <input type="hidden" name="coupon_active">
+                            <input type="hidden" name="coupon_id" value="">
+                            <input type="hidden" name="coupon_discount" value="0"/>
+
+                            <input type="hidden" name="pos" value="1" />
+
+                            @if(isset($lims_sale_data) && !empty($lims_sale_data))
+                            <input type="hidden" name="sale_id" value="{{$lims_sale_data->id}}" />
+                            <input type="hidden" name="draft" value="1" />
+                            @else
+                            <input type="hidden" name="draft" value="0" />
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 totals" style="background-color:#f5f6f7;border-top: 2px solid #ebe9f1;padding-bottom: 7px;padding-top: 7px;">
+                    <div class="row">
+                        <div class="col-sm-6 col-6"></div>
+                        <div class="col-sm-3 col-6">
+                            <strong class="totals-title">{{__('db.Items')}}</strong><strong id="item">0 (0)</strong>
+                        </div>
+                        <div class="col-sm-3 col-6">
+                            <strong class="totals-title">{{__('db.Total')}}</strong><strong id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
+                        </div>
+                        @if ($handle_discount_active)
+                            <div class="col-sm-3 col-6">
+                                <strong class="totals-title">{{__('db.Discount')}} <button type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#order-discount-modal"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg></button></strong><strong id="discount">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
+                            </div>
                         @endif
-
-                        <div class="col-12 pl-0 pr-0">
-                            <div class="search-box form-group mb-0">
-                                <div class="input-group pos">
-                                    <input style="border: 1px solid #7c5cc4;" type="text" name="product_code_name" id="product-search-input" placeholder="Scan/Search product by name/code/IMEI" class="form-control" autofocus />
-                                    <button type="button" class="btn btn-primary" onclick="barcode()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upc" viewBox="0 0 16 16"><path d="M3 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0z"/></svg></button>
-                                </div>
-                                <div id="product-results-container">
-
-                                </div>
-                                <div id="no-results-message" style="background-color: #f5f6f7;color: #666; margin-top: 5px;padding: 3px 5px; display: none;">No results found</div>
-                            </div>
+                        <div class="col-sm-3 col-6">
+                            <strong class="totals-title">{{__('db.Coupon')}} <button type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#coupon-modal"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg></button></strong><strong id="coupon-text">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
                         </div>
-                        <div class="table-responsive transaction-list">
-                            <table id="myTable" class="table table-hover table-striped order-list table-fixed">
-                                <thead class="d-none d-md-block">
-                                    <tr>
-                                        <th class="col-sm-5 col-6">{{__('db.product')}}</th>
-                                        <th class="col-sm-2">{{__('db.Price')}}</th>
-                                        <th class="col-sm-3 text-center">{{__('db.Quantity')}}</th>
-                                        <th class="col-sm-2">{{__('db.Subtotal')}}</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbody-id">
-
-                                </tbody>
-                            </table>
+                        <div class="col-sm-3 col-6">
+                            <strong class="totals-title">{{__('db.Tax')}} <button type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#order-tax"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg></button></strong><strong id="tax">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
                         </div>
-                        <div class="row" style="display: none;">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <input type="hidden" name="total_qty" value="0" />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <input type="hidden" name="total_discount" value="{{number_format(0, $general_setting->decimal, '.', '')}}" />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <input type="hidden" name="total_tax" value="{{number_format(0, $general_setting->decimal, '.', '')}}" />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <input type="hidden" name="total_price" value="{{number_format(0, $general_setting->decimal, '.', '')}}" />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <input type="hidden" name="item" value="0" />
-                                    <input type="hidden" name="order_tax" value="{{number_format(0, $general_setting->decimal, '.', '')}}" />
-                                </div>
-                                <x-validation-error fieldName="item" />
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <input type="hidden" name="grand_total" value="{{number_format(0, $general_setting->decimal, '.', '')}}"/>
-                                    <input type="hidden" name="used_points" />
-
-                                    @if(in_array('restaurant',explode(',',$general_setting->modules)))
-                                    <input type="hidden" name="sale_status" value="5" />
-                                    @else
-                                    <input type="hidden" name="sale_status" value="1" />
-                                    @endif
-                                    <x-validation-error fieldName="sale_status" />
-
-                                    <input type="hidden" name="coupon_active">
-                                    <input type="hidden" name="coupon_id" value="">
-                                    <input type="hidden" name="coupon_discount" value="0"/>
-
-                                    <input type="hidden" name="pos" value="1" />
-
-                                    @if(isset($lims_sale_data) && !empty($lims_sale_data))
-                                    <input type="hidden" name="sale_id" value="{{$lims_sale_data->id}}" />
-                                    <input type="hidden" name="draft" value="1" />
-                                    @else
-                                    <input type="hidden" name="draft" value="0" />
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 totals" style="background-color:#f5f6f7;border-top: 2px solid #ebe9f1;padding-bottom: 7px;padding-top: 7px;">
-                            <div class="row">
-                                <div class="col-sm-4 col-6">
-                                    <strong class="totals-title">{{__('db.Items')}}</strong><strong id="item">0 (0)</strong>
-                                </div>
-                                <div class="col-sm-4 col-6">
-                                    <strong class="totals-title">{{__('db.Total')}}</strong><strong id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
-                                </div>
-                                @if ($handle_discount_active)
-                                    <div class="col-sm-4 col-6">
-                                        <strong class="totals-title">{{__('db.Discount')}} <button type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#order-discount-modal"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg></button></strong><strong id="discount">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
-                                    </div>
-                                @endif
-                                <div class="col-sm-4 col-6">
-                                    <strong class="totals-title">{{__('db.Coupon')}} <button type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#coupon-modal"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg></button></strong><strong id="coupon-text">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
-                                </div>
-                                <div class="col-sm-4 col-6">
-                                    <strong class="totals-title">{{__('db.Tax')}} <button type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#order-tax"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg></button></strong><strong id="tax">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
-                                </div>
-                                <div class="col-sm-4 col-6">
-                                    <strong class="totals-title">{{__('db.Shipping')}} <button type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#shipping-cost-modal"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg></button></strong><strong id="shipping-cost">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
-                                </div>
-                            </div>
+                        <div class="col-sm-3 col-6">
+                            <strong class="totals-title">{{__('db.Shipping')}} <button type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#shipping-cost-modal"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg></button></strong><strong id="shipping-cost">{{number_format(0, $general_setting->decimal, '.', '')}}</strong>
                         </div>
                     </div>
+                </div>
 
-                    <div class="payment-amount d-none d-md-block">
-                        <h2>{{__('db.grand total')}} <span id="grand-total">{{number_format(0, $general_setting->decimal, '.', '')}}</span></h2>
-                    </div>
+                <div class="payment-amount d-none d-md-block">
+                    <h2>{{__('db.grand total')}} <span id="grand-total">{{number_format(0, $general_setting->decimal, '.', '')}}</span></h2>
                 </div>
                 <div class="payment-options">
                     <div class="column-5 more-payment-options">
@@ -1053,7 +1049,7 @@
                                 @if(in_array("installment",$options))
                                 <div class="column-5">
                                     <button type="button" class="btn btn-sm btn-warning" disabled="true" id="installmentPlanBtn">
-                                        <i class="bi bi-credit-card"></i> {{__('db.Installment')}}
+                                        <i class="bi bi-credit-card"></i> {{__('db.Instalment')}}
                                     </button>
                                 </div>
                                 @endif
@@ -1152,12 +1148,14 @@
                                                     @if($lims_reward_point_setting_data && $lims_reward_point_setting_data->is_active)
                                                     <option value="7">Points</option>
                                                     @endif
+                                                    @if(in_array("credit",$options))   {{-- ✅ এটা যোগ করুন --}}
+                                                    <option value="credit_sale">Credit Sale</option>
+                                                    @endif
                                                     @if(in_array("razorpay",$options))
                                                     <option value="razorpay">Razorpay</option>
                                                     @endif
-
                                                     @foreach($options as $option)
-                                                        @if($option !== 'cash' && $option !== 'card' && $option !== 'card' && $option !== 'cheque' && $option !== 'gift_card' && $option !== 'deposit' && $option !== 'paypal' && $option !== 'pesapal' && $option !== 'points')
+                                                        @if(!in_array($option, ['cash','card','cheque','gift_card','deposit','paypal','pesapal','points','credit']))
                                                             <option value="{{$option}}">{{ucfirst($option)}}</option>
                                                         @endif
                                                     @endforeach
@@ -1386,7 +1384,11 @@
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label>{{__('db.Unit Price')}}</label>
-                                            <input type="text" name="edit_unit_price" class="form-control numkey" step="any">
+                                            @can('price_edit_in_sale')
+                                                <input type="text" name="edit_unit_price" class="form-control numkey" step="any">
+                                            @else
+                                                <input type="text" name="edit_unit_price" class="form-control numkey" step="any" readonly>
+                                            @endcan
                                         </div>
                                         <?php
                                         $tax_name_all[] = 'No Tax';
@@ -1432,7 +1434,7 @@
                                     <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></span></button>
                                 </div>
                                 <div class="modal-body">
-                                <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                                <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -1576,12 +1578,12 @@
                             <div class="container mt-3 pb-2 border-bottom">
                                 <div class="row">
                                     <div class="col-md-6 d-print-none">
-                                        <button id="print-btn" type="button" class="btn btn-default btn-sm"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" /></svg> {{__('db.Print')}}</button>
+                                        <button id="print-btn" type="button" class="btn btn-light btn-sm"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" /></svg> {{__('db.Print')}}</button>
 
                                         <form action="{{ route('sale.sendmail') }}" method="POST" class="sendmail-form">
                                             @csrf
                                             <input type="hidden" name="sale_id">
-                                            <button class="btn btn-default btn-sm d-print-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg> {{__('db.Email')}}</button>
+                                            <button class="btn btn-light btn-sm d-print-none"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg> {{__('db.Email')}}</button>
                                         </form>
                                     </div>
                                     <div class="col-md-6 d-print-none">
@@ -1748,7 +1750,7 @@
         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-        <p class="italic"><small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+        <p class="italic"><small>{{ __('The field labels marked with are required input fields') }}.</small></p>
         <form action="{{ route('expenses.store') }}" method="POST">
             @csrf
         <?php
@@ -1866,7 +1868,7 @@
                 <h5 id="exampleModalLabel" class="modal-title">{{__('db.Add Cash Register')}}</h5>
             </div>
             <div class="modal-body">
-                <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                 <div class="row">
                     <div class="col-md-6 form-group warehouse-section">
                         <label>{{__('db.Warehouse')}} *</strong> </label>
@@ -1996,64 +1998,121 @@
     </div>
 </div>
 @endif
-<!-- ✅ Installment Plan Modal -->
-<div class="modal fade" id="installmentPlanModal" tabindex="-1" aria-labelledby="installmentPlanModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{__('db.Installment Plan')}}</h5>
-
-                <button id="close-installment-modal-x" type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></span></button>
-            </div>
-
-            <div class="modal-body">
-                <!-- Enable Installments -->
-                <div class="form-check mb-3">
-                    <input type="checkbox" class="form-check-input" id="enable_installment" name="enable_installment">
-                    <label for="enable_installment" class="form-check-label">{{__('db.Enable Installment Plan')}}</label>
+    <!-- ✅ Instalment Plan Modal -->
+    <div class="modal fade" id="installmentPlanModal" tabindex="-1" aria-labelledby="installmentPlanModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Instalment Plan</h5>
+                    <button type="button" id="close-installment-modal-x" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></span></button>
                 </div>
 
-                <!-- Installment Fields (hidden until checked) -->
-                <div id="installmentFields" class="row" style="display: none;">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{__('db.Plan Name')}}</label>
-                        <input type="text" class="form-control" name="installment_plan[name]" value="12 Months" placeholder="e.g., 6 Month Plan">
-                    </div>
+                <div class="modal-body">
+                    <input type="checkbox" class="form-check-input" id="enable_installment" name="enable_installment" style="display:none;">
+                    <div id="installmentFields">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">{{__('db.Plan Name')}}</label>
+                                    <input type="text" class="form-control" name="installment_plan[name]" value="12 Months" placeholder="e.g., 6 Month Plan">
+                                </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{__('db.Price')}}</label>
-                        <input type="number" step="0.01" class="form-control" name="installment_plan[price]" id="installment_price" readonly>
-                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label">{{__('db.Price')}}</label>
+                                    <input type="number" step="0.01" class="form-control" name="installment_plan[price]" id="installment_price" readonly>
+                                </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{__('db.Additional Amount')}}</label>
-                        <input id="additional_amount" type="number" step="0.01" class="form-control" name="installment_plan[additional_amount]" value="0">
-                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label">{{__('db.Additional Amount')}}</label>
+                                    <input id="additional_amount" type="number" step="0.01" class="form-control" name="installment_plan[additional_amount]" value="0">
+                                </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{__('db.Total Amount')}}</label>
-                        <input type="number" step="0.01" class="form-control" name="installment_plan[total_amount]" id="installment_total" readonly>
-                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label">{{__('db.Total Amount')}}</label>
+                                    <input type="number" step="0.01" class="form-control" name="installment_plan[total_amount]" id="installment_total" readonly>
+                                </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{__('db.Down Payment')}}</label>
-                        <input type="number" step="0.01" class="form-control" id="down_payment_id" name="installment_plan[down_payment]" value="0">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">{{__('db.Months')}}</label>
-                        <input type="number" step="1" class="form-control" name="installment_plan[months]" min="1" value="12">
-                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label">{{__('db.Down Payment')}}</label>
+                                    <input type="number" step="0.01" class="form-control" id="down_payment_id" name="installment_plan[down_payment]" value="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">{{__('db.Months')}}</label>
+                                    <input type="number" step="1" class="form-control" name="installment_plan[months]" id="installment_months" min="1" value="12">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="paymentFields" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">{{__('db.Payment Method')}}</label>
+                                        <select name="installment_plan[paid_by_id]" class="form-control selectpicker">
+                                            @if(in_array("cash",$options))
+                                            <option value="1">{{ __('db.Cash') }}</option>
+                                            @endif
+                                            @if(in_array("gift_card",$options))
+                                            <option value="2">{{ __('db.Gift Card') }}</option>
+                                            @endif
+                                            @if(in_array("card",$options))
+                                            <option value="3">{{ __('db.Credit Card') }}</option>
+                                            @endif
+                                            @if(in_array("cheque",$options))
+                                            <option value="4">{{ __('db.Cheque') }}</option>
+                                            @endif
+                                            @if(in_array("deposit",$options))
+                                            <option value="6">{{ __('db.Deposit') }}</option>
+                                            @endif
+                                            @if($lims_reward_point_setting_data && $lims_reward_point_setting_data->is_active)
+                                            <option value="7">{{ __('db.Points') }}</option>
+                                            @endif
+                                            @foreach($options as $option)
+                                                @if($option !== 'cash' && $option !== 'card' && $option !== 'cheque' && $option !== 'gift_card' && $option !== 'deposit' && $option !== 'paypal' && $option !== 'pesapal')
+                                                    <option value="{{$option}}">{{ucfirst($option)}}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">{{__('db.Account')}}</label>
+                                        <select name="installment_plan[account_id]" class="form-control selectpicker">
+                                            @foreach($lims_account_list as $account)
+                                            <option value="{{$account->id}}">{{$account->name}} [{{$account->account_no}}]</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">{{__('db.Payment Note')}}</label>
+                                        <textarea name="installment_plan[payment_note]" class="form-control"></textarea>
+                                    </div>
+                                </div>
+                                <div id="schedulePreview" class="mt-2">
+                                    <h6>Schedule Preview</h6>
+                                    <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                                        <table class="table table-sm table-bordered" id="installmentScheduleTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>{{__('db.date')}}</th>
+                                                    <th>{{__('db.Amount')}}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <input type="hidden" name="installment_plan[reference_type]" value="sale">
+                        <input type="hidden" name="installment_plan[reference_type]" value="sale">
+                    </div>
                 </div>
-            </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="done-installment-modal" data-bs-dismiss="modal">Done</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="close-installment-modal" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="done-installment-modal">Create Instalment</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </section>
 <section id="print-layout" class="">
 </section>
@@ -2117,9 +2176,6 @@
             $results.css('padding', '0 10px 15px');
             $results.html('<div class="loader " title="4" style="border:none;min-height:300px"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="30px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve"><rect x="0" y="0" width="4" height="10" fill="#333"><animateTransform attributeType="xml" attributeName="transform" type="translate" values="0 0; 0 20; 0 0" begin="0" dur="0.6s" repeatCount="indefinite"></animateTransform></rect><rect x="10" y="0" width="4" height="10" fill="#333"><animateTransform attributeType="xml" attributeName="transform" type="translate" values="0 0; 0 20; 0 0" begin="0.2s" dur="0.6s" repeatCount="indefinite"></animateTransform></rect><rect x="20" y="0" width="4" height="10" fill="#333"><animateTransform attributeType="xml" attributeName="transform" type="translate" values="0 0; 0 20; 0 0" begin="0.4s" dur="0.6s" repeatCount="indefinite"></animateTransform></rect></svg></div>');
             $noResults.hide();
-
-            // search = encodeURIComponent(search); //btoa(search); previous code
-            // console.log(search);
 
             $.ajax({
                 url: '{{ url("/sales/search") }}',
@@ -2275,47 +2331,90 @@
             }
         });
 
-        // Show modal
+        // ✅ Show modal and calculate base totals
         $('#installmentPlanBtn').on('click', function() {
+            let baseTotal = parseFloat($('input[name="grand_total"]').val()) || 0;
+            let additionalAmount = parseFloat($('#additional_amount').val()) || 0;
+            let installment_total_price = baseTotal + additionalAmount;
+
+            $('#installment_price').val(baseTotal.toFixed(2));
+            $('#installment_total').val(installment_total_price.toFixed(2));
+
+            updateSchedulePreview();
             $('#installmentPlanModal').modal('show');
         });
 
-        // Toggle fields visibility when checkbox checked/unchecked
-        $('#enable_installment').on('change', function() {
-            if (this.checked) {
-                $('#installmentFields').slideDown();
-                $('#installment_price').val($('input[name="grand_total"]').val());
-                let installment_total_price = parseFloat($('input[name="grand_total"]').val() + $('#additional_amount').val());
-                $('#installment_total').val(installment_total_price.toFixed(2));
-                $('input[name="grand_total"]').val(installment_total_price);
-                $('input[name="total_price"]').val(installment_total_price);
-            } else {
-                $('#installmentFields').slideUp();
-            }
-        });
+        function updateSchedulePreview() {
+            let total = parseFloat($('#installment_total').val()) || 0;
+            let downPayment = parseFloat($('#down_payment_id').val()) || 0;
+            let months = parseInt($('#installment_months').val()) || 1;
+            let remaining = total - downPayment;
+            let installmentAmount = (months > 0) ? (remaining / months).toFixed(2) : 0;
 
-        $('#additional_amount').focusout(function() {
-            var grand_total = parseFloat($('input[name="grand_total"]').val());
-            var additional_amount = parseFloat($(this).val()) || 0;
-            var installment_total_price = grand_total + additional_amount;
+            let tbody = $('#installmentScheduleTable tbody');
+            tbody.empty();
+
+            let date = new Date();
+            for (let i = 1; i <= months; i++) {
+                let nextDate = new Date(date);
+                nextDate.setMonth(date.getMonth() + i);
+                let dateString = nextDate.toISOString().split('T')[0];
+                tbody.append(`<tr><td>${i}</td><td>${dateString}</td><td>${installmentAmount}</td></tr>`);
+            }
+
+            if (downPayment > 0) {
+                $('#paymentFields').slideDown();
+                $('#done-installment-modal').text('Create Instalment & Pay');
+            } else {
+                $('#paymentFields').slideUp();
+                $('#done-installment-modal').text('Create Instalment');
+            }
+        }
+
+        $('#additional_amount, #down_payment_id, #installment_months').on('input', function() {
+            let baseTotal = parseFloat($('#installment_price').val()) || 0;
+            let additional_amount = parseFloat($('#additional_amount').val()) || 0;
+            let installment_total_price = baseTotal + additional_amount;
+
             $('#installment_total').val(installment_total_price.toFixed(2));
+            updateSchedulePreview();
         });
 
         // ✅ When Close button clicked
-        $('#close-installment-modal').on('click', function() {
-            // Uncheck and hide
+        $('#close-installment-modal, #close-installment-modal-x').on('click', function() {
             $('#enable_installment').prop('checked', false);
-            $('#installmentFields').slideUp();
-            $('#installmentPlanModal').modal('hide');
-        });
-        $('#close-installment-modal-x').on('click', function() {
             $('#installmentPlanModal').modal('hide');
         });
 
-        // ✅ When Done button clicked — just close modal (Bootstrap handles this)
+        // ✅ Reset modal fields every time it's closed
+        $('#installmentPlanModal').on('hidden.bs.modal', function() {
+            if (!$('#enable_installment').prop('checked')) {
+                $(this).find('input[name="installment_plan[name]"]').val('12 Months');
+                $(this).find('input[name="installment_plan[additional_amount]"]').val('0');
+                $(this).find('input[name="installment_plan[down_payment]"]').val('0');
+                $(this).find('input[name="installment_plan[months]"]').val('12');
+                $(this).find('textarea[name="installment_plan[payment_note]"]').val('');
+                $(this).find('select[name="installment_plan[paid_by_id]"]').val('1').trigger('change');
+                $('#paymentFields').hide();
+                $('#done-installment-modal').text('Create Instalment');
+                $('#installmentScheduleTable tbody').empty();
+            }
+        });
+
+        // ✅ When Done button clicked
         $('#done-installment-modal').on('click', function() {
+            let months = parseInt($('#installment_months').val()) || 0;
+            if (months < 1) {
+                alert('Please enter valid number of months.');
+                return;
+            }
+
             $('input[name="grand_total"]').val($('#installment_total').val());
             $('input[name="total_price"]').val($('#installment_total').val());
+            $('#grand-total').text(parseFloat($('#installment_total').val()).toFixed({{$general_setting->decimal}}));
+            $('#grand-total-m').text(parseFloat($('#installment_total').val()).toFixed({{$general_setting->decimal}}));
+            
+            $('#enable_installment').prop('checked', true);
             $('#installmentPlanModal').modal('hide');
         });
 
@@ -2437,8 +2536,6 @@
     var temp_unit_operator = [];
     var temp_unit_operation_value = [];
 
-    var deposit = <?php echo json_encode($deposit) ?>;
-    var points = <?php echo json_encode($points) ?>;
     var reward_point_setting = <?php echo json_encode($lims_reward_point_setting_data) ?>;
 
     @if($lims_pos_setting_data)
@@ -2590,6 +2687,15 @@
         $.get('{{url("sales/getcustomergroup")}}/' + customer_id, function(data) {
             customer_group_rate = (data / 100);
         });
+
+        var customer_type = $(this).find(':selected').data('type');
+        if (customer_type == 'walkin') {
+            $('#installmentPlanBtn').attr('disabled', true);
+        } else {
+             if ($('table.order-list tbody tr').length > 0) {
+                $('#installmentPlanBtn').removeAttr('disabled');
+            }
+        }
     });
 
     @if($lims_pos_setting_data && $lims_pos_setting_data->cash_register)
@@ -2725,10 +2831,6 @@
     }
 
     function productSearch(data) {
-        // if(data.embedded == 1) {
-        //     alert('{{ __("db.This product has been added using the weight scale machine.")}}');
-        //     return;
-        // }
 
         var item_code = data.code;
         var pre_qty = 0;
@@ -2797,7 +2899,7 @@
                             product_price[rowindex] = parseFloat(data[2] * currency['exchange_rate']) + parseFloat(data[2] * currency['exchange_rate'] * customer_group_rate);
                         }
 
-                        checkDiscount(String(qty), true);
+                        // checkDiscount(String(qty), true); //check discount is already called in addNewProduct() function
                         flag = 0;
                     }
                     $("input[name='product_code_name']").val('');
@@ -2829,7 +2931,10 @@
 
     function addNewProduct(data){
         $('.payment-btn').removeAttr('disabled');
-        $('#installmentPlanBtn').removeAttr('disabled');
+        var customer_type = $('#customer_id option:selected').data('type');
+        if (customer_type != 'walkin') {
+            $('#installmentPlanBtn').removeAttr('disabled');
+        }
         var newRow = $('<tr id='+ data[1] +'>');
         var cols = '';
         temp_unit_name = (data[6]).split(',');
@@ -2864,7 +2969,7 @@
 
         // If no IMEI, show minus button
         if (!data[18] || data[18] == 'null') {
-            cols += '<button type="button" class="btn btn-default minus mr-1" style="padding:5px"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" /></svg></button>';
+            cols += '<button type="button" class="btn btn-light minus mr-1" style="padding:5px"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" /></svg></button>';
         }
 
         // Input field
@@ -2872,7 +2977,7 @@
 
         // If no IMEI, show plus button
         if (!data[18] || data[18] == 'null') {
-            cols += '<button type="button" class="btn btn-default plus ml-1" style="padding:5px"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></button>';
+            cols += '<button type="button" class="btn btn-light plus ml-1" style="padding:5px"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></button>';
         }
 
         cols += '</span></div></td>';
@@ -2905,7 +3010,7 @@
 
         if(keyboard_active==1) {
             $("table.order-list tbody").prepend(newRow).find('.qty').keyboard({usePreview: false, layout: 'custom', display: { 'accept'  : '&#10004;', 'cancel'  : '&#10006;' }, customLayout : {
-            'normal' : ['1 2 3', '4 5 6', '7 8 9','0 {dec} {bksp}','{clear} {cancel} {accept}']}, restrictInput : true, preventPaste : true, autoAccept : true, css: { container: 'center-block dropdown-menu', buttonDefault: 'btn btn-default', buttonHover: 'btn-primary',buttonAction: 'active', buttonDisabled: 'disabled'},});
+            'normal' : ['1 2 3', '4 5 6', '7 8 9','0 {dec} {bksp}','{clear} {cancel} {accept}']}, restrictInput : true, preventPaste : true, autoAccept : true, css: { container: 'center-block dropdown-menu', buttonDefault: 'btn btn-light', buttonHover: 'btn-primary',buttonAction: 'active', buttonDisabled: 'disabled'},});
         }
         else
             $("table.order-list tbody").prepend(newRow);
@@ -3188,7 +3293,7 @@
                 // keyboard container
                 container: 'center-block dropdown-menu', // jumbotron
                 // default state
-                buttonDefault: 'btn btn-default',
+                buttonDefault: 'btn btn-light',
                 // hovered button
                 buttonHover: 'btn-primary',
                 // Action keys (e.g. Accept, Cancel, Tab, etc);
@@ -3206,7 +3311,7 @@
                 // keyboard container
                 container: 'center-block dropdown-menu', // jumbotron
                 // default state
-                buttonDefault: 'btn btn-default',
+                buttonDefault: 'btn btn-light',
                 // hovered button
                 buttonHover: 'btn-primary',
                 // Action keys (e.g. Accept, Cancel, Tab, etc);
@@ -3231,7 +3336,7 @@
                 // keyboard container
                 container: 'center-block dropdown-menu', // jumbotron
                 // default state
-                buttonDefault: 'btn btn-default',
+                buttonDefault: 'btn btn-light',
                 // hovered button
                 buttonHover: 'btn-primary',
                 // Action keys (e.g. Accept, Cancel, Tab, etc);
@@ -3261,11 +3366,11 @@
     // Add More Button of Multiple Payment Modal
     $('.add-more').on("click", function(e) {
         e.preventDefault();
-
+        var toPay = 0;
         var htmlText = `<div class="row new-row">
                             <div class="col-md-3 col-6 mt-2 paying-amount-container">
                                 <label>{{__('db.Paying Amount')}} *</label>
-                                <input type="text" name="paid_amount[]" value="0" class="form-control paid_amount numkey" step="any">
+                                <input type="text" name="paid_amount[]" value="` + toPay + `" class="form-control paid_amount numkey" step="any">
                             </div>
                             <div class="col-md-3 col-6 mt-2">
                                 <input type="hidden" name="paid_by_id[]">
@@ -3292,6 +3397,10 @@
                                     @if($lims_reward_point_setting_data && $lims_reward_point_setting_data->is_active)
                                     <option value="7">Points</option>
                                     @endif
+
+                                    @if(in_array("credit",$options))
+                                        <option value="credit_sale">Credit Sale</option>
+                                    @endif
                                     @foreach($options as $option)
                                         @if($option !== 'cash' && $option !== 'card' && $option !== 'card' && $option !== 'cheque' && $option !== 'gift_card' && $option !== 'deposit' && $option !== 'paypal' && $option !== 'pesapal' && $option !== 'points')
                                             <option value="{{$option}}">{{ucfirst($option)}}</option>
@@ -3300,7 +3409,7 @@
                                 </select>
                             </div>
                             <div class="col-md-3 col-5 mt-2 cash-received-container">
-                                <label>{{__('db.Cash Received')}} <x-info title="Cash handed over to you. example: sale amount is 300. customer gives you 500. cash received: 500 " type="info" /> *</label>
+                                <label>{{__('db.Cash Received')}} <x-info title="Cash handed over to you. example: sale amount is 300. customer gives you 500. cash received: 500 " type="info" /> </label>
                                 <input type="text" name="paying_amount[]" class="form-control paying_amount numkey" required step="any">
                             </div>
                             <div class="col-1 mt-2">
@@ -3341,8 +3450,8 @@
             success:function(response) {
                 key = response['id'];
                 value = response['name']+' ['+response['phone_number']+']';
-                $('select[name="customer_id"]').append('<option value="'+ key +'">'+ value +'</option>');
-                $('select[name="customer_id"]').val(key);
+                $('select[name="customer_id"]').append('<option value="'+ key +'" data-type="'+response['type']+'">'+ value +'</option>');
+                $('select[name="customer_id"]').val(key).trigger('change');
                 $('.selectpicker').selectpicker('refresh');
                 $("#addCustomer").modal('hide');
             },
@@ -3796,9 +3905,11 @@
     }
 
     $("#myTable").on('click', '.plus', function() {
-        rowindex = $(this).closest('tr').index();
-        var qty = parseFloat($('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ') .qty').val());
-        var max_qty = parseFloat($('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ') .qty').attr('max'));
+        var row = $(this).closest('tr');
+        var qtyInput = row.find('.qty'); 
+        
+        var qty = parseFloat(qtyInput.val()) || 0;
+        var max_qty = parseFloat(qtyInput.attr('max'));
         if(!qty)
             qty = 1;
         else if(!isNaN(max_qty) && qty >= max_qty && without_stock == 'no') {
@@ -4090,7 +4201,10 @@
                 total_amount: $('input[name="installment_plan[total_amount]"]').val(),
                 down_payment: $('input[name="installment_plan[down_payment]"]').val(),
                 months: $('input[name="installment_plan[months]"]').val(),
-                reference_type: $('input[name="installment_plan[reference_type]"]').val()
+                reference_type: $('input[name="installment_plan[reference_type]"]').val(),
+                paid_by_id: $('select[name="installment_plan[paid_by_id]"]').val(),
+                account_id: $('select[name="installment_plan[account_id]"]').val(),
+                payment_note: $('textarea[name="installment_plan[payment_note]"]').val()
             };
 
             // 🟢 Append installment plan fields to the form before submitting
@@ -4358,18 +4472,89 @@
     function changeLabelText(labelText) {
         $("#received-paying").text(labelText);
     }
-
     function checkCreditLimit(){
         var selectedOption = $('#customer_id option:selected');
-        var credit_limit = selectedOption.data('credit-limit');
-        var due = parseFloat($('.due').text());
-        if (credit_limit !== null && credit_limit !== '' && due > credit_limit) {
-            alert('{{__("db.Credit limit exceeded! Customer credit limit:")}} ' + credit_limit);
-            $('#submit-btn').prop('disabled', true);
-        }else{
+        var credit_limit   = parseFloat(selectedOption.data('credit-limit')) || 0;
+
+        console.log('Credit Limit:', credit_limit);
+        console.log('Selected Option:', selectedOption.val());
+
+        if (credit_limit <= 0) {
             $('#submit-btn').prop('disabled', false);
+            return;
         }
 
+        var customer_id = $('#customer_id').val();
+
+        $.ajax({
+            url: '/customer/' + customer_id + '/due',
+            type: 'GET',
+            async: false,
+            success: function(existing_due) {
+                console.log('Existing Due Response:', existing_due);
+
+                var current_grand_total = parseFloat($('input[name="grand_total"]').val()) || 0;
+                var total_paying        = parseFloat($('.total_paying').text()) || 0;
+                var new_due             = current_grand_total - total_paying;
+                var total_due_after     = parseFloat(existing_due) + new_due;
+
+                console.log('Grand Total:', current_grand_total);
+                console.log('Total Paying:', total_paying);
+                console.log('New Due:', new_due);
+                console.log('Total Due After:', total_due_after);
+
+                if (total_due_after > credit_limit) {
+                    alert(
+                        '{{__("db.Credit limit exceeded!")}}' +
+                        '\nCredit Limit: ' + credit_limit +
+                        '\nExisting Due: ' + parseFloat(existing_due).toFixed(2) +
+                        '\nNew Due: ' + new_due.toFixed(2) +
+                        '\nTotal Due After Sale: ' + total_due_after.toFixed(2)
+                    );
+                    $('#submit-btn').prop('disabled', true);
+                } else {
+                    $('#submit-btn').prop('disabled', false);
+                }
+            },
+            error: function(xhr) {
+                console.log('AJAX Error:', xhr.status, xhr.responseText);
+            }
+        });
+    }
+
+    function checkCreditLimitForMultiple(creditAmount) {
+        var selectedOption = $('#customer_id option:selected');
+        var credit_limit   = parseFloat(selectedOption.data('credit-limit')) || 0;
+
+        if (credit_limit <= 0) {
+            $('#submit-btn').prop('disabled', false);
+            return;
+        }
+
+        var customer_id = $('#customer_id').val();
+
+        $.ajax({
+            url: '/customer/' + customer_id + '/due',
+            type: 'GET',
+            async: false,
+            success: function(existing_due) {
+                var total_due_after = parseFloat(existing_due) + parseFloat(creditAmount);
+
+                if (total_due_after > credit_limit) {
+                    alert(
+                        '{{ __("db.Credit limit exceeded!") }}' +
+                        '\n\nCredit Limit: '        + credit_limit.toFixed(2) +
+                        '\nExisting Due: '          + parseFloat(existing_due).toFixed(2) +
+                        '\nNew Credit Amount: '     + parseFloat(creditAmount).toFixed(2) +
+                        '\nTotal Due After Sale: '  + total_due_after.toFixed(2) +
+                        '\n\nCredit Sale সিলেক্ট করা যাবে না।'
+                    );
+                    $('#submit-btn').prop('disabled', true);
+                } else {
+                    $('#submit-btn').prop('disabled', false);
+                }
+            }
+        });
     }
 
     function appendRemoveElement(className, payOption = false){
@@ -4550,7 +4735,7 @@
             $('select[name="paid_by_id_select[]"]').val(6);
             let customerId = $('#customer_id').val();
             let paidAmount = parseFloat($('input[name="paid_amount[]"]').val() || 0);
-            let customerDeposit = parseFloat(deposit[customerId] || 0);
+            let customerDeposit = parseFloat($('#customer_id option:selected').data('deposit') || 0);
 
             // If the deposit is 0 or less, the modal will not be shown
             if (customerDeposit <= 0 || isNaN(customerDeposit)) {
@@ -4686,13 +4871,101 @@
 
     $(document).on("change", 'select[name="paid_by_id_select[]"]', function() {
         updateChange();
-        var id = $(this).val();
+        var id       = $(this).val();
+        var $thisSelect = $(this);
         var appendElement = '';
         $(".payment-form").off("submit");
         $(this).parent().parent().siblings('.cash-received-container').addClass('d-none');
         $(this).parent().parent().siblings('.gift-card').remove();
         $(this).parent().parent().siblings('.credit-card').remove();
         $(this).parent().parent().siblings('.cheque').remove();
+        $(this).parent().parent().siblings('.credit-sale-extra').remove();
+
+        // ✅ Credit Sale select হলে আগে duplicate ও limit check করো
+        if (id === 'credit_sale') {
+
+            // ✅ Duplicate check — অন্য row তে credit_sale আছে কিনা
+            var creditSaleAlreadyExists = false;
+            $('select[name="paid_by_id_select[]"]').each(function() {
+                if (!$(this).is($thisSelect) && $(this).val() === 'credit_sale') {
+                    creditSaleAlreadyExists = true;
+                    return false;
+                }
+            });
+
+            if (creditSaleAlreadyExists) {
+                alert('Credit Sale ইতোমধ্যে যোগ করা হয়েছে। একটির বেশি Credit Sale সম্ভব নয়।');
+                $thisSelect.val('1').selectpicker('refresh');
+                $thisSelect.closest('.row, .new-row').find('.cash-received-container').removeClass('d-none');
+                return;
+            }
+
+            // ✅ Credit Amount হিসাব করো
+            var grandTotal = parseFloat($('#grand-total').text()) || 0;
+            var otherPaid  = 0;
+
+            $('.paid_amount').each(function() {
+                var $parentRow = $(this).closest('.new-row');
+                if ($parentRow.length === 0) {
+                    $parentRow = $(this).closest('#payment-select-row > .row');
+                }
+                if (!$parentRow.find($thisSelect).length) {
+                    var $otherSelect = $parentRow.find('select[name="paid_by_id_select[]"]');
+                    if ($otherSelect.val() !== 'credit_sale') {
+                        otherPaid += parseFloat($(this).val()) || 0;
+                    }
+                }
+            });
+
+            var creditAmount = grandTotal - otherPaid;
+            if (creditAmount < 0) creditAmount = 0;
+
+            // ✅ Credit Limit check
+            var selectedOption = $('#customer_id option:selected');
+            var credit_limit   = parseFloat(selectedOption.data('credit-limit')) || 0;
+
+            if (credit_limit > 0) {
+                var customer_id = $('#customer_id').val();
+
+                $.ajax({
+                    url: '/customer/' + customer_id + '/due',
+                    type: 'GET',
+                    async: true,
+                    success: function(existing_due) {
+                        var total_due_after = parseFloat(existing_due) + parseFloat(creditAmount);
+
+                        if (total_due_after > credit_limit) {
+                            alert(
+                                '{{ __("db.Credit limit exceeded!") }}' +
+                                '\n\nCredit Limit: '        + credit_limit.toFixed(2) +
+                                '\nExisting Due: '          + parseFloat(existing_due).toFixed(2) +
+                                '\nNew Credit Amount: '     + creditAmount.toFixed(2) +
+                                '\nTotal Due After Sale: '  + total_due_after.toFixed(2) +
+                                '\n\nCredit Sale সিলেক্ট করা যাবে না।'
+                            );
+
+                            // ❌ Revert to Cash
+                            $thisSelect.val('1').selectpicker('refresh');
+                            $thisSelect.closest('.row, .new-row')
+                                .find('.cash-received-container')
+                                .removeClass('d-none');
+
+                            $('#submit-btn').prop('disabled', false);
+                            return;
+                        }
+
+                        // ✅ Limit OK — proceed
+                        proceedCreditSaleInMultiple($thisSelect, creditAmount);
+                    }
+                });
+
+            } else {
+                // Unlimited credit — proceed directly
+                proceedCreditSaleInMultiple($thisSelect, creditAmount);
+            }
+
+            return; // async এর জন্য early return
+        }
         //cash
         if(id == 1){
             $(this).parent().parent().siblings('.cash-received-container').removeClass('d-none');
@@ -4767,6 +5040,55 @@
                 $currentSelect.selectpicker('refresh');
                 return;
             }
+        }
+
+        else if (id == 'credit_sale') {
+            var selected        = $('#customer_id option:selected');
+            var pay_term_no     = selected.data('pay_term_no')     || '';
+            var pay_term_period = selected.data('pay_term_period') || 'days';
+
+            appendElement = `
+                <div class="form-group col-md-10 credit-sale-extra">
+                    <label>Pay Term</label>
+                    <div class="input-group">
+                        <input type="number"
+                            name="pay_term_no"
+                            class="form-control"
+                            min="1"
+                            placeholder="e.g. 30"
+                            value="${pay_term_no}">
+                        <select name="pay_term_period" class="form-control">
+                            <option value="days"   ${pay_term_period == 'days'   ? 'selected' : ''}>Days</option>
+                            <option value="months" ${pay_term_period == 'months' ? 'selected' : ''}>Months</option>
+                        </select>
+                    </div>
+                </div>`;
+
+            $(this).closest('.col-md-3').after(appendElement);
+
+            // paid amount = grand total - অন্য payments এর sum
+            var grandTotal = parseFloat($('#grand-total').text()) || 0;
+            var otherPaid  = 0;
+
+            $(this).closest('.row, .new-row').siblings().find('.paid_amount').each(function() {
+                otherPaid += parseFloat($(this).val()) || 0;
+            });
+
+            // প্রথম row এর paid_amount বাদ দিতে হবে
+            var $thisPaidAmount = $(this).closest('.row, .new-row').find('.paid_amount');
+            var creditAmount    = grandTotal - otherPaid;
+            if (creditAmount < 0) creditAmount = 0;
+
+            $thisPaidAmount.val(creditAmount.toFixed({{ $general_setting->decimal }}));
+
+            // Paying amount 0 করে দাও (credit sale এ cash নেওয়া হয় না)
+            $(this).parent().parent().siblings('.cash-received-container').addClass('d-none');
+
+            // Credit limit check
+            checkCreditLimitForMultiple(creditAmount);
+
+            calculatePayingAmount();
+            updateChange();
         }
     });
 
@@ -4901,26 +5223,37 @@
 
     // Function to calculate the total and update the total_payable
     function calculatePayingAmount() {
+    let cashTotal  = 0;
+    let grandTotal = parseFloat($("#grand-total").text()) || 0;
 
-        let total = 0;
-        let due = 0;
-        let grandTotal = parseFloat($("#grand-total").text()) || 0;
+    $('.paid_amount').each(function() {
+        // এই paid_amount কোন row এ আছে সেটা বের করো
+        var $parentRow = $(this).closest('.new-row');
+        if ($parentRow.length === 0) {
+            $parentRow = $(this).closest('#payment-select-row > .row');
+        }
 
-        // Loop through each paying_amount field and sum their values
-        $('.paid_amount').each(function() {
-            let value = $(this).val();
+        var $select = $parentRow.find('select[name="paid_by_id_select[]"]');
+        var payType = $select.val();
 
-            // Check if the value is a valid number
-            if ($.isNumeric(value)) {
-                total += parseFloat(value);
-                due = grandTotal - total;
-            }
-        });
-        // Update the total_payable with the total
-        $('.total_paying').text(total);
-        $('.due').text(due);
-        checkCreditLimit();
-    }
+        // credit_sale হলে total paying এ যোগ করবো না
+        if (payType === 'credit_sale') {
+            return; // skip
+        }
+
+        if ($.isNumeric($(this).val())) {
+            cashTotal += parseFloat($(this).val());
+        }
+    });
+
+    var due = grandTotal - cashTotal;
+    if (due < 0) due = 0;
+
+    $('.total_paying').text(cashTotal.toFixed({{ $general_setting->decimal }}));
+    $('.due').text(due.toFixed({{ $general_setting->decimal }}));
+
+    checkCreditLimit();
+}
 
     function confirmDelete() {
         if (confirm("Are you sure want to delete?")) {
@@ -6046,7 +6379,7 @@
             action: () =>  {
                 $('#shipping-cost-modal').modal('show');
             }
-        },  
+        },
         cash_register_details: {
             keys: 'shift+r',
             action: () => $('#register-details-btn').click()
@@ -6091,7 +6424,7 @@
         if (e.key === "Enter") return false;
 
         // Disable shortcuts inside input fields
-        return element.tagName === 'INPUT' || 
+        return element.tagName === 'INPUT' ||
             element.tagName === 'TEXTAREA' ||
             element.isContentEditable;
     };

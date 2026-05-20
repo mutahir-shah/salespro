@@ -1033,7 +1033,7 @@
                     <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
                 </div>
                 <div class="modal-body">
-                  <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                  <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                     <form action="{{ route('notifications.store') }}" method="post">
                       @csrf
                       <div class="row">
@@ -1075,7 +1075,7 @@
                     <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
                 </div>
                 <div class="modal-body">
-                  <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                  <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                     <form action="{{ route('expenses.store') }}" method="post">
                       @csrf
                     <?php
@@ -1147,7 +1147,7 @@
                     <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
                 </div>
                 <div class="modal-body">
-                  <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                  <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                     <form action="{{ route('accounts.store') }}" method="post">
                       @csrf
                       <div class="form-group">
@@ -1185,7 +1185,7 @@
                     <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
                 </div>
                 <div class="modal-body">
-                  <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                  <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                     <form action="{{ route('accounts.statement') }}" method="post">
                       @csrf
                       <div class="row">
@@ -1233,7 +1233,7 @@
                     <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
                 </div>
                 <div class="modal-body">
-                  <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                  <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                     <form action="{{ route('report.warehouse') }}" method="post">
                       @csrf
                     <?php
@@ -1270,7 +1270,7 @@
                     <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
                 </div>
                 <div class="modal-body">
-                  <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                  <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                     <form action="{{ route('report.user') }}" method="post">
                       @csrf
                     <?php
@@ -1307,7 +1307,7 @@
                     <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
                 </div>
                 <div class="modal-body">
-                  <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                  <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                     <form action="{{ route('report.customer') }}" method="post">
                       @csrf
                     <?php
@@ -1344,7 +1344,7 @@
                     <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
                 </div>
                 <div class="modal-body">
-                  <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                  <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                     <form action="{{ route('report.supplier') }}" method="post">
                       @csrf
                     <?php

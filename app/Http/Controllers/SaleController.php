@@ -169,7 +169,14 @@ class SaleController extends Controller
                 $field_name[] = str_replace(" ", "_", strtolower($fieldName));
             }
             $smsTemplates = SmsTemplate::all();
-            $currency_list = Currency::where('is_active', true)->get();
+            if(cache()->has('currency_list'))
+            {
+                $currency_list = cache()->get('currency_list');
+            }else {
+                $currency_list = Currency::where('is_active', true)->get();
+                cache()->put('currency_list', $currency_list, 60 * 60 * 24);
+            }
+            
             return view('backend.sale.index', compact('starting_date', 'ending_date', 'warehouse_id', 'sale_status', 'payment_status', 'sale_type', 'payment_method', 'lims_gift_card_list', 'lims_pos_setting_data', 'lims_reward_point_setting_data', 'lims_account_list', 'lims_warehouse_list', 'all_permission','options', 'numberOfInvoice', 'custom_fields', 'field_name', 'lims_courier_list','smsTemplates', 'currency_list'));
         }
         else
@@ -178,6 +185,8 @@ class SaleController extends Controller
 
     public function saleData(Request $request)
     {
+
+        
         $general_setting = GeneralSetting::select('modules', 'show_products_details_in_sales_table')->first();
         // 1. Column mapping for DataTables
         $columns = array(
@@ -261,20 +270,20 @@ class SaleController extends Controller
             $qBase = $qBase->where('sales.sale_type', $sale_type);
 
         if ($installment == 1) {
-            $qBase->whereExists(function ($q) {
+            $qBase = $qBase->whereExists(function ($q) {
                 $q->select(DB::raw(1))
-                ->from('payments')
-                ->whereColumn('payments.sale_id', 'sales.id')
-                ->whereNotNull('payments.installment_id');
+                ->from('installment_plans')
+                ->where('reference_type', 'sale')
+                ->whereColumn('reference_id', 'sales.id');
             });
         }
 
         if ($installment == 2) {
-            $qBase->whereNotExists(function ($q) {
+            $qBase = $qBase->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
-                ->from('payments')
-                ->whereColumn('payments.sale_id', 'sales.id')
-                ->whereNotNull('payments.installment_id');
+                ->from('installment_plans')
+                ->where('reference_type', 'sale')
+                ->whereColumn('reference_id', 'sales.id');
             });
         }
 
@@ -303,12 +312,17 @@ class SaleController extends Controller
 
             // Rebuild the query for fetching the final results (with due calculation)
             $query = Sale::select('sales.*', DB::raw('(grand_total - paid_amount) as due'))
-                ->with('biller', 'customer', 'warehouse', 'user')
+                ->with([
+                    'biller:id,name,company_name,email,phone_number',
+                    'customer:id,name,phone_number,deposit,expense,points',
+                    'warehouse:id,name',
+                    'user:id,name'
+                ])
                 ->whereNull('sales.deleted_at')
                 ->where(function ($q) {
                     $q->where('sales.sale_type', '!=', 'opening balance')
                     ->orWhereNull('sales.sale_type');
-                })
+                }) 
                 ->whereDate('sales.created_at', '>=', $request->input('starting_date'))
                 ->whereDate('sales.created_at', '<=', $request->input('ending_date'));
 
@@ -329,20 +343,20 @@ class SaleController extends Controller
             if($sale_type)
                 $query = $query->where('sales.sale_type', $sale_type);
             if ($installment == 1) {
-                $query->whereExists(function ($q) {
+                $query = $query->whereExists(function ($q) {
                     $q->select(DB::raw(1))
-                    ->from('payments')
-                    ->whereColumn('payments.sale_id', 'sales.id')
-                    ->whereNotNull('payments.installment_id');
+                    ->from('installment_plans')
+                    ->where('reference_type', 'sale')
+                    ->whereColumn('reference_id', 'sales.id');
                 });
             }
 
             if ($installment == 2) {
-                $query->whereNotExists(function ($q) {
+                $query = $query->whereNotExists(function ($q) {
                     $q->select(DB::raw(1))
-                    ->from('payments')
-                    ->whereColumn('payments.sale_id', 'sales.id')
-                    ->whereNotNull('payments.installment_id');
+                    ->from('installment_plans')
+                    ->where('reference_type', 'sale')
+                    ->whereColumn('reference_id', 'sales.id');
                 });
             }
 
@@ -393,10 +407,8 @@ class SaleController extends Controller
                     $q->where('sales.sale_type', '!=', 'opening balance')
                     ->orWhereNull('sales.sale_type');
                 })
-                ->whereBetween(DB::raw('DATE(sales.created_at)'), [
-                    $request->input('starting_date'),
-                    $request->input('ending_date')
-                ]);
+                ->whereDate('sales.created_at', '>=', $request->input('starting_date'))
+                ->whereDate('sales.created_at', '<=', $request->input('ending_date'));
 
             // ✅ APPLY FILTERS FIRST (DO NOT MOVE THIS)
             if ($warehouse_id) {
@@ -421,20 +433,20 @@ class SaleController extends Controller
             }
 
             if ($installment == 1) {
-                $q->whereExists(function ($q) {
-                    $q->select(DB::raw(1))
-                    ->from('payments')
-                    ->whereColumn('payments.sale_id', 'sales.id')
-                    ->whereNotNull('payments.installment_id');
+                $q = $q->whereExists(function ($q1) {
+                    $q1->select(DB::raw(1))
+                    ->from('installment_plans')
+                    ->where('reference_type', 'sale')
+                    ->whereColumn('reference_id', 'sales.id');
                 });
             }
 
             if ($installment == 2) {
-                $q->whereNotExists(function ($q) {
-                    $q->select(DB::raw(1))
-                    ->from('payments')
-                    ->whereColumn('payments.sale_id', 'sales.id')
-                    ->whereNotNull('payments.installment_id');
+                $q = $q->whereNotExists(function ($q1) {
+                    $q1->select(DB::raw(1))
+                    ->from('installment_plans')
+                    ->where('reference_type', 'sale')
+                    ->whereColumn('reference_id', 'sales.id');
                 });
             }
 
@@ -462,7 +474,8 @@ class SaleController extends Controller
                     ->orWhere('customers.phone_number', 'LIKE', "%{$search}%")
                     ->orWhere('billers.name', 'LIKE', "%{$search}%")
                     ->orWhere('product_sales.imei_number', 'LIKE', "%{$search}%")
-                    ->orWhere('products.name', 'LIKE', "%{$search}%");
+                    ->orWhere('products.name', 'LIKE', "%{$search}%")
+                    ->orWhere('products.code', 'LIKE', "%{$search}%");
 
                 // Custom fields
                 foreach ($field_names as $field_name) {
@@ -493,10 +506,23 @@ class SaleController extends Controller
                         'sales.*',
                         DB::raw('(sales.grand_total - sales.paid_amount) as due')
                     )
+                    ->with([
+                        'payments:id,sale_id,amount,paying_method',
+                        'delivery:id,sale_id,status',
+                        'return:id,sale_id,grand_total'
+                    ])
                     ->groupBy('sales.id')
                     ->skip($start)
                     ->take($limit)
                     ->get();
+        }
+
+        if(cache()->has('currency_list'))
+        {
+            $currency_list = cache()->get('currency_list');
+        }else {
+            $currency_list = Currency::where('is_active', true)->get();
+            cache()->put('currency_list', $currency_list, 60 * 60 * 24);
         }
 
         // --- 5. PREPARING DATA FOR DATATABLES ---
@@ -506,8 +532,6 @@ class SaleController extends Controller
             $steadfast_sent_value = [];
             foreach ($sales as $key=>$sale)
             {
-                // ... (Your existing logic for populating $nestedData remains here)
-                // It uses the $sale object fetched in step 3 or 4.
 
                 $lims_installment_plan_data = DB::table('installment_plans')
                                                 ->where([
@@ -516,7 +540,7 @@ class SaleController extends Controller
                                                 ])->first();
 
                 if($sale->currency_id){
-                    $currency_code = Currency::select('code')->find($sale->currency_id)->code;
+                    $currency_code = $currency_list->where('id', $sale->currency_id)->first()->code;
                     $currency = $currency_code . '/'.$sale->exchange_rate;
                 }else{
                     $currency_code = 'N/A';
@@ -532,8 +556,7 @@ class SaleController extends Controller
                 $nestedData['created_by'] = $user->name;
                 $nestedData['customer'] = $sale->customer->name.'<br>'.$sale->customer->phone_number.'<input type="hidden" class="deposit" value="'.($sale->customer->deposit - $sale->customer->expense).'" />'.'<input type="hidden" class="points" value="'.$sale->customer->points.'" />';
 
-                $warehouse = Warehouse::select('name')->where('id', $sale->warehouse_id)->first();
-                $nestedData['warehouse_name'] = $warehouse->name;
+                $nestedData['warehouse_name'] = $sale->warehouse->name;
                 $nestedData['currency'] = $currency;
 
                 // Products details logic (make sure $sale->products relationship is working)
@@ -552,7 +575,7 @@ class SaleController extends Controller
                 if(!$sale->exchange_rate || $sale->exchange_rate == 0)
                     $sale->exchange_rate = 1;
 
-                $payments = Payment::where('sale_id', $sale->id)->select('amount','paying_method')->get();
+                $payments = $sale->payments;
                 $paymentMethods = $payments->map(function ($payment) use ($sale) {
                     return ucfirst($payment->paying_method ?? '') .
                         '(' . number_format($payment->amount / $sale->exchange_rate, config('decimal')) . ')';
@@ -583,7 +606,7 @@ class SaleController extends Controller
                     $nestedData['payment_status'] = '<div class="badge badge-success">'.__('db.Paid').'</div>';
 
                 // Delivery Status Logic
-                $delivery_data = DB::table('deliveries')->select('status')->where('sale_id', $sale->id)->first();
+                $delivery_data = $sale->delivery;
                 if($delivery_data) {
                     if($delivery_data->status == 1)
                         $nestedData['delivery_status'] = '<div class="badge badge-primary">'.__('db.Packing').'</div>';
@@ -596,7 +619,7 @@ class SaleController extends Controller
                     $nestedData['delivery_status'] = 'N/A';
 
                 // Financial amounts
-                $returned_amount = DB::table('returns')->where('sale_id', $sale->id)->sum('grand_total');
+                $returned_amount = $sale->return?->grand_total ?? 0;
                 $nestedData['grand_total'] = number_format($sale->grand_total / $sale->exchange_rate, config('decimal'));
                 $nestedData['returned_amount'] = number_format($returned_amount / $sale->exchange_rate, config('decimal'));
                 $nestedData['paid_amount'] = number_format($sale->paid_amount / $sale->exchange_rate, config('decimal'));
@@ -647,7 +670,7 @@ class SaleController extends Controller
                             '<li>
                                 <button type="button" class="get-payment btn btn-link" data-id = "'.$sale->id.'"><i class="fa fa-money"></i> '.__('db.View Payment').'</button>
                             </li>';
-                if(in_array("sale-payment-add", $request['all_permission']) && ($sale->payment_status != 4) && ($sale->sale_status != 3)) {
+                if(in_array("sale-payment-add", $request['all_permission']) && ($sale->payment_status != 4) && ($sale->sale_status != 3) && ($sale->sale_status != 4)) {
                     $currency_code_name = $sale->currency->code ?? 'USD';
                     $nestedData['options'] .=
                             ' <li>
@@ -692,19 +715,7 @@ class SaleController extends Controller
                     '<li>
                         <button type="button" class="add-delivery btn btn-link" data-id = "'.$sale->id.'"><i class="fa fa-truck"></i> '.__('db.Add Delivery').'</button>
                     </li>';
-                // if ($sale->sale_status == 1) {
-                //     if ($sale->steadfast) {
-                //         $nestedData['options'] .=
-                //         '<li>
-                //             <button type="button" id="steadfast-btn" class="track-order btn btn-link" data-invoice = "'.$sale->reference_no.'"><i class="fa fa-truck"></i> '.__('db.Track Order').'</button>
-                //         </li>';
-                //     } else {
-                //         $nestedData['options'] .=
-                //         '<li>
-                //             <button type="button" id="steadfast-btn" class="steadfast-delivery btn btn-link" data-id = "'.$sale->id.'"><i class="fa fa-truck"></i> '.__('db.Send To SteadFast').'</button>
-                //         </li>';
-                //     }
-                // }
+
                 if(in_array("sales-delete", $request['all_permission']))
                     $nestedData['options'] .= '<form action="' . route("sales.destroy", $sale->id) . '" method="POST">'.csrf_field().'' . method_field("DELETE") . '<li><button type="submit" class="btn btn-link" onclick="return confirmDelete()"><i class="dripicons-trash"></i> ' . __("db.delete") . '</button></li></form>
                         </ul>
@@ -720,34 +731,34 @@ class SaleController extends Controller
                     if($table) $table_name = $table->name;
                 }
 
-                $due_date_display = '';
-                $days_remaining   = '';
+            $due_date_display = '';
+            $days_remaining   = '';
 
-                if ($sale->pay_term_no) {
+            if ($sale->pay_term_no) {
 
-                    $created = \Carbon\Carbon::parse($sale->created_at);
+                $created = \Carbon\Carbon::parse($sale->created_at);
 
-                    if (!empty($sale->due_date)) {
-                        $due_date = \Carbon\Carbon::parse($sale->due_date);
+                if (!empty($sale->due_date)) {
+                    $due_date = \Carbon\Carbon::parse($sale->due_date);
+                } else {
+                    $due_date = $sale->pay_term_period == 'months'
+                        ? $created->copy()->addMonths((int)$sale->pay_term_no)
+                        : $created->copy()->addDays((int)$sale->pay_term_no);
+                }
+
+                $due_date_display = $due_date->format('Y-m-d');
+
+                $today = \Carbon\Carbon::today();
+                $diff  = $today->diffInDays($due_date, false);
+
+                if ($diff > 0) {
+                    $days_remaining = $diff . ' days remaining';
+                    } elseif ($diff == 0) {
+                        $days_remaining = 'Due Today';
                     } else {
-                        $due_date = $sale->pay_term_period == 'months'
-                            ? $created->copy()->addMonths((int)$sale->pay_term_no)
-                            : $created->copy()->addDays((int)$sale->pay_term_no);
+                        $days_remaining = 'Overdue by ' . abs($diff) . ' days';
                     }
-
-                    $due_date_display = $due_date->format('Y-m-d');
-
-                    $today = \Carbon\Carbon::today();
-                    $diff  = $today->diffInDays($due_date, false);
-
-                    if ($diff > 0) {
-                        $days_remaining = $diff . ' days remaining';
-                        } elseif ($diff == 0) {
-                            $days_remaining = 'Due Today';
-                        } else {
-                            $days_remaining = 'Overdue by ' . abs($diff) . ' days';
-                        }
-                    }
+                }
 
                     $nestedData['sale'] = array( '[ "'.date(config('date_format'), strtotime($sale->created_at->toDateString())).'"', ' "'.$sale->reference_no.'"', ' "'.$sale_status_text.'"', ' "'.@$sale->biller->name.'"', ' "'.@$sale->biller->company_name.'"', ' "'.@$sale->biller->email.'"', ' "'.@$sale->biller->phone_number.'"', ' "'.@$sale->biller->address.'"', ' "'.@$sale->biller->city.'"', ' "'.@$sale->customer->name.'"', ' "'.@$sale->customer->phone_number.'"', ' "'.@$sale->customer->address.'"', ' "'.@$sale->customer->city.'"', ' "'.@$sale->id.'"', ' "'.@$sale->total_tax.'"', ' "'.$sale->total_discount.'"', ' "'.$sale->total_price.'"', ' "'.$sale->order_tax.'"', ' "'.$sale->order_tax_rate.'"', ' "'.$sale->order_discount.'"', ' "'.$sale->shipping_cost.'"', ' "'.$sale->grand_total.'"', ' "'.$sale->paid_amount.'"', ' "'.preg_replace('/[\n\r]/', "<br>", $sale->sale_note).'"', ' "'.preg_replace('/[\n\r]/', "<br>", $sale->staff_note).'"', ' "'.$sale->user->name.'"', ' "'.$sale->user->email.'"', ' "'.$sale->warehouse->name.'"', ' "'.$coupon_code.'"', ' "'.$sale->coupon_discount.'"', ' "'.$sale->document.'"', ' "'.$currency_code.'"', ' "'.$sale->exchange_rate.'"', ' "'.$table_name.'"', ' "'.$sale->pay_term_no.'"', ' "'.$sale->pay_term_period.'"' , ' "'.$due_date_display.'"', ' "'.$days_remaining.'"]'
                     );
@@ -800,7 +811,14 @@ class SaleController extends Controller
             else
                 $options = [];
 
-            $currency_list = Currency::where('is_active', true)->get();
+            if(cache()->has('currency_list'))
+            {
+                $currency_list = cache()->get('currency_list');
+            }else {
+                $currency_list = Currency::where('is_active', true)->get();
+                cache()->put('currency_list', $currency_list, 60 * 60 * 24);
+            }
+
             $numberOfInvoice = Sale::whereNull('sales.deleted_at')
                                 ->where(function ($q) {
                                     $q->where('sales.sale_type', '!=', 'opening balance')
@@ -839,7 +857,6 @@ class SaleController extends Controller
 
     public function store(StoreSaleRequest $request)
     {
-
         $data = $request->all();
         $lims_pos_setting_data = PosSetting::latest()->first();
         /*try {*/
@@ -976,6 +993,40 @@ class SaleController extends Controller
                     $data['due_date'] = date('Y-m-d', strtotime($sale_date . ' +' . $data['pay_term_no'] . ' months'));
                 }
             }
+
+            $lims_customer_check = Customer::find($data['customer_id']);
+            if ($lims_customer_check->credit_limit > 0) {
+                $existing_sales_total = Sale::where('customer_id', $data['customer_id'])
+                    ->where('payment_status', '!=', 4) // paid বাদে
+                    ->whereNull('deleted_at')
+                    ->sum('grand_total');
+
+                $existing_paid_total = \App\Models\Payment::join('sales', 'sales.id', '=', 'payments.sale_id')
+                    ->where('sales.customer_id', $data['customer_id'])
+                    ->whereNull('sales.deleted_at')
+                    ->sum('payments.amount');
+
+                $existing_due = $existing_sales_total - $existing_paid_total;
+
+                $new_grand_total = floatval($data['grand_total']);
+                $new_paid        = array_sum((array) $data['paid_amount']);
+                $new_due         = $new_grand_total - $new_paid;
+
+                $total_due_after_sale = $existing_due + $new_due;
+
+                if ($total_due_after_sale > $lims_customer_check->credit_limit) {
+                    $message = __('db.Credit limit exceeded!') .
+                            ' ' . __('db.Credit Limit') . ': ' . $lims_customer_check->credit_limit .
+                            ', ' . __('db.Total Due After Sale') . ': ' . $total_due_after_sale;
+
+                    if (request()->ajax()) {
+                        return response()->json(['error' => $message], 422);
+                    }
+
+                    return redirect()->back()->with('not_permitted', $message);
+                }
+            }
+
             $lims_sale_data = Sale::create($data);
 
             $data['paid_amount'] = $new_data['paid_amount'];
@@ -1197,7 +1248,6 @@ class SaleController extends Controller
                     DB::commit();
                 } catch (\Exception $e) {
                     DB::rollBack();
-                    \Log::error('Combo Product Stock Update Error: '.$e->getMessage());
                     return redirect()->back()->with('error', 'Something went wrong while updating stock.');
                 }
 
@@ -1507,7 +1557,8 @@ class SaleController extends Controller
 
     }
 
-    private function generateInvoiceName($default){
+    private function generateInvoiceName($default)
+    {
         $invoice_settings = InvoiceSetting::active_setting();
         $invoice_schema = InvoiceSchema::latest()->first();
         $show_active_status =  json_decode($invoice_settings->show_column);
@@ -1600,6 +1651,7 @@ class SaleController extends Controller
         else
             return 'All the items of this sale has already been packed';
     }
+
     public function sendSMS(Request $request)
     {
         $data = $request->all();
@@ -2140,7 +2192,14 @@ class SaleController extends Controller
             });
             $flag = 0;
 
-            $currency_list = Currency::where('is_active', true)->get();
+            if(cache()->has('currency_list'))
+            {
+                $currency_list = cache()->get('currency_list');
+            }else {
+                $currency_list = Currency::where('is_active', true)->get();
+                cache()->put('currency_list', $currency_list, 60 * 60 * 24);
+            }
+
             $numberOfInvoice = Sale::whereNull('sales.deleted_at')
                                 ->where(function ($q) {
                                     $q->where('sales.sale_type', '!=', 'opening balance')
@@ -2340,7 +2399,13 @@ class SaleController extends Controller
             $lims_category_list = Category::where('is_active',true)->get();
             $lims_coupon_list = Coupon::where('is_active',true)->get();
 
-            $currency_list = Currency::where('is_active', true)->get();
+            if(cache()->has('currency_list'))
+            {
+                $currency_list = cache()->get('currency_list');
+            }else {
+                $currency_list = Currency::where('is_active', true)->get();
+                cache()->put('currency_list', $currency_list, 60 * 60 * 24);
+            }
 
             return view('backend.sale.create_sale',compact('currency_list', 'lims_biller_list', 'lims_customer_list', 'lims_warehouse_list', 'lims_tax_list', 'lims_sale_data','lims_product_sale_data', 'lims_pos_setting_data', 'lims_brand_list', 'lims_category_list', 'lims_coupon_list', 'lims_product_list', 'product_number', 'lims_customer_group_all', 'lims_reward_point_setting_data'));
         }
@@ -2484,7 +2549,7 @@ class SaleController extends Controller
                 $data['image'][$index] = $images[0] ?? null;
                 $data['qty'][$index] = '∞';
                 $data['price'][$index] = $product->price ?? 0;
-                $data['batch'][$index] = $pw->product_batch_id;
+                $data['batch'][$index] = '';
                 $index++;
                 continue;
             } else {
@@ -2778,6 +2843,7 @@ class SaleController extends Controller
 
     public function productSaleData($id)
     {
+        $sale = Sale::select('created_at')->find($id);
         $lims_product_sale_data = Product_Sale::where('sale_id', $id)->get();
         foreach ($lims_product_sale_data as $key => $product_sale_data) {
             $product = Product::find($product_sale_data->product_id);
@@ -2828,6 +2894,28 @@ class SaleController extends Controller
                 $product_sale[9][$key] = __('db.Yes');
             else
                 $product_sale[9][$key] = __('db.No');
+
+            // Add Warranty Info
+            if ($product->warranty) {
+                $warranty_duration = $product->warranty . ' ' . ($product->warranty === 1 ? str_replace('s', '', $product->warranty_type) : $product->warranty_type);
+                $warranty_end = $this->getWarrantyGuaranteeEndDate([
+                    'sale_date' => $sale->created_at,
+                    'duration' => $product->warranty,
+                    'type' => $product->warranty_type,
+                ]);
+                $product_sale[0][$key] .= '<br><span style="font-weight: bold;">' . __('db.Warranty') . ':</span> ' . $warranty_duration . '<br><span style="font-weight: bold;">Expire At:</span> ' . date(config('date_format'), strtotime($warranty_end));
+            }
+
+            // Add Guarantee Info
+            if ($product->guarantee) {
+                $guarantee_duration = $product->guarantee . ' ' . ($product->guarantee === 1 ? str_replace('s', '', $product->guarantee_type) : $product->guarantee_type);
+                $guarantee_end = $this->getWarrantyGuaranteeEndDate([
+                    'sale_date' => $sale->created_at,
+                    'duration' => $product->guarantee,
+                    'type' => $product->guarantee_type,
+                ]);
+                $product_sale[0][$key] .= '<br><span style="font-weight: bold;">' . __('db.Guarantee') . ':</span> ' . $guarantee_duration . '<br><span style="font-weight: bold;">Expire At:</span> ' . date(config('date_format'), strtotime($guarantee_end));
+            }
 
             if(cache()->has('general_setting'))
             {
@@ -4343,28 +4431,32 @@ class SaleController extends Controller
             return redirect()->back()->with('message', $message);
         }
 
-         if (isset($data['print_receipt']) && $data['print_receipt'] == 1) {
-            $general_setting        = GeneralSetting::latest()->first();
-            $invoice_settings       = InvoiceSetting::latest()->first();
-            $lims_warehouse_data    = $lims_sale_data->warehouse;
-            $lims_product_sale_data = Product_sale::where('sale_id', $lims_sale_data->id)->get();
-
-            $cheque_no = ($paying_method == 'Cheque') ? ($data['cheque_no'] ?? null) : null;
-
-            return view('backend.sale.payment_receipt', compact(
-                'lims_payment_data',
-                'lims_sale_data',
-                'lims_customer_data',
-                'lims_warehouse_data',
-                'general_setting',
-                'invoice_settings',
-                'lims_product_sale_data',
-                'cheque_no',
-                'message'
-            ));
+        if (isset($data['print_receipt']) && $data['print_receipt'] == 1) {
+            paymentReceipt($lims_payment_data->id);
         }
 
         return redirect('sales')->with('message', $message);
+    }
+
+    public function paymentReceipt($id)
+    {
+        $lims_payment_data = Payment::find($id);
+        $lims_sale_data = Sale::find($lims_payment_data->sale_id);
+        $lims_customer_data = Customer::find($lims_sale_data->customer_id);
+        $general_setting = GeneralSetting::latest()->first();
+        $invoice_settings = InvoiceSetting::latest()->first();
+        $lims_warehouse_data = Warehouse::find($lims_sale_data->warehouse_id);
+        $lims_product_sale_data = Product_Sale::where('sale_id', $lims_sale_data->id)->get();
+
+        return view('backend.sale.payment_receipt', compact(
+            'lims_payment_data',
+            'lims_sale_data',
+            'lims_customer_data',
+            'lims_warehouse_data',
+            'general_setting',
+            'invoice_settings',
+            'lims_product_sale_data'
+        ));
     }
 
     public function getPayment($id)
@@ -4737,7 +4829,7 @@ class SaleController extends Controller
     {
         // 🔹 Total sales (normalized by exchange_rate)
         $data['total_sale_amount'] = Sale::whereDate('created_at', date("Y-m-d"))
-            ->select(DB::raw('SUM(grand_total / exchange_rate) as total'))
+            ->select(DB::raw('SUM(grand_total  / COALESCE(NULLIF(exchange_rate, 0), 1)) as total'))
             ->whereNull('deleted_at')
             ->where(function ($q) {
                 $q->where('sales.sale_type', '!=', 'opening balance')
@@ -4749,7 +4841,7 @@ class SaleController extends Controller
         $data['total_payment'] = Payment::join('sales', 'payments.sale_id', '=', 'sales.id')
             ->whereDate('payments.created_at', date("Y-m-d"))
             ->whereNull('sales.deleted_at')
-            ->select(DB::raw('SUM(payments.amount / sales.exchange_rate) as total'))
+            ->select(DB::raw('SUM(payments.amount  / COALESCE(NULLIF(sales.exchange_rate, 0), 1)) as total'))
             ->value('total');
 
         // 🔹 Payments by method (normalized by exchange_rate)
@@ -4760,7 +4852,7 @@ class SaleController extends Controller
                 ->whereNull('sales.deleted_at')
                 ->where('payments.paying_method', $method)
                 ->whereDate('payments.created_at', date("Y-m-d"))
-                ->select(DB::raw('SUM(payments.amount / sales.exchange_rate) as total'))
+                ->select(DB::raw('SUM(payments.amount  / COALESCE(NULLIF(sales.exchange_rate, 0), 1)) as total'))
                 ->value('total');
         }
 
@@ -4768,7 +4860,7 @@ class SaleController extends Controller
         $data['total_sale_return'] = Returns::join('sales', 'returns.sale_id', '=', 'sales.id')
             ->whereDate('returns.created_at', date("Y-m-d"))
             ->whereNull('sales.deleted_at')
-            ->select(DB::raw('SUM(returns.grand_total / sales.exchange_rate) as total'))
+            ->select(DB::raw('SUM(returns.grand_total  / COALESCE(NULLIF(sales.exchange_rate, 0), 1)) as total'))
             ->value('total');
 
         // 🔹 Expenses (assuming already stored in base currency)
@@ -4790,7 +4882,7 @@ class SaleController extends Controller
                     product_sales.product_id,
                     product_sales.product_batch_id,
                     SUM(product_sales.qty) as sold_qty,
-                    SUM(product_sales.total / sales.exchange_rate) as sold_amount
+                    SUM(product_sales.total  / COALESCE(NULLIF(sales.exchange_rate, 0), 1)) as sold_amount
                 '))
                 ->whereNull('sales.deleted_at')
                 ->whereDate('sales.created_at', date("Y-m-d"))
@@ -4802,7 +4894,7 @@ class SaleController extends Controller
                     product_sales.product_id,
                     product_sales.product_batch_id,
                     SUM(product_sales.qty) as sold_qty,
-                    SUM(product_sales.total / sales.exchange_rate) as sold_amount
+                    SUM(product_sales.total  / COALESCE(NULLIF(sales.exchange_rate, 0), 1)) as sold_amount
                 '))
                 ->whereNull('sales.deleted_at')
                 ->where('sales.warehouse_id', $warehouse_id)
@@ -5551,246 +5643,210 @@ class SaleController extends Controller
     public function search(Request $request)
     {
         $warehouse_id = $request->warehouse_id;
-        $search = $request->search;
+
+        // Trim first, THEN check length
+        $search = trim($request->search ?? '');
 
         if (strlen($search) < 2) {
             return response()->json([]);
         }
 
-        $search = trim($search);
-        $exactMatchFound = false;
-        $products = [];
-
         $today = Carbon::now()->toDateString();
 
-        // Handle embedded barcode (13 digits → take first 7)
+        // -------------------------------------------------------
+        // Handle embedded barcode (13 digits -> truncate to first 7)
+        // -------------------------------------------------------
         $product_embed_code = null;
+
         if (preg_match('/^\d{13}$/', $search)) {
             $product_embed_code = $search;
-            $product = Product::where('is_embeded', true)
+            $embeddedProduct = Product::where('is_embeded', true)
                 ->where(function ($q) use ($product_embed_code) {
                     $q->where('code', 'like', $product_embed_code . '%')
-                    ->orWhere('name', 'like', '%' . $product_embed_code . '%');
+                      ->orWhere('name', 'like', '%' . $product_embed_code . '%');
                 })
                 ->first();
-            if ($product) {
+
+            if ($embeddedProduct) {
                 $search = substr($search, 0, 7);
             }
         }
 
-        // 🔹 Step 1: Exact variant match (quick path)
+        // -------------------------------------------------------
+        // Shared SELECT columns for product + warehouse joins
+        // -------------------------------------------------------
+        $productColumns = [
+            'products.id',
+            'products.name',
+            'products.code',
+            'products.type',
+            'products.is_imei',
+            'products.is_diffPrice',
+            'products.is_variant',
+            'products.is_embeded',
+            'products.is_batch',
+            'products.product_list',
+            'products.qty_list',
+        ];
+
+        $variantPriceCase = DB::raw("CASE WHEN products.is_diffPrice = 1
+                                         THEN product_warehouse.price
+                                         ELSE products.price + product_variants.additional_price
+                                     END as price");
+
+        $standardPriceCase = DB::raw("CASE WHEN products.is_diffPrice = 1
+                                           THEN product_warehouse.price
+                                           ELSE products.price
+                                       END as price");
+
+        // -------------------------------------------------------
+        // Step 1: Exact variant item_code match (fast path)
+        // -------------------------------------------------------
         $exactVariant = ProductVariant::join('products', 'product_variants.product_id', '=', 'products.id')
             ->join('product_warehouse', function ($join) use ($warehouse_id) {
                 $join->on('product_variants.variant_id', '=', 'product_warehouse.variant_id')
-                    ->where('product_warehouse.warehouse_id', $warehouse_id);
+                     ->on('product_variants.product_id', '=', 'product_warehouse.product_id')
+                     ->where('product_warehouse.warehouse_id', $warehouse_id);
             })
             ->where('product_variants.item_code', $search)
-            ->where('products.is_active', true)
-            ->select(
-                'products.id',
+            ->where('products.is_active', 1)
+            ->select(array_merge($productColumns, [
                 'product_variants.item_code as code',
-                'products.name',
-                'products.is_imei',
-                'products.is_diffPrice',
-                'products.is_variant',
-                'products.is_embeded',
-                'products.is_batch',
-                'products.type',
-                'products.product_list',
-                'products.qty_list',
-                DB::raw("CASE WHEN products.is_diffPrice = 1
-                            THEN product_warehouse.price
-                            ELSE products.price + product_variants.additional_price
-                        END as price"),
+                $variantPriceCase,
                 'product_warehouse.qty',
                 'product_warehouse.imei_number',
-                'product_warehouse.product_batch_id'
-            )
+                'product_warehouse.product_batch_id',
+            ]))
             ->first();
 
         if ($exactVariant) {
             return response()->json([$exactVariant]);
         }
 
-        // 🔹 Step 1.5: Exact IMEI match for VARIANT products
+        // -------------------------------------------------------
+        // Step 1.5: Exact IMEI match for VARIANT products
+        // (item_code was already checked and failed in Step 1, so only check IMEI here)
+        // -------------------------------------------------------
         $variantImeiMatch = ProductVariant::join('products', 'product_variants.product_id', '=', 'products.id')
             ->join('product_warehouse', function ($join) use ($warehouse_id) {
                 $join->on('product_variants.variant_id', '=', 'product_warehouse.variant_id')
+                     ->on('product_variants.product_id', '=', 'product_warehouse.product_id')
                      ->where('product_warehouse.warehouse_id', $warehouse_id);
             })
-            ->where('products.is_active', true)
-            ->where(function ($q) use ($search) {
-                $q->where('product_variants.item_code', $search)
-                  ->orWhere('product_warehouse.imei_number', $search); // exact match
-            })
-            ->select(
-                'products.id',
+            ->where('products.is_active', 1)
+            ->where('product_warehouse.imei_number', $search)
+            ->select(array_merge($productColumns, [
                 'product_variants.item_code as code',
-                'products.name',
-                'products.is_imei',
-                'products.is_diffPrice',
-                'products.is_variant',
-                'products.is_embeded',
-                'products.is_batch',
-                'products.type',
-                DB::raw("CASE WHEN products.is_diffPrice = 1
-                    THEN product_warehouse.price
-                    ELSE products.price + product_variants.additional_price
-                END as price"),
+                $variantPriceCase,
                 DB::raw('1 as qty'),
                 'product_warehouse.imei_number',
-                'product_warehouse.product_batch_id'
-            )
+                'product_warehouse.product_batch_id',
+            ]))
             ->first();
 
         if ($variantImeiMatch) {
             return response()->json([$variantImeiMatch]);
         }
 
-        // 🔹 Step 2: Prefetch data for efficiency
-        $warehouseStocks = DB::table('product_warehouse')
-            ->where('warehouse_id', $warehouse_id)
-            ->select('product_id', 'variant_id', 'qty', 'imei_number', 'price', 'product_batch_id')
-            ->get()
-            ->groupBy('product_id');
+        // -------------------------------------------------------
+        // Step 2: Broad search - code prefix -> name -> variant code -> IMEI
+        // -------------------------------------------------------
 
-        $productBatches = ProductBatch::whereDate('expired_date', '>=', $today)
-                        ->orderBy('expired_date', 'asc') // closest expiry first
-                        ->get()
-                        ->groupBy('product_id');
-
-        $variants = ProductVariant::join('product_warehouse', function ($join) use ($warehouse_id) {
-                    $join->on('product_variants.variant_id', '=', 'product_warehouse.variant_id')
-                        ->where('product_warehouse.warehouse_id', $warehouse_id);
-                })
-                ->select(
-                    'product_variants.product_id',
-                    'product_variants.item_code',
-                    'product_variants.variant_id',
-                    'product_variants.additional_price',
-                    'product_warehouse.qty',
-                    'product_warehouse.imei_number',
-                    'product_warehouse.product_batch_id'
-                )
-                ->get()
-                ->groupBy('product_id');
-
-
-        // ------------------------------------------
-        // FAST PREFIX SEARCH ON PRODUCT CODE
-        // ------------------------------------------
-        $byCode = Product::leftJoin('product_warehouse', function($j) use ($warehouse_id){
-                $j->on('products.id','=','product_warehouse.product_id')
-                ->where('product_warehouse.warehouse_id',$warehouse_id);
+        // 2a. Code prefix match
+        $byCode = Product::leftJoin('product_warehouse', function ($j) use ($warehouse_id) {
+                $j->on('products.id', '=', 'product_warehouse.product_id')
+                  ->where('product_warehouse.warehouse_id', $warehouse_id);
             })
-            ->where('products.is_active',1)
-            ->where('products.code','like',$search.'%')
-            ->select(
-                'products.*',
-                DB::raw("CASE WHEN products.is_diffPrice = 1 THEN product_warehouse.price ELSE products.price END as price"),
+            ->where('products.is_active', 1)
+            ->where('products.code', 'like', $search . '%')
+            ->select(array_merge($productColumns, [
+                $standardPriceCase,
                 'product_warehouse.qty',
                 'product_warehouse.imei_number',
-                'product_warehouse.product_batch_id'
-            )
+                'product_warehouse.product_batch_id',
+            ]))
             ->orderBy('products.code')
             ->limit(20)
             ->get();
 
-
-        // ------------------------------------------
-        // SEARCH BY NAME (ONLY if code is empty)
-        // ------------------------------------------
+        // 2b. Name match (only when code search returns nothing)
         $byName = collect();
 
         if ($byCode->isEmpty()) {
-
-            $byName = Product::leftJoin('product_warehouse', function($j) use ($warehouse_id){
-                    $j->on('products.id','=','product_warehouse.product_id')
-                    ->where('product_warehouse.warehouse_id',$warehouse_id);
+            $byName = Product::leftJoin('product_warehouse', function ($j) use ($warehouse_id) {
+                    $j->on('products.id', '=', 'product_warehouse.product_id')
+                      ->where('product_warehouse.warehouse_id', $warehouse_id);
                 })
-                ->where('products.is_active',1)
-                ->where('products.name','like','%'.$search.'%')
-                ->select(
-                    'products.*',
-                    DB::raw("CASE WHEN products.is_diffPrice = 1 THEN product_warehouse.price ELSE products.price END as price"),
+                ->where('products.is_active', 1)
+                ->where('products.name', 'like', '%' . $search . '%')
+                ->select(array_merge($productColumns, [
+                    $standardPriceCase,
                     'product_warehouse.qty',
                     'product_warehouse.imei_number',
-                    'product_warehouse.product_batch_id'
-                )
+                    'product_warehouse.product_batch_id',
+                ]))
                 ->orderBy('products.name')
                 ->limit(20)
                 ->get();
         }
 
+        // 2c. Variant item_code fuzzy match (only when nothing found yet)
         $byVariant = collect();
 
         if ($byCode->isEmpty() && $byName->isEmpty()) {
-
             $byVariant = ProductVariant::join('products', 'product_variants.product_id', '=', 'products.id')
                 ->join('product_warehouse', function ($join) use ($warehouse_id) {
                     $join->on('product_variants.variant_id', '=', 'product_warehouse.variant_id')
-                        ->where('product_warehouse.warehouse_id', $warehouse_id);
+                         ->on('product_variants.product_id', '=', 'product_warehouse.product_id')
+                         ->where('product_warehouse.warehouse_id', $warehouse_id);
                 })
                 ->where('products.is_active', 1)
                 ->where('product_variants.item_code', 'like', '%' . $search . '%')
-                ->select(
-                    'products.id',
+                ->select(array_merge($productColumns, [
                     'product_variants.item_code as code',
-                    'products.name',
+                    $variantPriceCase,
                     'product_warehouse.qty',
-                    DB::raw('products.price + product_variants.additional_price as price'),
-                    'products.is_imei',
-                    'products.is_embeded',
-                    'product_warehouse.product_batch_id'
-                )
+                    'product_warehouse.imei_number',
+                    'product_warehouse.product_batch_id',
+                ]))
                 ->limit(20)
                 ->get();
         }
 
-
-        // ------------------------------------------
-        // SEARCH BY IMEI (ONLY if nothing found yet)
-        // ------------------------------------------
+        // 2d. IMEI fuzzy match (only when nothing found yet)
         $byIMEI = collect();
 
-        if ($byCode->isEmpty() && $byName->isEmpty()) {
-
-            $byIMEI = Product_Warehouse::where('warehouse_id',$warehouse_id)
-                ->where('imei_number','like','%'.$search.'%')
-                ->limit(5)
-                ->get()
-                ->map(function($pw){
-                    return Product::find($pw->product_id);
-                });
-        }
-
-        $byIMEI = collect();
-
-        if ($byCode->isEmpty() && $byName->isEmpty()) {
-
-            $imeiMatch = Product_Warehouse::where('warehouse_id',$warehouse_id)
-                ->where('imei_number','like','%'.$search.'%')
+        if ($byCode->isEmpty() && $byName->isEmpty() && $byVariant->isEmpty()) {
+            $imeiMatch = Product_Warehouse::where('warehouse_id', $warehouse_id)
+                ->where('imei_number', 'like', '%' . $search . '%')
+                ->select('product_id', 'qty', 'imei_number', 'price', 'product_batch_id')
                 ->first();
 
             if ($imeiMatch) {
+                $imeiProduct = Product::leftJoin('product_warehouse', function ($j) use ($warehouse_id) {
+                        $j->on('products.id', '=', 'product_warehouse.product_id')
+                          ->where('product_warehouse.warehouse_id', $warehouse_id);
+                    })
+                    ->where('products.id', $imeiMatch->product_id)
+                    ->select(array_merge($productColumns, [
+                        $standardPriceCase,
+                        'product_warehouse.qty',
+                        'product_warehouse.imei_number',
+                        'product_warehouse.product_batch_id',
+                    ]))
+                    ->first();
 
-                $product = Product::find($imeiMatch->product_id);
-
-                if ($product) {
-
-                    // Inject matched IMEI for exact handling
-                    $product->imei_number = $search;
-
-                    $byIMEI = collect([$product]);
+                if ($imeiProduct) {
+                    // Inject the matched IMEI token so the loop short-circuit fires correctly
+                    $imeiProduct->imei_number = $search;
+                    $byIMEI = collect([$imeiProduct]);
                 }
             }
         }
 
-
-
-        // ------------------------------------------
-        // COMBINE RESULTS
-        // ------------------------------------------
+        // -------------------------------------------------------
+        // Step 3: Merge base results (non-combo products)
+        // -------------------------------------------------------
         $baseProducts = $byCode
             ->merge($byName)
             ->merge($byVariant)
@@ -5799,198 +5855,263 @@ class SaleController extends Controller
             ->take(20)
             ->values();
 
-
-        // 🔹 Step 4: Add combo products
-        $combos = Product::where('products.is_active', true)
-            ->where('products.type', 'combo')
+        // -------------------------------------------------------
+        // Step 4: Combo products
+        // -------------------------------------------------------
+        $combos = Product::where('is_active', 1)
+            ->where('type', 'combo')
             ->where(function ($q) use ($search) {
-                $q->where('products.code', 'like', "%search%")
-                ->orWhere('products.name', 'like', "%$search%");
+                $q->where('code', 'like', '%' . $search . '%')
+                  ->orWhere('name', 'like', '%' . $search . '%');
             })
-            ->select('products.*')
+            ->select(array_merge($productColumns, ['products.price']))
             ->orderBy('name')
             ->limit(20)
             ->get();
 
-        // Calculate combo available qty efficiently
+        // -------------------------------------------------------
+        // Step 5: Lazy-load supporting data scoped to found products
+        // -------------------------------------------------------
+
+        // Combo stock lookup - only the component IDs actually needed
+        $comboComponentIds = [];
         foreach ($combos as $combo) {
-            $componentIds = array_filter(explode(',', $combo->product_list));
-            $requiredQtys = array_filter(explode(',', $combo->qty_list));
+            $ids = array_filter(explode(',', $combo->product_list ?? ''));
+            foreach ($ids as $cid) {
+                $comboComponentIds[] = (int) $cid;
+            }
+        }
+        $comboComponentIds = array_unique($comboComponentIds);
+
+        $warehouseStocks = [];
+        if (!empty($comboComponentIds)) {
+            $warehouseStocks = DB::table('product_warehouse')
+                ->where('warehouse_id', $warehouse_id)
+                ->whereIn('product_id', $comboComponentIds)
+                ->select('product_id', 'qty')
+                ->get()
+                ->groupBy('product_id');
+        }
+
+        // Batch data - scoped to base products that are batch-tracked
+        $productBatches = collect();
+        if ($baseProducts->isNotEmpty()) {
+            $batchProductIds = $baseProducts->where('is_batch', 1)->pluck('id')->unique()->values()->all();
+            if (!empty($batchProductIds)) {
+                $productBatches = ProductBatch::whereIn('product_id', $batchProductIds)
+                    ->whereDate('expired_date', '>=', $today)
+                    ->orderBy('expired_date', 'asc')
+                    ->get()
+                    ->groupBy('product_id');
+            }
+        }
+
+        // Variant data - scoped to variant products in base results
+        $variants = collect();
+        if ($baseProducts->isNotEmpty()) {
+            $variantProductIds = $baseProducts->where('is_variant', 1)->pluck('id')->unique()->values()->all();
+            if (!empty($variantProductIds)) {
+                $variants = ProductVariant::whereIn('product_variants.product_id', $variantProductIds)
+                    ->join('product_warehouse', function ($join) use ($warehouse_id) {
+                        $join->on('product_variants.variant_id', '=', 'product_warehouse.variant_id')
+                             ->on('product_variants.product_id', '=', 'product_warehouse.product_id')
+                             ->where('product_warehouse.warehouse_id', $warehouse_id);
+                    })
+                    ->select(
+                        'product_variants.product_id',
+                        'product_variants.item_code',
+                        'product_variants.variant_id',
+                        'product_variants.additional_price',
+                        'product_warehouse.qty',
+                        'product_warehouse.imei_number',
+                        'product_warehouse.product_batch_id'
+                    )
+                    ->get()
+                    ->groupBy('product_id');
+            }
+        }
+
+        // -------------------------------------------------------
+        // Step 6: Resolve combo available quantities
+        // -------------------------------------------------------
+        foreach ($combos as $combo) {
+            $componentIds = array_filter(explode(',', $combo->product_list ?? ''));
+            $requiredQtys = array_filter(explode(',', $combo->qty_list ?? ''));
             $minAvailable = PHP_INT_MAX;
 
             foreach ($componentIds as $i => $compId) {
-                $required = isset($requiredQtys[$i]) ? (int)$requiredQtys[$i] : 1;
-                $stock = $warehouseStocks[$compId][0]->qty ?? 0;
+                $required  = isset($requiredQtys[$i]) ? (int) $requiredQtys[$i] : 1;
+                $stock     = $warehouseStocks[$compId][0]->qty ?? 0;
 
                 if ($stock <= 0) {
                     $minAvailable = 0;
                     break;
                 }
 
-                $available = floor($stock / max(1, $required));
-                $minAvailable = min($minAvailable, $available);
+                $minAvailable = min($minAvailable, (int) floor($stock / max(1, $required)));
             }
 
-            $combo->qty = $minAvailable == PHP_INT_MAX ? 0 : $minAvailable;
+            $combo->qty = ($minAvailable === PHP_INT_MAX) ? 0 : $minAvailable;
             $baseProducts->push($combo);
         }
 
-        // 🔹 Step 5: Build unified product array
+        // -------------------------------------------------------
+        // Step 7: Build unified output array
+        // -------------------------------------------------------
+        $products = [];
+
         foreach ($baseProducts as $product) {
-            $batch_no = null;
+            $batch_no     = null;
             $expired_date = null;
 
+            // Resolve batch info for batch-tracked products
             if ($product->is_batch == 1) {
-
                 $batches = $productBatches[$product->id] ?? collect();
-            
+
                 if ($batches->isNotEmpty()) {
-            
-                    // first batch = closest expiry >= today
-                    $batch = $batches->first();
-            
-                    $batch_no = $batch->batch_no;
-                    $expired_date = date(config('date_format'), strtotime($batch->expired_date));
+                    $batch        = $batches->first(); // closest expiry >= today
+                    $batch_no     = $batch->batch_no;
+                    $expired_date = Carbon::parse($batch->expired_date)->format(config('date_format'));
                     $product->product_batch_id = $batch->id;
-            
                 } else {
-                    continue; // all batches expired
+                    // All batches expired - skip this product
+                    continue;
                 }
             }
-            
+
             $imei_numbers = $product->imei_number ? explode(',', $product->imei_number) : [null];
 
-            // Exact IMEI match short-circuit
-            if (in_array($search, $imei_numbers)) {
-                $exactMatchFound = true;
+            // Short-circuit: exact IMEI token match found in loop
+            if ($search && in_array($search, $imei_numbers)) {
                 if ($product->is_variant == 1) {
                     $vars = $variants[$product->id] ?? collect();
                     foreach ($vars as $v) {
                         return response()->json([[
-                            'id' => $product->id,
-                            'code' => $v->item_code,
-                            'name' => $product->name,
-                            'qty' => $v->qty,
-                            'price' => $product->price + $v->additional_price,
-                            'is_imei' => $product->is_imei,
-                            'is_embeded' => $product->is_embeded,
-                            'batch_no' => $batch_no,
+                            'id'               => $product->id,
+                            'code'             => $v->item_code,
+                            'name'             => $product->name,
+                            'qty'              => $v->qty,
+                            'price'            => $product->price + $v->additional_price,
+                            'is_imei'          => $product->is_imei,
+                            'is_embeded'       => $product->is_embeded,
+                            'batch_no'         => $batch_no,
                             'product_batch_id' => $product->product_batch_id,
-                            'expired_date' => $expired_date,
-                            'imei_number' => $search,
+                            'expired_date'     => $expired_date,
+                            'imei_number'      => $search,
                         ]]);
                     }
                 } else {
                     return response()->json([[
-                        'id' => $product->id,
-                        'code' => $product->code,
-                        'name' => $product->name,
-                        'qty' => $product->qty,
-                        'price' => $product->price,
-                        'is_imei' => $product->is_imei,
-                        'is_embeded' => $product->is_embeded,
-                        'batch_no' => $batch_no,
+                        'id'               => $product->id,
+                        'code'             => $product->code,
+                        'name'             => $product->name,
+                        'qty'              => $product->qty,
+                        'price'            => $product->price,
+                        'is_imei'          => $product->is_imei,
+                        'is_embeded'       => $product->is_embeded,
+                        'batch_no'         => $batch_no,
                         'product_batch_id' => $product->product_batch_id,
-                        'expired_date' => $expired_date,
-                        'imei_number' => $search,
+                        'expired_date'     => $expired_date,
+                        'imei_number'      => $search,
                     ]]);
                 }
             }
 
-            // Variant handling
-            if ($product->is_variant == 1 && $product->is_imei == 0) {
+            // Variant + IMEI product: expand one row per IMEI per variant
+            if ($product->is_variant == 1 && $product->is_imei == 1) {
+                $vars = $variants[$product->id] ?? collect();
+                foreach ($vars as $v) {
+                    $imeiList = array_filter(explode(',', $v->imei_number ?? ''));
+                    foreach ($imeiList as $imei) {
+                        $products[] = [
+                            'id'               => $product->id,
+                            'code'             => $v->item_code,
+                            'name'             => $product->name,
+                            'qty'              => 1,
+                            'price'            => $product->price + $v->additional_price,
+                            'is_imei'          => 1,
+                            'is_embeded'       => $product->is_embeded,
+                            'batch_no'         => $batch_no,
+                            'product_batch_id' => $v->product_batch_id,
+                            'expired_date'     => $expired_date,
+                            'imei_number'      => trim($imei),
+                        ];
+                    }
+                }
+
+            // Variant product (no IMEI): expand one row per variant
+            } elseif ($product->is_variant == 1) {
                 $vars = $variants[$product->id] ?? collect();
                 foreach ($vars as $v) {
                     $products[] = [
-                        'id' => $product->id,
-                        'code' => $v->item_code,
-                        'name' => $product->name,
-                        'qty' => $v->qty,
-                        'price' => $product->price + $v->additional_price,
-                        'is_imei' => $product->is_imei,
-                        'is_embeded' => $product->is_embeded,
-                        'batch_no' => $batch_no,
+                        'id'               => $product->id,
+                        'code'             => $v->item_code,
+                        'name'             => $product->name,
+                        'qty'              => $v->qty,
+                        'price'            => $product->price + $v->additional_price,
+                        'is_imei'          => $product->is_imei,
+                        'is_embeded'       => $product->is_embeded,
+                        'batch_no'         => $batch_no,
                         'product_batch_id' => $product->product_batch_id,
-                        'expired_date' => $expired_date,
-                        'imei_number' => null,
+                        'expired_date'     => $expired_date,
+                        'imei_number'      => null,
                     ];
                 }
-                // ensuring uniqueness by product code (array to collection and back)
-                $products = (collect($products)->unique('code'))->values()->toArray();
-            } elseif ($product->is_variant == 1 && $product->is_imei == 1) {
+                // Deduplicate by variant code
+                $products = collect($products)->unique('code')->values()->all();
 
-                    $vars = $variants[$product->id] ?? collect();
-
-                    foreach ($vars as $v) {
-                        $imeiList = array_filter(explode(',', $v->imei_number ?? ''));
-
-                        foreach ($imeiList as $imei) {
-                            $products[] = [
-                                'id' => $product->id,
-                                'code' => $v->item_code,
-                                'name' => $product->name,
-                                'qty' => 1,
-                                'price' => $product->price + $v->additional_price,
-                                'is_imei' => 1,
-                                'is_embeded' => $product->is_embeded,
-                                'batch_no' => $batch_no,
-                                'product_batch_id' => $v->product_batch_id,
-                                'expired_date' => $expired_date,
-                                'imei_number' => trim($imei),
-                            ];
-                        }
+            // Non-variant product
+            } else {
+                // Embedded barcode: restore the original 13-digit code; skip if no embed context
+                if ($product->is_embeded == 1) {
+                    if (isset($product_embed_code)) {
+                        $product->code = $product_embed_code;
+                    } else {
+                        // Embedded product surfaced without an embedded scan - skip
+                        continue;
                     }
-
-                } else {
-                // Embedded product code normalization
-                if ($product->is_embeded == 1 && isset($product_embed_code)) {
-                    $product->code = $product_embed_code;
-                } elseif ($product->is_embeded == 1 && !isset($product_embed_code)) {
-                    continue;
                 }
 
                 if ($product->is_imei == 1 && !empty($product->imei_number)) {
                     $imeiList = array_filter(explode(',', $product->imei_number));
-
                     foreach ($imeiList as $imei) {
                         $products[] = [
-                            'type' => $product->type,
-                            'id' => $product->id,
-                            'code' => $product->code,
-                            'name' => $product->name,
-                            'qty' => 1, // each IMEI represents one physical unit
-                            'price' => $product->price,
-                            'is_imei' => $product->is_imei,
-                            'is_embeded' => $product->is_embeded,
-                            'batch_no' => $batch_no,
+                            'type'             => $product->type,
+                            'id'               => $product->id,
+                            'code'             => $product->code,
+                            'name'             => $product->name,
+                            'qty'              => 1,
+                            'price'            => $product->price,
+                            'is_imei'          => $product->is_imei,
+                            'is_embeded'       => $product->is_embeded,
+                            'batch_no'         => $batch_no,
                             'product_batch_id' => $product->product_batch_id,
-                            'expired_date' => $expired_date,
-                            'imei_number' => trim($imei),
+                            'expired_date'     => $expired_date,
+                            'imei_number'      => trim($imei),
                         ];
                     }
                 } else {
                     $products[] = [
-                        'type' => $product->type,
-                        'id' => $product->id,
-                        'code' => $product->code,
-                        'name' => $product->name,
-                        'qty' => $product->qty ?? 0,
-                        'price' => $product->price,
-                        'is_imei' => $product->is_imei,
-                        'is_embeded' => $product->is_embeded,
-                        'batch_no' => $batch_no,
+                        'type'             => $product->type,
+                        'id'               => $product->id,
+                        'code'             => $product->code,
+                        'name'             => $product->name,
+                        'qty'              => $product->qty ?? 0,
+                        'price'            => $product->price,
+                        'is_imei'          => $product->is_imei,
+                        'is_embeded'       => $product->is_embeded,
+                        'batch_no'         => $batch_no,
                         'product_batch_id' => $product->product_batch_id,
-                        'expired_date' => $expired_date,
-                        'imei_number' => $product->imei_number,
+                        'expired_date'     => $expired_date,
+                        'imei_number'      => $product->imei_number,
                     ];
                 }
-
             }
         }
-        // dd($search, $warehouse_id, $products);
 
         return response()->json($products);
     }
+
 
     public function customerSales($customer_id) {
         $sales = Sale::with('customer')

@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Auth;
 use Illuminate\Support\Facades\View;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class SuperAdminAuth
 {
@@ -20,12 +20,6 @@ class SuperAdminAuth
     public function handle(Request $request, Closure $next)
     {
         if(Auth::check()) {
-            if(isset($_COOKIE['language'])) {
-                \App::setLocale($_COOKIE['language']);
-            } 
-            else {
-                \App::setLocale('en');
-            }
             //setting theme
             if(isset($_COOKIE['theme'])) {
                 View::share('theme', $_COOKIE['theme']);

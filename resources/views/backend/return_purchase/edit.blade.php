@@ -11,7 +11,7 @@
                         <h4>{{__('db.Update Return')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('return-purchase.update', $lims_return_data->id) }}" method="POST" enctype="multipart/form-data" class="payment-form">
                             @csrf
                             @method('PUT')

@@ -91,7 +91,7 @@
           <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-          <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+          <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
            <p>{{__('db.The correct column order is')}} (name*, image, company_name*, vat_number, email*, phone_number*, address*, city*,state, postal_code, country) {{__('db.and you must follow this')}}.</p>
            <p>{{__('db.To display Image it must be stored in')}} images/biller {{__('db.directory')}}</p>
             <div class="row">

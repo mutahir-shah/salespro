@@ -1,13 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
 use App\Http\Controllers\Controller;
-
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-
 use Illuminate\Http\Request;
-use App\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 
 class SuperAdminLoginController extends Controller
 {
@@ -15,10 +13,6 @@ class SuperAdminLoginController extends Controller
 
     public function login()
     {
-        if(isset($_COOKIE['language']))
-            \App::setLocale($_COOKIE['language']);
-        else
-            \App::setLocale('en');
         //getting theme
         if(isset($_COOKIE['theme']))
             $theme = $_COOKIE['theme'];

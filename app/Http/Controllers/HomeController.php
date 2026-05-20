@@ -115,26 +115,25 @@ class HomeController extends Controller
         if(Auth::user()->role_id > 2 && cache()->get('general_setting')->staff_access == 'own')
         {
 
-            $sale_query = Sale::whereDate('created_at', '>=' , $start_date)->where('user_id', Auth::id())->whereDate('created_at', '<=' , $end_date)->whereNull('deleted_at');
+            $sale_query = Sale::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->whereNull('deleted_at');
 
-            $revenue = $sale_query->sum(DB::raw('(grand_total - shipping_cost) / exchange_rate'));
+            $revenue = $sale_query->sum(DB::raw('(grand_total - shipping_cost) / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-            $expense = Expense::whereDate('created_at', '>=' , $start_date)->where('user_id', Auth::id())->whereDate('created_at', '<=' , $end_date)->sum('amount');
+            $expense = Expense::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->sum('amount');
 
-            $purchase_query = Purchase::whereDate('created_at', '>=' , $start_date)
+            $purchase_query = Purchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                             ->where('user_id', Auth::id())
-                            ->whereDate('created_at', '<=' , $end_date)
                             ->whereNull('deleted_at')
                             ->where(function ($q) {
                                 $q->where('purchase_type', '!=', 'opening balance')
                                 ->orWhereNull('purchase_type');
                             });
 
-            $return = Returns::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->where('user_id', Auth::id())->sum(DB::raw('grand_total / exchange_rate'));
+            $return = Returns::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
             
-            $income = Income::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->where('user_id', Auth::id())->sum('amount');
+            $income = Income::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->sum('amount');
 
-            $purchase = $purchase_query->sum(DB::raw('grand_total / exchange_rate'));
+            $purchase = $purchase_query->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
             $revenue = $revenue - $return + $income;
 
@@ -142,25 +141,24 @@ class HomeController extends Controller
         else
         {
 
-            $sale_query = Sale::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->whereNull('deleted_at');
+            $sale_query = Sale::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->whereNull('deleted_at');
 
-            $revenue = $sale_query->sum(DB::raw('(grand_total - shipping_cost) / exchange_rate'));
+            $revenue = $sale_query->sum(DB::raw('(grand_total - shipping_cost) / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-            $expense = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount');
+            $expense = Expense::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->sum('amount');
 
-            $income = Income::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount');
+            $income = Income::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->sum('amount');
 
-            $return = Returns::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum(DB::raw('grand_total / exchange_rate'));
+            $return = Returns::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-            $purchase_query = Purchase::whereDate('created_at', '>=' , $start_date)
-                            ->whereDate('created_at', '<=' , $end_date)
+            $purchase_query = Purchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                             ->whereNull('deleted_at')
                             ->where(function ($q) {
                                 $q->where('purchase_type', '!=', 'opening balance')
                                 ->orWhereNull('purchase_type');
                             });
            
-            $purchase = $purchase_query->sum(DB::raw('grand_total / exchange_rate'));
+            $purchase = $purchase_query->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
             $revenue = $revenue - $return + $income;
 
@@ -176,20 +174,20 @@ class HomeController extends Controller
             $end_date = date("Y-m", $start).'-'.date('t', mktime(0, 0, 0, date("m", $start), 1, date("Y", $start)));
 
             if(Auth::user()->role_id > 2 && cache()->get('general_setting')->staff_access == 'own') {
-                $recieved_amount = DB::table('payments')->whereNotNull('sale_id')->whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->where('user_id', Auth::id())->sum(DB::raw('amount / exchange_rate'));
-                $sent_amount = DB::table('payments')->whereNotNull('purchase_id')->whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->where('user_id', Auth::id())->sum(DB::raw('amount / exchange_rate'));
-                $return_amount = Returns::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->where('user_id', Auth::id())->sum(DB::raw('grand_total / exchange_rate'));
-                $purchase_return_amount = ReturnPurchase::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->where('user_id', Auth::id())->sum(DB::raw('grand_total / exchange_rate'));
-                $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->where('user_id', Auth::id())->sum('amount');
-                $payroll_amount = Payroll::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->where('user_id', Auth::id())->sum('amount');
+                $recieved_amount = DB::table('payments')->whereNotNull('sale_id')->whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->sum(DB::raw('amount / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+                $sent_amount = DB::table('payments')->whereNotNull('purchase_id')->whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->sum(DB::raw('amount / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+                $return_amount = Returns::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+                $purchase_return_amount = ReturnPurchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+                $expense_amount = Expense::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->sum('amount');
+                $payroll_amount = Payroll::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->where('user_id', Auth::id())->sum('amount');
             }
             else {
-                $recieved_amount = DB::table('payments')->whereNotNull('sale_id')->whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum(DB::raw('amount / exchange_rate'));
-                $sent_amount = DB::table('payments')->whereNotNull('purchase_id')->whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum(DB::raw('amount / exchange_rate'));
-                $return_amount = Returns::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum(DB::raw('grand_total / exchange_rate'));
-                $purchase_return_amount = ReturnPurchase::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum(DB::raw('grand_total / exchange_rate'));
-                $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount');
-                $payroll_amount = Payroll::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount');
+                $recieved_amount = DB::table('payments')->whereNotNull('sale_id')->whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->sum(DB::raw('amount / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+                $sent_amount = DB::table('payments')->whereNotNull('purchase_id')->whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->sum(DB::raw('amount / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+                $return_amount = Returns::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+                $purchase_return_amount = ReturnPurchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+                $expense_amount = Expense::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->sum('amount');
+                $payroll_amount = Payroll::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->sum('amount');
             }
             $sent_amount = $sent_amount + $return_amount + $expense_amount + $payroll_amount;
 
@@ -206,35 +204,31 @@ class HomeController extends Controller
             $start_date = date("Y").'-'.date('m', $start).'-'.'01';
             $end_date = date("Y").'-'.date('m', $start).'-'.date('t', mktime(0, 0, 0, date("m", $start), 1, date("Y", $start)));
             if(Auth::user()->role_id > 2 && cache()->get('general_setting')->staff_access == 'own') {
-                $sale_amount = Sale::whereDate('created_at', '>=' , $start_date)
-                                ->whereDate('created_at', '<=' , $end_date)
+                $sale_amount = Sale::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                                 ->where('user_id', Auth::id())
                                 ->whereNull('deleted_at')
-                                ->sum(DB::raw('grand_total / exchange_rate'));
+                                ->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-                $purchase_amount = Purchase::whereDate('created_at', '>=' , $start_date)
-                                    ->whereDate('created_at', '<=' , $end_date)
+                $purchase_amount = Purchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                                     ->where('user_id', Auth::id())
                                     ->whereNull('deleted_at')
                                     ->where(function ($q) {
                                         $q->where('purchase_type', '!=', 'opening balance')
                                         ->orWhereNull('purchase_type');
                                     })
-                                    ->sum(DB::raw('grand_total / exchange_rate'));
+                                    ->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
             }
             else{
-                $sale_amount = Sale::whereDate('created_at', '>=' , $start_date)
-                                ->whereDate('created_at', '<=' , $end_date)
+                $sale_amount = Sale::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                                 ->whereNull('deleted_at')
-                                ->sum(DB::raw('grand_total / exchange_rate'));
-                $purchase_amount = Purchase::whereDate('created_at', '>=' , $start_date)
-                                    ->whereDate('created_at', '<=' , $end_date)
+                                ->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+                $purchase_amount = Purchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                                     ->whereNull('deleted_at')
                                     ->where(function ($q) {
                                         $q->where('purchase_type', '!=', 'opening balance')
                                         ->orWhereNull('purchase_type');
                                     })
-                                    ->sum(DB::raw('grand_total / exchange_rate'));
+                                    ->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
             }
             $yearly_sale_amount[] = number_format((float)$sale_amount, config('decimal'), '.', '');
             $yearly_purchase_amount[] = number_format((float)$purchase_amount, config('decimal'), '.', '');
@@ -266,35 +260,35 @@ class HomeController extends Controller
             DB::reconnect();
 
             $q = Sale::join('product_sales', 'sales.id','=', 'product_sales.sale_id')
-                ->select(DB::raw('product_sales.product_id, product_sales.product_batch_id, product_sales.sale_unit_id, sum(product_sales.qty) as sold_qty, sum(product_sales.return_qty) as return_qty, sum(product_sales.total) as sold_amount'))
+                ->select(DB::raw('product_sales.product_id, product_sales.variant_id, product_sales.product_batch_id, product_sales.sale_unit_id, sum(product_sales.qty) as sold_qty, sum(product_sales.return_qty) as return_qty, sum(product_sales.total) as sold_amount'))
                 ->whereNull('sales.deleted_at')
                 ->where('sales.user_id', Auth::id())
-                ->whereBetween('sales.created_at', [$start_date, $end_date]);
+                ->whereDate('sales.created_at', '>=', $start_date)->whereDate('sales.created_at', '<=', $end_date);
 
             if($warehouse_id != 0) {
                 $q->where('sales.warehouse_id',$warehouse_id);
             }
 
-            $product_sale_data = $q->groupBy('product_sales.product_id', 'product_sales.product_batch_id')->get();
+            $product_sale_data = $q->groupBy('product_sales.product_id', 'product_sales.variant_id', 'product_sales.product_batch_id')->get();
 
             config()->set('database.connections.mysql.strict', true);
             DB::reconnect();
 
             $product_cost = $this->calculateAverageCOGS($product_sale_data);
 
-            $total_sale_q = Sale::where('user_id', Auth::id())->whereBetween('created_at', [$start_date, $end_date])->whereNull('deleted_at');
+            $total_sale_q = Sale::where('user_id', Auth::id())->whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)->whereNull('deleted_at');
 
             $purchase_q = Purchase::where('user_id', Auth::id())
-                        ->whereBetween('created_at', [$start_date, $end_date])
+                        ->whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                         ->whereNull('deleted_at')
                         ->where(function ($q) {
                             $q->where('purchase_type', '!=', 'opening balance')
                             ->orWhereNull('purchase_type');
                         });
 
-            $return_q = Returns::where('user_id', Auth::id())->whereBetween('created_at', [$start_date, $end_date]);
+            $return_q = Returns::where('user_id', Auth::id())->whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date);
 
-            $purchase_return_q = ReturnPurchase::where('user_id', Auth::id())->whereBetween('created_at', [$start_date, $end_date]);
+            $purchase_return_q = ReturnPurchase::where('user_id', Auth::id())->whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date);
 
             if($warehouse_id != 0) {
                 $total_sale_q->where('warehouse_id',$warehouse_id);
@@ -303,30 +297,30 @@ class HomeController extends Controller
                 $purchase_return_q->where('warehouse_id',$warehouse_id);
             }
 
-            $total_sale = $total_sale_q->sum(DB::raw('(grand_total - shipping_cost) / exchange_rate'));
-            $purchase = $purchase_q->sum(DB::raw('grand_total / exchange_rate'));
-            $return = $return_q->sum(DB::raw('grand_total / exchange_rate'));
-            $purchase_return = $purchase_return_q->sum(DB::raw('grand_total / exchange_rate'));
+            $total_sale = $total_sale_q->sum(DB::raw('(grand_total - shipping_cost) / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+            $purchase = $purchase_q->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+            $return = $return_q->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+            $purchase_return = $purchase_return_q->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-            $invoice_due = Sale::whereBetween('created_at', [$start_date, $end_date])
+            $invoice_due = Sale::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                             ->whereNull('deleted_at')
                             ->whereNull('sale_type')
                             ->where('user_id', Auth::id())
                             ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                                 $q->where('warehouse_id', $warehouse_id);
                             })
-                            ->sum(DB::raw('(grand_total - paid_amount) / exchange_rate'));
+                            ->sum(DB::raw('(grand_total - paid_amount) / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-            $purchase_due = Purchase::whereBetween('created_at', [$start_date, $end_date])
+            $purchase_due = Purchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                             ->whereNull('deleted_at')
                             ->whereNull('purchase_type')
                             ->where('user_id', Auth::id())
                             ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                                 $q->where('warehouse_id', $warehouse_id);
                             })
-                            ->sum(DB::raw('(grand_total - paid_amount) / exchange_rate'));
+                            ->sum(DB::raw('(grand_total - paid_amount) / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-            $expense = Expense::whereBetween('created_at', [$start_date, $end_date])
+            $expense = Expense::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                 ->where('user_id', Auth::id())
                 ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                     $q->where('warehouse_id', $warehouse_id);
@@ -334,7 +328,7 @@ class HomeController extends Controller
                 ->sum('amount');
 
 
-            $income = Income::whereBetween('created_at', [$start_date, $end_date])
+            $income = Income::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                 ->where('user_id', Auth::id())
                 ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                     $q->where('warehouse_id', $warehouse_id);
@@ -349,42 +343,42 @@ class HomeController extends Controller
             DB::reconnect();
 
             $q = Sale::join('product_sales', 'sales.id','=', 'product_sales.sale_id')
-                ->select(DB::raw('product_sales.product_id, product_sales.product_batch_id, product_sales.sale_unit_id, sum(product_sales.qty) as sold_qty, sum(product_sales.return_qty) as return_qty, sum(product_sales.total) as sold_amount'))
+                ->select(DB::raw('product_sales.product_id, product_sales.variant_id, product_sales.product_batch_id, product_sales.sale_unit_id, sum(product_sales.qty) as sold_qty, sum(product_sales.return_qty) as return_qty, sum(product_sales.total) as sold_amount'))
                 ->whereNull('sales.deleted_at')
                 ->where(function ($q) {
                     $q->where('sales.sale_type', '!=', 'opening balance')
                     ->orWhereNull('sales.sale_type');
                 })
-                ->whereBetween('sales.created_at', [$start_date, $end_date]);
+                ->whereDate('sales.created_at', '>=', $start_date)->whereDate('sales.created_at', '<=', $end_date);
 
             if($warehouse_id != 0) {
                 $q->where('sales.warehouse_id',$warehouse_id);
             }
 
-            $product_sale_data = $q->groupBy('product_sales.product_id', 'product_sales.product_batch_id')->get();
+            $product_sale_data = $q->groupBy('product_sales.product_id', 'product_sales.variant_id', 'product_sales.product_batch_id')->get();
 
             config()->set('database.connections.mysql.strict', true);
             DB::reconnect();
 
             $product_cost = $this->calculateAverageCOGS($product_sale_data);
 
-            $total_sale_q = Sale::whereBetween('created_at', [$start_date, $end_date])
+            $total_sale_q = Sale::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                             ->whereNull('deleted_at')
                             ->where(function ($q) {
                                 $q->where('sale_type', '!=', 'opening balance')
                                 ->orWhereNull('sale_type');
                             });
 
-            $purchase_q = Purchase::whereBetween('created_at', [$start_date, $end_date])
+            $purchase_q = Purchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                         ->whereNull('deleted_at')
                         ->where(function ($q) {
                             $q->where('purchase_type', '!=', 'opening balance')
                             ->orWhereNull('purchase_type');
                         });
 
-            $return_q = Returns::whereBetween('created_at', [$start_date, $end_date]);
-
-            $purchase_return_q = ReturnPurchase::whereBetween('created_at', [$start_date, $end_date]);
+            $return_q = Returns::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date);
+                    
+            $purchase_return_q = ReturnPurchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date);
 
             if($warehouse_id != 0) {
                 $total_sale_q->where('warehouse_id',$warehouse_id);
@@ -393,35 +387,35 @@ class HomeController extends Controller
                 $purchase_return_q->where('warehouse_id',$warehouse_id);
             }
 
-            $total_sale = $total_sale_q->sum(DB::raw('(grand_total - shipping_cost) / exchange_rate'));
-            $purchase = $purchase_q->sum(DB::raw('grand_total / exchange_rate'));
-            $return = $return_q->sum(DB::raw('grand_total / exchange_rate'));
-            $purchase_return = $purchase_return_q->sum(DB::raw('grand_total / exchange_rate'));
+            $total_sale = $total_sale_q->sum(DB::raw('(grand_total - shipping_cost) / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+            $purchase = $purchase_q->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+            $return = $return_q->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
+            $purchase_return = $purchase_return_q->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-            $invoice_due = Sale::whereBetween('created_at', [$start_date, $end_date])
+            $invoice_due = Sale::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                             ->whereNull('deleted_at')
                             ->whereNull('sales.sale_type')
                             ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                                 $q->where('warehouse_id', $warehouse_id);
                             })
-                            ->sum(DB::raw('(grand_total - paid_amount) / exchange_rate'));
+                            ->sum(DB::raw('(grand_total - paid_amount) / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-            $purchase_due = Purchase::whereBetween('created_at', [$start_date, $end_date])
+            $purchase_due = Purchase::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                             ->whereNull('deleted_at')
                             ->whereNull('purchase_type')
                             ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                                 $q->where('warehouse_id', $warehouse_id);
                             })
-                            ->sum(DB::raw('(grand_total - paid_amount) / exchange_rate'));
+                            ->sum(DB::raw('(grand_total - paid_amount) / COALESCE(NULLIF(exchange_rate, 0), 1)'));
 
-            $expense = Expense::whereBetween('created_at', [$start_date, $end_date])
+            $expense = Expense::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                 ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                     $q->where('warehouse_id', $warehouse_id);
                 })
                 ->sum('amount');
 
 
-            $income = Income::whereBetween('created_at', [$start_date, $end_date])
+            $income = Income::whereDate('created_at', '>=', $start_date)->whereDate('created_at', '<=', $end_date)
                 ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                     $q->where('warehouse_id', $warehouse_id);
                 })
@@ -453,7 +447,7 @@ class HomeController extends Controller
         foreach ($product_sale_data as $key => $product_sale) {
 
             // Fetch product details for the sold product
-            $product_data = Product::select('type', 'product_list', 'variant_list', 'qty_list')
+            $product_data = Product::select('type', 'product_list', 'variant_list', 'qty_list', 'cost')
                 ->find($product_sale->product_id);
 
             // If product is a combo (bundle of multiple products)
@@ -521,8 +515,10 @@ class HomeController extends Controller
                     // Compute average cost (purchase amount / total received qty)
                     if($total_received_qty)
                         $averageCost = $total_purchased_amount / $total_received_qty;
-                    else
-                        $averageCost = 0;
+                    else {
+                        $component_data = Product::select('cost')->find($product_id);
+                        $averageCost = $component_data->cost;
+                    }
 
                     // Add to total product cost
                     $product_cost += $sold_qty * $averageCost;
@@ -598,8 +594,19 @@ class HomeController extends Controller
                 // Calculate average cost for the product
                 if($total_received_qty)
                     $averageCost = $total_purchased_amount / $total_received_qty;
-                else
-                    $averageCost = 0;
+                else {
+                    if($product_sale->variant_id) {
+                        $additional_cost = DB::table('product_variants')
+                            ->where([
+                                ['product_id', $product_sale->product_id],
+                                ['variant_id', $product_sale->variant_id]
+                            ])->value('additional_cost');
+                        $averageCost = $product_data->cost + ($additional_cost ?? 0);
+                    }
+                    else {
+                        $averageCost = $product_data->cost;
+                    }
+                }
 
                 // Add to total product cost
                 $product_cost += $sold_qty * $averageCost;
@@ -772,7 +779,7 @@ class HomeController extends Controller
                                             $q->where('sales.sale_type', '!=', 'opening balance')
                                             ->orWhereNull('sales.sale_type');
                                         })
-                                        ->sum(DB::raw('grand_total / exchange_rate'));
+                                        ->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
             $purchase_generated[$start] = Purchase::whereDate('created_at', $date)
                                         ->where('user_id', Auth::id())
                                         ->whereNull('deleted_at')
@@ -788,7 +795,7 @@ class HomeController extends Controller
                                                 $q->where('purchase_type', '!=', 'opening balance')
                                                 ->orWhereNull('purchase_type');
                                             })
-                                            ->sum(DB::raw('grand_total / exchange_rate'));
+                                            ->sum(DB::raw('grand_total / COALESCE(NULLIF(exchange_rate, 0), 1)'));
             $quotation_generated[$start] = Quotation::whereDate('created_at', $date)->where('user_id', Auth::id())->count();
             $quotation_grand_total[$start] = Quotation::whereDate('created_at', $date)->where('user_id', Auth::id())->sum('grand_total');
             $start++;

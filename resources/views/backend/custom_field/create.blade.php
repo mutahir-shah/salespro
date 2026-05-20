@@ -12,7 +12,7 @@
                         <h4>{{__('db.Create Custom Field')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('custom-fields.store') }}" method="POST">
                             @csrf
                             <div class="row">

@@ -75,11 +75,7 @@ body {
         {{-- Price --}}
         @if(!empty($print['price']))
             <div style="font-size: {{ $print['price_size'] ?? 11 }}px; margin: 2px 0;">
-                @if($label['currency_position'] == 'prefix')
-                    {{ $label['currency'] }} {{ $label['product_price'] }}
-                @else
-                    {{ $label['product_price'] }} {{ $label['currency'] }}
-                @endif
+                    {{ format_currency($label['product_price']) }}
             </div>
         @endif
 

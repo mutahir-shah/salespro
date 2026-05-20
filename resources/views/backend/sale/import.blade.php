@@ -12,7 +12,7 @@
                         <h4>{{__('db.Import Sale')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('sale.import') }}" method="POST" enctype="multipart/form-data" class="payment-form">
                             @csrf
 

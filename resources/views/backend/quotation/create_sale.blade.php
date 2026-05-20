@@ -21,7 +21,7 @@
                         <h4>{{__('db.Add Sale')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('sales.store') }}" method="POST" enctype="multipart/form-data" class="sale-form">
                             @csrf
                         <div class="row">
@@ -67,6 +67,27 @@
                                                 <option value="{{$biller->id}}">{{$biller->name . ' (' . $biller->company_name . ')'}}</option>
                                                 @endforeach
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>{{__('db.Currency')}} *</label>
+                                            <select name="currency_id" id="currency" class="form-control selectpicker" data-toggle="tooltip" title="" data-original-title="Sale currency">
+                                                @foreach($currency_list as $currency_data)
+                                                <option value="{{$currency_data->id}}" data-rate="{{$currency_data->exchange_rate}}">{{$currency_data->code}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-0">
+                                            <label>{{__('db.Exchange Rate')}} *</label>
+                                        </div>
+                                        <div class="form-group d-flex">
+                                            <input class="form-control" type="text" id="exchange_rate" name="exchange_rate" value="{{$currency->exchange_rate}}">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text" data-toggle="tooltip" title="" data-original-title="currency exchange rate">i</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -315,6 +336,31 @@
                                             </select>
                                         </div>
                                     </div>
+                                    @php
+                                        $accountSelection = $role_has_permissions_list->where('name', 'account-selection')->first();
+                                    @endphp
+                                    @if ($accountSelection)
+                                        <!-- New Account Selection Field -->
+                                        <div id="account-list" class="col-md-4" hidden>
+                                            <div class="form-group">
+                                                <label>{{__('db.Account')}}</label>
+                                                <select name="account_id" id="account_id" class="selectpicker form-control" data-live-search="true">
+                                                    <option value="0" style="color: #A7B49E;">Select an Account</option>
+                                                    @foreach($lims_account_list as $account)
+                                                        <option value="{{ $account->id }}"
+                                                            @if(auth()->user()->account_id == $account->id)
+                                                                selected
+                                                            @elseif($account->is_default == 1)
+                                                                selected
+                                                            @endif
+                                                        >
+                                                            {{ $account->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                                 <div id="payment">
                                     <div class="row">
@@ -776,6 +822,8 @@
             $("#payment").show();
             $("#paying-amount").prop('required',true);
             $("#paid-amount").prop('required',true);
+            $('#account-list').prop('hidden', false);
+            $('#account_id').prop('required', true);
             if(payment_status == 4){
                 $("#paid-amount").prop('disabled',true);
                 $('input[name="paying_amount"]').val($('input[name="grand_total"]').val());
@@ -787,7 +835,15 @@
             $('input[name="paying_amount"]').val('');
             $('input[name="paid_amount"]').val('');
             $("#payment").hide();
+            $('#account-list').prop('hidden', true);
+            $('#account_id').prop('required', false);
         }
+    });
+
+    $('#currency').on("change", function() {
+        var currency_id = $(this).val();
+        var exchange_rate = $(this).find(':selected').data('rate');
+        $('#exchange_rate').val(exchange_rate);
     });
 
     $('select[name="paid_by_id"]').on("change", function() {

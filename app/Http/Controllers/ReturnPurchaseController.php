@@ -2,31 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Mail\UserNotification;
+use App\Models\Account;
+use App\Models\Currency;
+use App\Models\Payment;
+use App\Models\Product_Warehouse;
+use App\Models\Product;
+use App\Models\ProductBatch;
+use App\Models\ProductPurchase;
+use App\Models\ProductVariant;
+use App\Models\Purchase;
+use App\Models\PurchaseProductReturn;
 use App\Models\ReturnPurchase;
-use App\Models\Warehouse;
 use App\Models\Supplier;
 use App\Models\Tax;
-use App\Models\Product;
-use App\Models\Product_Warehouse;
 use App\Models\Unit;
-use App\Models\PurchaseProductReturn;
-use App\Models\Account;
-use App\Models\ProductVariant;
-use App\Models\ProductBatch;
 use App\Models\Variant;
-use App\Models\Purchase;
-use App\Models\ProductPurchase;
-use App\Models\Currency;
-use Auth;
-use DB;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use App\Mail\UserNotification;
-use App\Models\Payment;
+use App\Models\Warehouse;
+use App\Traits\TenantInfo;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use App\Traits\TenantInfo;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class ReturnPurchaseController extends Controller
 {
@@ -117,73 +117,115 @@ class ReturnPurchaseController extends Controller
         }
         else
         {
-            $search = $request->input('search.value');
-            $q = ReturnPurchase::leftJoin('suppliers', 'return_purchases.supplier_id', '=', 'suppliers.id')
-                ->whereDate('return_purchases.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
-                ->offset($start)
-                ->limit($limit)
-                ->orderBy($order,$dir);
-            if(Auth::user()->role_id > 2 && config('staff_access') == 'own') {
-                $returnss =  $q->select('return_purchases.*')
-                            ->with('supplier', 'warehouse', 'user')
-                            ->where('return_purchases.user_id', Auth::id())
-                            ->orwhere([
-                                ['return_purchases.reference_no', 'LIKE', "%{$search}%"],
-                                ['return_purchases.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['suppliers.name', 'LIKE', "%{$search}%"],
-                                ['return_purchases.user_id', Auth::id()]
-                            ])
-                            ->get();
+            // $search = $request->input('search.value');
+            // $q = ReturnPurchase::leftJoin('suppliers', 'return_purchases.supplier_id', '=', 'suppliers.id')
+            //     ->whereDate('return_purchases.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
+            //     ->offset($start)
+            //     ->limit($limit)
+            //     ->orderBy($order,$dir);
+            // if(Auth::user()->role_id > 2 && config('staff_access') == 'own') {
+            //     $returnss =  $q->select('return_purchases.*')
+            //                 ->with('supplier', 'warehouse', 'user')
+            //                 ->where('return_purchases.user_id', Auth::id())
+            //                 ->orwhere([
+            //                     ['return_purchases.reference_no', 'LIKE', "%{$search}%"],
+            //                     ['return_purchases.user_id', Auth::id()]
+            //                 ])
+            //                 ->orwhere([
+            //                     ['suppliers.name', 'LIKE', "%{$search}%"],
+            //                     ['return_purchases.user_id', Auth::id()]
+            //                 ])
+            //                 ->get();
 
-                $totalFiltered = $q->where('return_purchases.user_id', Auth::id())
-                                ->orwhere([
-                                    ['return_purchases.reference_no', 'LIKE', "%{$search}%"],
-                                    ['return_purchases.user_id', Auth::id()]
-                                ])
-                                ->orwhere([
-                                    ['suppliers.name', 'LIKE', "%{$search}%"],
-                                    ['return_purchases.user_id', Auth::id()]
-                                ])
-                                ->count();
+            //     $totalFiltered = $q->where('return_purchases.user_id', Auth::id())
+            //                     ->orwhere([
+            //                         ['return_purchases.reference_no', 'LIKE', "%{$search}%"],
+            //                         ['return_purchases.user_id', Auth::id()]
+            //                     ])
+            //                     ->orwhere([
+            //                         ['suppliers.name', 'LIKE', "%{$search}%"],
+            //                         ['return_purchases.user_id', Auth::id()]
+            //                     ])
+            //                     ->count();
+            // }
+            // elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse') {
+            //     $returnss =  $q->select('return_purchases.*')
+            //                 ->with('supplier', 'warehouse', 'user')
+            //                 ->where('return_purchases.user_id', Auth::id())
+            //                 ->orwhere([
+            //                     ['return_purchases.reference_no', 'LIKE', "%{$search}%"],
+            //                     ['return_purchases.warehouse_id', Auth::user()->warehouse_id]
+            //                 ])
+            //                 ->orwhere([
+            //                     ['suppliers.name', 'LIKE', "%{$search}%"],
+            //                     ['return_purchases.warehouse_id', Auth::user()->warehouse_id]
+            //                 ])
+            //                 ->get();
+
+            //     $totalFiltered = $q->where('return_purchases.user_id', Auth::id())
+            //                     ->orwhere([
+            //                         ['return_purchases.reference_no', 'LIKE', "%{$search}%"],
+            //                         ['return_purchases.warehouse_id', Auth::user()->warehouse_id]
+            //                     ])
+            //                     ->orwhere([
+            //                         ['suppliers.name', 'LIKE', "%{$search}%"],
+            //                         ['return_purchases.warehouse_id', Auth::user()->warehouse_id]
+            //                     ])
+            //                     ->count();
+            // }
+            // else {
+            //     $returnss =  $q->select('return_purchases.*')
+            //                 ->with('supplier', 'warehouse', 'user')
+            //                 ->orwhere('return_purchases.reference_no', 'LIKE', "%{$search}%")
+            //                 ->orwhere('suppliers.name', 'LIKE', "%{$search}%")
+            //                 ->get();
+
+            //     $totalFiltered = $q->orwhere('return_purchases.reference_no', 'LIKE', "%{$search}%")
+            //                     ->orwhere('suppliers.name', 'LIKE', "%{$search}%")
+            //                     ->count();
+            // }
+            $search = $request->input('search.value');
+
+            $q = ReturnPurchase::query()
+                ->leftJoin('suppliers', 'return_purchases.supplier_id', '=', 'suppliers.id')
+                ->leftJoin('product_purchases', 'return_purchases.purchase_id', '=', 'product_purchases.purchase_id') // adjust if needed
+                ->leftJoin('products', 'product_purchases.product_id', '=', 'products.id')
+                ->whereDate('return_purchases.created_at', '>=', $request->input('starting_date'))
+                ->whereDate('return_purchases.created_at', '<=', $request->input('ending_date'));
+
+            if(Auth::user()->role_id > 2 && config('staff_access') == 'own') {
+                $q->where('return_purchases.user_id', Auth::id());
             }
             elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse') {
-                $returnss =  $q->select('return_purchases.*')
-                            ->with('supplier', 'warehouse', 'user')
-                            ->where('return_purchases.user_id', Auth::id())
-                            ->orwhere([
-                                ['return_purchases.reference_no', 'LIKE', "%{$search}%"],
-                                ['return_purchases.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['suppliers.name', 'LIKE', "%{$search}%"],
-                                ['return_purchases.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->get();
-
-                $totalFiltered = $q->where('return_purchases.user_id', Auth::id())
-                                ->orwhere([
-                                    ['return_purchases.reference_no', 'LIKE', "%{$search}%"],
-                                    ['return_purchases.warehouse_id', Auth::user()->warehouse_id]
-                                ])
-                                ->orwhere([
-                                    ['suppliers.name', 'LIKE', "%{$search}%"],
-                                    ['return_purchases.warehouse_id', Auth::user()->warehouse_id]
-                                ])
-                                ->count();
+                $q->where('return_purchases.warehouse_id', Auth::user()->warehouse_id);
             }
-            else {
-                $returnss =  $q->select('return_purchases.*')
-                            ->with('supplier', 'warehouse', 'user')
-                            ->orwhere('return_purchases.reference_no', 'LIKE', "%{$search}%")
-                            ->orwhere('suppliers.name', 'LIKE', "%{$search}%")
-                            ->get();
-
-                $totalFiltered = $q->orwhere('return_purchases.reference_no', 'LIKE', "%{$search}%")
-                                ->orwhere('suppliers.name', 'LIKE', "%{$search}%")
-                                ->count();
+            elseif($warehouse_id != 0) {
+                $q->where('return_purchases.warehouse_id', $warehouse_id);
             }
+
+            $q->where(function ($query) use ($search) {
+
+                // Date detection
+                $date = date('Y-m-d', strtotime(str_replace('/', '-', $search)));
+                if ($date) {
+                    $query->orWhereDate('return_purchases.created_at', $date);
+                }
+
+                $query->orWhere('return_purchases.reference_no', 'LIKE', "%{$search}%")
+                    ->orWhere('suppliers.name', 'LIKE', "%{$search}%")
+                    ->orWhere('products.name', 'LIKE', "%{$search}%")   // ✅ added
+                    ->orWhere('products.code', 'LIKE', "%{$search}%"); // ✅ added
+            });
+
+            $totalFiltered = $q->distinct('return_purchases.id')->count('return_purchases.id');
+
+            $returnss = $q->select('return_purchases.*')
+                ->with('supplier', 'warehouse', 'user')
+                ->distinct('return_purchases.id')
+                ->offset($start)
+                ->limit($limit)
+                ->orderBy($order, $dir)
+                ->get();
         }
         $data = array();
         if(!empty($returnss))

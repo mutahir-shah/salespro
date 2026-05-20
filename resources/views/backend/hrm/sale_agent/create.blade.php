@@ -12,7 +12,7 @@
                         </div>
                         <div class="card-body">
                             <p class="italic">
-                                <small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                                <small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                             <form action="{{ route('sale-agents.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
 
@@ -35,8 +35,8 @@
 
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>{{ __('db.Email') }}</label>
-                                        <input type="email" name="email" class="form-control">
+                                        <label>{{ __('db.Email') }} *</label>
+                                        <input type="email" name="email" required class="form-control">
                                     </div>
                                 </div>
 

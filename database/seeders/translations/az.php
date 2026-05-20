@@ -130,7 +130,7 @@ return array (
   21 => 
   array (
     'locale' => 'az',
-    'key' => 'The field labels marked with * are required input fields',
+    'key' => 'The field labels marked with are required input fields',
     'value' => '* ilə işarələnmiş sahə etiketləri tələb olunan daxiletmə sahələridir',
   ),
   22 => 

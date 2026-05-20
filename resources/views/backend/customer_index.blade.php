@@ -14,11 +14,7 @@
         <div class="brand-text float-right mt-4">
             <h3>{{__('db.Reward Points')}}: <span>{{$customer->points}}</span> </h3>
             <h3>{{__('db.One Point is Equivalent to:')}}
-                @if($general_setting->currency_position == 'prefix')
-                    <span>{{$currency->code}} {{$lims_reward_point_setting_data->per_point_amount}}</span>
-                @else
-                    <span>{{$lims_reward_point_setting_data->per_point_amount}} {{$currency->code}}</span>
-                @endif
+                <span>{{format_currency($lims_reward_point_setting_data->per_point_amount)}}</span>
             </h3>
         </div>
         @endif

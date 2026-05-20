@@ -14,6 +14,7 @@
                     <th>{{__('db.Packing Slip Reference')}}</th>
                     <th>{{__('db.customer')}}</th>
                     <th>{{__('db.Courier')}}</th>
+                    <th>{{__('db.Tracking Code')}}</th>
                     <th>{{__('db.Address')}}</th>
                     <th>{{__('db.Products')}}</th>
                     <th>{{__('db.grand total')}}</th>
@@ -88,7 +89,6 @@
             <div class="modal-body">
                 <form action="{{ route('delivery.update') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    @method('PUT')
                     <div class="row">
                         <div class="col-md-6 form-group">
                             <label>{{__('db.Delivery Reference')}}</label>
@@ -148,11 +148,30 @@
     </div>
 </div>
 
+{{-- ====== TRACKING MODAL ====== --}}
+<div id="trackingModal" tabindex="-1" role="dialog" aria-hidden="true" class="modal fade text-left">
+    <div role="document" class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #2d6a4f;">
+                <h5 class="modal-title text-white">
+                    <i class="fa fa-map-marker"></i> Parcel Tracking
+                </h5>
+                <button type="button" data-dismiss="modal" aria-label="Close" class="close text-white">
+                    <span aria-hidden="true"><i class="dripicons-cross"></i></span>
+                </button>
+            </div>
+            <div class="modal-body" id="tracking-modal-body">
+                {{-- JS দিয়ে inject হবে --}}
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="steadfast-delivery" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
     <div role="document" class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="exampleModalLabel" class="modal-title">{{__('db.SteadFast Delivery')}}</h5>
+                <h5 id="exampleModalLabel" class="modal-title">{{__('db.Send Delivery')}}</h5>
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
@@ -259,22 +278,33 @@
         }
     );
 
-    $(document).on("click", "table.delivery-list tbody .steadfast-delivery", function(event) {
-        var id = $(this).data('id').toString();
-        // console.log(id);
-        $.get('delivery/steadfast/'+id, function(data) {
-            $('#invoice').text(data['invoice']);
-            $('input[name="invoice"]').val(data['invoice']);
-            $('input[name="sale_id"]').val(id);
-            $('input[name="recipient_name"]').val(data['recipient_name']);
-            $('input[name="recipient_email"]').val(data['recipient_email']);
-            $('input[name="recipient_phone"]').val(data['recipient_phone']);
-            $('textarea[name="recipient_address"]').val(data['recipient_address']);
-            let amount = parseFloat(data['cod_amount']);
-            $('input[name="cod_amount"]').val(isNaN(amount) ? '' : amount.toFixed(2));
-            $('#steadfast-delivery').modal('show');
-        });
+   $(document).on("click", "table.delivery-list tbody .steadfast-delivery", function(event) {
+    var id = $(this).data('id').toString();
+    var type = $(this).data('type').toString();
+
+    $.get('delivery/steadfast/'+id, function(data) {
+        $('#invoice').text(data['invoice']);
+        $('input[name="invoice"]').val(data['invoice']);
+        $('input[name="sale_id"]').val(id);
+        $('input[name="recipient_name"]').val(data['recipient_name']);
+        $('input[name="recipient_email"]').val(data['recipient_email']);
+        $('input[name="recipient_phone"]').val(data['recipient_phone']);
+        $('textarea[name="recipient_address"]').val(data['recipient_address']);
+        let amount = parseFloat(data['cod_amount']);
+        $('input[name="cod_amount"]').val(isNaN(amount) ? '' : amount.toFixed(2));
+
+        // ✅ Set form action based on type
+        if (type === 'pathao') {
+            // Construct URL manually or use route with ID parameter
+            let pathaoUrl = "{{ route('delivery.sendToPathao', ['id' => 'PLACEHOLDER']) }}".replace('PLACEHOLDER', id);
+            $('#steadfastForm').attr('action', pathaoUrl);
+        } else {
+            $('#steadfastForm').attr('action', "{{ route('steadfast.create-order') }}");
+        }
+
+        $('#steadfast-delivery').modal('show');
     });
+});
 
     function deliveryDetails(delivery, barcode) {
         $('input[name="delivery_id"]').val(delivery[4]);
@@ -350,7 +380,7 @@
 
     $(document).ready(function() {
         $(document).on('click', '.open-EditCategoryDialog', function(){
-          var url ="delivery/"
+          var url ="{{url('delivery')}}/"
           var id = $(this).data('id').toString();
           url = url.concat(id).concat("/edit");
 
@@ -378,7 +408,7 @@
         "serverSide": true,
         "order": [],
         "ajax":{
-            url:"delivery/delivery_list_data",
+            url:"{{url('delivery/delivery_list_data')}}",
             dataType: "json",
             type:"get",
         },
@@ -389,11 +419,13 @@
             {"data": "packing_slip_references"},
             {"data": "customer"},
             {"data": "courier"},
+            {"data": 'tracking_code'},
             {"data": "address"},
             {"data": "products"},
             {"data": "grand_total"},
             {"data": "status"},
             {"data": "options"},
+
         ],
         'language': {
             'lengthMenu': '_MENU_ {{__("db.records per page")}}',
@@ -498,5 +530,125 @@
             },
         ],
     } );
+
+
+    // ====== TRACK BUTTON CLICK ======
+$(document).on('click', '.track-delivery-btn', function () {
+    var deliveryId    = $(this).data('id');
+    var trackingCode  = $(this).data('tracking');
+
+    $('#tracking-modal-body').html(`
+        <div class="text-center py-4">
+            <i class="fa fa-spinner fa-spin fa-2x text-info"></i>
+            <p class="mt-2 text-muted">
+                Fetching tracking info for
+                <strong>${trackingCode}</strong>...
+            </p>
+        </div>
+    `);
+
+    $('#trackingModal').modal('show');
+
+    $.ajax({
+        url: '{{url("delivery")}}/' + deliveryId + '/track',
+        type: 'GET',
+        success: function (res) {
+            if (!res.success) {
+                $('#tracking-modal-body').html(`
+                    <div class="alert alert-danger">
+                        <i class="fa fa-times-circle"></i> ${res.error}
+                    </div>
+                `);
+                return;
+            }
+
+            const trackingUrlBtn = res.tracking_url
+                ? `<div class="text-center mt-3">
+                       <a href="${res.tracking_url}" target="_blank" class="btn btn-sm btn-outline-info">
+                           <i class="fa fa-external-link"></i> View on ${res.courier} Website
+                       </a>
+                   </div>`
+                : '';
+
+            const recipientRow = res.recipient_name
+                ? `<tr><th>Recipient</th><td>${res.recipient_name}</td></tr>` : '';
+
+            const addressRow = res.address
+                ? `<tr><th>Address</th><td>${res.address}</td></tr>` : '';
+
+            const amountRow = res.amount
+                ? `<tr><th>Amount</th><td>${res.amount} ৳</td></tr>` : '';
+
+            const updatedRow = res.updated_at
+                ? `<tr><th>Last Updated</th><td>${res.updated_at}</td></tr>` : '';
+
+            $('#tracking-modal-body').html(`
+                <div class="text-center mb-3">
+                    <span class="badge badge-success" style="font-size:14px; padding:8px 18px;">
+                        ${res.courier}
+                    </span>
+                </div>
+
+                <div style="background:#e8f5e9; border:1px dashed #2d6a4f; border-radius:8px;
+                            padding:16px; text-align:center; margin-bottom:16px;">
+                    <div style="font-size:11px; color:#777; text-transform:uppercase; letter-spacing:1px;">
+                        Tracking Code
+                    </div>
+                    <div style="font-size:22px; font-weight:bold; color:#2d6a4f; letter-spacing:3px;">
+                        ${res.tracking_code}
+                    </div>
+                </div>
+
+                <table class="table table-sm table-bordered">
+                    <tr>
+                        <th style="width:40%">Status</th>
+                        <td><span class="badge badge-primary" style="font-size:13px;">${res.status}</span></td>
+                    </tr>
+                    ${recipientRow}
+                    ${addressRow}
+                    ${amountRow}
+                    ${updatedRow}
+                </table>
+
+                ${trackingUrlBtn}
+            `);
+        },
+        error: function () {
+            $('#tracking-modal-body').html(`
+                <div class="alert alert-danger">
+                    <i class="fa fa-times-circle"></i> Server error. Please try again.
+                </div>
+            `);
+        }
+    });
+});
+
+// ====== PATHAO DELIVERY BUTTON CLICK ======
+$(document).on('click', '.pathao-delivery', function () {
+    var deliveryId = $(this).data('delivery-id');
+    var saleId     = $(this).data('id');
+
+    if (confirm('Are you sure you want to send this order to Pathao?')) {
+        $.ajax({
+            type: 'POST',
+            url: '{{url("delivery")}}/' + deliveryId + '/send-to-pathao',
+            data: { _token: '{{ csrf_token() }}' },
+            beforeSend: function () {
+                alert('Sending order to Pathao...');
+            },
+            success: function (response) {
+                if (response.success) {
+                    alert('Order sent to Pathao successfully! Tracking Code: ' + response.tracking_code);
+                    location.reload();
+                } else {
+                    alert('Failed to send order to Pathao. Error: ' + response.error);
+                }
+            },
+            error: function () {
+                alert('Something went wrong! Please try again.');
+            }
+        });
+    }
+});
 </script>
 @endpush

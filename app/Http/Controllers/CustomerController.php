@@ -115,14 +115,18 @@ class CustomerController extends Controller
         else
         {
             $search = $request->input('search.value');
-            $q = $q
-                ->with('discountPlans', 'customerGroup')
-                ->where('customers.name', 'LIKE', "%{$search}%")
-                ->orwhere('customers.company_name', 'LIKE', "%{$search}%")
-                ->orwhere('customers.phone_number', 'LIKE', "%{$search}%");
-            foreach ($field_names as $key => $field_name) {
-                $q = $q->orwhere('customers.' . $field_name, 'LIKE', "%{$search}%");
-            }
+            $q = $q->with('discountPlans', 'customerGroup')
+                ->where(function ($query) use ($search, $field_names) {
+
+                    $query->where('customers.name', 'LIKE', "%{$search}%")
+                        ->orWhere('customers.company_name', 'LIKE', "%{$search}%")
+                        ->orWhere('customers.phone_number', 'LIKE', "%{$search}%");
+
+                    foreach ($field_names as $field_name) {
+                        $query->orWhere('customers.' . $field_name, 'LIKE', "%{$search}%");
+                    }
+                });
+
             $customers = $q->get();
             $totalFiltered = $q->count();
         }
@@ -164,38 +168,32 @@ class CustomerController extends Controller
                                         ->orWhereNull('sale_type');
                                     })
                                     ->where('customer_id', $customer->id)
-                                    ->where('sale_status', 1)// completed
                                     ->whereNull('deleted_at')
                                     ->sum('grand_total');
 
                 if ($total_sales_amount == 0) {
                     $total_paid_amount = Payment::join('sales', 'sales.id', '=', 'payments.sale_id')
                                         ->where('sales.customer_id', $customer->id)
-                                        ->where('sales.sale_status', 1)// completed
-                                        ->whereNull('payments.return_id')
                                         ->whereNull('sales.deleted_at')
                                         ->sum('payments.amount');
                     $total_due = $opening_balance_amount - $total_paid_amount;
                 } else {
                     $total_paid_amount = Payment::join('sales', 'sales.id', '=', 'payments.sale_id')
                                         ->where('sales.customer_id', $customer->id)
-                                        ->where('sales.sale_status', 1)// completed
-                                        ->whereNull('payments.return_id')
+                                        ->whereNull('return_id') 
                                         ->whereNull('sales.deleted_at')
                                         ->sum('payments.amount');
 
-                    $total_returns_amount = Returns::where('customer_id', $customer->id)
+                    $total_refund_amount = Payment::join('returns', 'returns.id', '=', 'payments.return_id')
+                                            ->where('returns.customer_id', $customer->id)
+                                            ->sum('payments.amount');
+
+                    $total_returns_amount = Returns::where('customer_id', $customer->id)   
                                             ->sum('grand_total');
 
-                    $total_refund = Payment::join('returns', 'returns.id', '=', 'payments.return_id')
-                                        ->where('returns.customer_id', $customer->id)
-                                        ->sum('payments.amount');
+                    $total_due =  ($opening_balance_amount + $total_sales_amount + $total_refund_amount)
+                                - ($total_paid_amount + $total_returns_amount);
 
-                    $total_due =  $opening_balance_amount
-                                    + $total_sales_amount
-                                    - $total_paid_amount
-                                    - $total_returns_amount
-                                    + $total_refund;
                 }
 
                 $nestedData['total_due'] = number_format($total_due, 2);
@@ -227,7 +225,7 @@ class CustomerController extends Controller
                 }
                 if($customer->type != 'walkin'){
                     if(in_array("due-report", $request['all_permission'])) {
-                        $nestedData['options'] .= '<li><form route="report.customerDueByDate" method = "post" id = "due-report-form">
+                        $nestedData['options'] .= '<li><form action="'.route('report.customerDueByDate').'" method = "post" id = "due-report-form">
                                 '.csrf_field().'
                                 <input type="hidden" name="start_date" value="'.date('Y-m-d', strtotime('-30 year')).'" />
                                 <input type="hidden" name="end_date" value="'.date('Y-m-d').'" />
@@ -343,7 +341,7 @@ class CustomerController extends Controller
                 $paying_method = 'Points';
 
             $due_amount = $sale_data->grand_total - $sale_data->paid_amount;
-
+            
             $lims_cash_register_data = CashRegister::select('id',)
                                         ->where([
                                             ['user_id', Auth::id()],
@@ -380,7 +378,6 @@ class CustomerController extends Controller
 
             $total_paid_amount -= $data['amount'];
 
-            $lims_payment_data   = Payment::latest()->first();
             $data['payment_id']  = $lims_payment_data->id;
 
             // ── Payment method specific logic ──
@@ -625,6 +622,7 @@ class CustomerController extends Controller
         $customerInfo['id'] = $lims_customer_data->id;
         $customerInfo['name'] = $lims_customer_data->name;
         $customerInfo['phone_number'] = $lims_customer_data->phone_number;
+        $customerInfo['type'] = $lims_customer_data->type;
 
         $lims_discount_plan_data = DiscountPlan::where([
             'is_active' => true,
@@ -679,10 +677,14 @@ class CustomerController extends Controller
             $total_returns = 0;
         } else {
 
-            // Total paid (single query, no N+1)
             $total_paid = Payment::join('sales', 'sales.id', '=', 'payments.sale_id')
                 ->where('sales.customer_id', $id)
+                ->whereNull('return_id')
                 ->whereNull('sales.deleted_at')
+                ->sum('payments.amount');
+
+            $total_refund = Payment::join('returns', 'returns.id', '=', 'payments.return_id')
+                ->where('returns.customer_id', $id)
                 ->sum('payments.amount');
 
             // Total returns
@@ -690,7 +692,7 @@ class CustomerController extends Controller
                 ->sum('grand_total');
 
             // Final balance due
-            $balance_due = ($total_sales + $opening_balance) - ( $total_paid + $total_returns);
+            $balance_due = ($total_sales + $opening_balance + $total_refund) - ( $total_paid + $total_returns);
         }
 
         return view('backend.customer.view', [
@@ -708,7 +710,7 @@ class CustomerController extends Controller
         $sales = Sale::where('customer_id', $id)->whereNull('deleted_at')->get()->map(function ($s) {
             return [
                 'id' => $s->id,
-                'date' => $s->created_at->format('Y-m-d'),
+                'date' => $s->created_at,
                 'type' => $s->sale_type ?? 'Sale',
                 'reference' => $s->reference_no,
                 'debit' => floatval($s->grand_total),
@@ -716,21 +718,19 @@ class CustomerController extends Controller
             ];
         });
 
-        $payments = [];
-        foreach ($sales as $sale) {
-            $sale_payments = Payment::where('sale_id', $sale['id'])->get()->map(function ($p) {
-                return [
-                    'id'        => $p->id,
-                    'date'      => $p->date ?? $p->created_at->format('Y-m-d'),
-                    'type'      => 'Payment',
-                    'reference' => $p->payment_reference ?? '-',
-                    'debit'     => 0,
-                    'credit'    => floatval($p->amount),
-                ];
-            })->toArray(); // convert collection to array
-
-            $payments = array_merge($payments, $sale_payments);
-        }
+        $payments = Payment::whereIn('sale_id', $sales->pluck('id'))
+                    ->whereNull('return_id')
+                    ->get()
+                    ->map(function ($p) {
+                        return [
+                            'id'        => $p->id,
+                            'date'      => $p->date ?? $p->created_at,
+                            'type'      => 'Payment',
+                            'reference' => $p->payment_reference ?? '-',
+                            'debit'     => 0,
+                            'credit'    => floatval($p->amount),
+                        ];
+                    });
 
         $returns = Returns::where('customer_id', $id)->get()->map(function($r) {
             return [
@@ -743,13 +743,58 @@ class CustomerController extends Controller
             ];
         });
 
-        $ledger = $sales->merge($payments)->merge($returns)->sortBy('date')->values()->toArray();
+        $refunds = Payment::join('returns', 'returns.id', '=', 'payments.return_id')
+                    ->where('returns.customer_id', $id)
+                    ->get()
+                    ->map(function($r) {
+                        return [
+                            'id'        => $r->id,
+                            'date'      => $r->date ?? $r->created_at, // payment date
+                            'type'      => 'Refund',
+                            'reference' => $r->payment_reference ?? '-',
+                            'debit'     => floatval($r->amount),
+                            'credit'    => 0,
+                        ];
+                    });
+
+        $seq = 1;
+
+        $sales = $sales->map(function ($row) use (&$seq) {
+            $row['sequence'] = $seq++;
+            return $row;
+        });
+
+        $payments = $payments->map(function ($row) use (&$seq) {
+            $row['sequence'] = $seq++;
+            return $row;
+        });
+
+        $returns = $returns->map(function ($row) use (&$seq) {
+            $row['sequence'] = $seq++;
+            return $row;
+        });
+
+        $refunds = $refunds->map(function ($row) use (&$seq) {
+            $row['sequence'] = $seq++;
+            return $row;
+        });
+
+        $ledger = $sales
+                    ->merge($payments)
+                    ->merge($returns)
+                    ->merge($refunds)
+                    ->sortBy('sequence')
+                    ->values();
 
         $balance = 0;
-        foreach ($ledger as $key => $row) {
+
+        $ledger = $ledger->map(function ($row) use (&$balance) {
             $balance += ($row['debit'] - $row['credit']);
-            $ledger[$key]['balance'] = number_format($balance, 2);
-        }
+            $row['balance'] = round($balance, 2);
+            return $row;
+        });
+
+        $ledger = $ledger->reverse()->values();
 
         return response()->json(['data' => $ledger]);
     }
@@ -1219,6 +1264,7 @@ class CustomerController extends Controller
         $payments = DB::table('payments')
             ->join('sales', 'payments.sale_id', '=', 'sales.id')
             ->where('sales.customer_id', $customer_id)
+            ->whereNull('return_id')
             ->whereNull('sales.deleted_at')
             ->select(
                 'payments.id',
@@ -1244,5 +1290,22 @@ class CustomerController extends Controller
             });
 
         return response()->json(['data' => $payments]);
+    }
+
+    public function getCustomerDue($id)
+    {
+        $customer = Customer::findOrFail($id);
+
+        $total_sales = Sale::where('customer_id', $id)
+            ->where('payment_status', '!=', 4)
+            ->whereNull('deleted_at')
+            ->sum('grand_total');
+
+        $total_paid = Payment::join('sales', 'sales.id', '=', 'payments.sale_id')
+            ->where('sales.customer_id', $id)
+            ->whereNull('sales.deleted_at')
+            ->sum('payments.amount');
+
+        return response()->json($total_sales - $total_paid);
     }
 }

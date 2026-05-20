@@ -90,7 +90,11 @@ class UserController extends Controller
             ]);
         }
         $data = $request->all();
-        $message = 'User created successfully';
+        $toast_notify = [
+            'type' => 'success',
+            'message' => 'User created successfully',
+            'action' => null,
+        ];
         $mail_setting = MailSetting::latest()->first();
         if($mail_setting) {
             $this->setMailInfo($mail_setting);
@@ -98,7 +102,11 @@ class UserController extends Controller
                 Mail::to($data['email'])->send(new UserDetails($data));
             }
             catch(\Exception $e){
-                $message = 'User created successfully. Please setup your <a href="setting/mail_setting">mail setting</a> to send mail.';
+                 $toast_notify['message'] = 'User created successfully, but email failed to send.';
+                $toast_notify['action'] = [
+                    'label' => 'Fix Mail Settings',
+                    'url' => route('setting.mail'),
+                ];
             }
         }
         if(!isset($data['is_active']))
@@ -114,7 +122,7 @@ class UserController extends Controller
             $data['is_active'] = true;
             Customer::create($data);
         }
-        return redirect('user')->with('message1', $message);
+        return redirect('user')->with('toast_notify', $toast_notify);
     }
 
     public function edit($id)

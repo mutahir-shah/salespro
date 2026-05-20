@@ -232,7 +232,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p class="italic"><small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                <p class="italic"><small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                 <form id="bookingForm" method="POST" action="{{ route('bookings.store') }}">
                     @csrf
                     <input type="hidden" id="formMethod" name="_method" value="POST">

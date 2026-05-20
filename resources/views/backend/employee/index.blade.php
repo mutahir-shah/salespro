@@ -129,7 +129,7 @@
                 </div>
                 <div class="modal-body">
                     <p class="italic">
-                        <small>{{ __('db.The field labels marked with * are required input fields') }}.</small>
+                        <small>{{ __('db.The field labels marked with are required input fields') }}.</small>
                     </p>
 
                     <form action="{{ route('employees.update', 1) }}" method="post" enctype="multipart/form-data">

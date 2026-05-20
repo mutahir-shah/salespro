@@ -50,68 +50,12 @@
                             </select>
                         </div>
                     </div>
-
-                    {{-- Submit button separate --}}
-                    <div class="text-center mt-3">
-                        <button class="btn btn-primary" style="margin-top: 34px" type="submit">{{ __('db.submit') }}</button>
-                    </div>
                 </div>
                 </form>
             </div>
         </div>
-        <div class="table-responsive mb-4">
-            <table id="report-table" class="table table-hover">
-                <thead>
-                    <tr>
-                        <th class="not-exported"></th>
-                        <th>{{ __('db.date') }}</th>
-                        <th>{{ __('db.Payment Reference') }} </th>
-                        <th>{{ __('db.Sale Reference') }}</th>
-                        <th>{{ __('db.Purchase Reference') }}</th>
-                        <th>{{ __('db.Paid By') }}</th>
-                        <th>{{ __('db.Amount') }}</th>
-                        <th>{{ __('db.Created By') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($lims_payment_data as $payment)
-                        <?php
-                        $sale = DB::table('sales')->find($payment->sale_id);
-                        $purchase = DB::table('purchases')->find($payment->purchase_id);
-                        $user = DB::table('users')->find($payment->user_id);
-                        ?>
-                        <tr>
-                            <td></td>
-                            <td>{{ date($general_setting->date_format, strtotime($payment->created_at->toDateString())) . ' ' . $payment->created_at->toTimeString() }}
-                            </td>
-                            <td>{{ $payment->payment_reference }}</td>
-                            <td>
-                                @if ($sale)
-                                    {{ $sale->reference_no }}
-                                @endif
-                            </td>
-                            <td>
-                                @if ($purchase)
-                                    {{ $purchase->reference_no }}
-                                @endif
-                            </td>
-                            <td>{{ $payment->paying_method }}</td>
-                            <td>{{ $payment->amount }}</td>
-                            <td>{{ $user->name }}<br>{{ $user->email }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-                <tfoot class="tfoot active">
-                    <th></th>
-                    <th>{{ __('db.Total') }}:</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th>{{ number_format(0, $general_setting->decimal, '.', '') }}<< /th>
-                    <th></th>
-                </tfoot>
-            </table>
+        <div id="table-container">
+            @include('backend.report.partials.payment_table')
         </div>
     </section>
 @endsection
@@ -119,113 +63,134 @@
 @push('scripts')
     <script type="text/javascript">
 
-        $('#report-table').DataTable({
-            "order": [],
-            'language': {
-                'lengthMenu': '_MENU_ {{ __('db.records per page') }}',
-                "info": '<small>{{ __('db.Showing') }} _START_ - _END_ (_TOTAL_)</small>',
-                "search": '{{ __('db.Search') }}',
-                'paginate': {
-                    'previous': '<i class="dripicons-chevron-left"></i>',
-                    'next': '<i class="dripicons-chevron-right"></i>'
-                }
-            },
-            'columnDefs': [{
-                    "orderable": false,
-                    'targets': 0
+        function initializePaymentTable() {
+            $('#report-table').DataTable({
+                "destroy": true,
+                "order": [],
+                'language': {
+                    'lengthMenu': '_MENU_ {{ __('db.records per page') }}',
+                    "info": '<small>{{ __('db.Showing') }} _START_ - _END_ (_TOTAL_)</small>',
+                    "search": '{{ __('db.Search') }}',
+                    'paginate': {
+                        'previous': '<i class="dripicons-chevron-left"></i>',
+                        'next': '<i class="dripicons-chevron-right"></i>'
+                    }
                 },
-                {
-                    'render': function(data, type, row, meta) {
-                        if (type === 'display') {
-                            data =
-                                '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>';
-                        }
+                'columnDefs': [{
+                        "orderable": false,
+                        'targets': 0
+                    },
+                    {
+                        'render': function(data, type, row, meta) {
+                            if (type === 'display') {
+                                data =
+                                    '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>';
+                            }
 
-                        return data;
+                            return data;
+                        },
+                        'checkboxes': {
+                            'selectRow': true,
+                            'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+                        },
+                        'targets': [0]
+                    }
+                ],
+                'select': {
+                    style: 'multi',
+                    selector: 'td:first-child'
+                },
+                'lengthMenu': [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, "All"]
+                ],
+                dom: '<"row"lfB>rtip',
+                buttons: [{
+                        extend: 'pdf',
+                        text: '<i title="export to pdf" class="fa fa-file-pdf-o"></i>',
+                        exportOptions: {
+                            columns: ':visible:Not(.not-exported)',
+                            rows: ':visible'
+                        },
+                        action: function(e, dt, button, config) {
+                            datatable_sum(dt, true);
+                            $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+                            datatable_sum(dt, false);
+                        },
+                        footer: true
                     },
-                    'checkboxes': {
-                        'selectRow': true,
-                        'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+                    {
+                        extend: 'excel',
+                        text: '<i title="export to excel" class="dripicons-document-new"></i>',
+                        exportOptions: {
+                            columns: ':visible:Not(.not-exported)',
+                            rows: ':visible'
+                        },
+                        action: function(e, dt, button, config) {
+                            datatable_sum(dt, true);
+                            $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                            datatable_sum(dt, false);
+                        },
+                        footer: true
                     },
-                    'targets': [0]
+                    {
+                        extend: 'csv',
+                        text: '<i title="export to csv" class="fa fa-file-text-o"></i>',
+                        exportOptions: {
+                            columns: ':visible:Not(.not-exported)',
+                            rows: ':visible'
+                        },
+                        action: function(e, dt, button, config) {
+                            datatable_sum(dt, true);
+                            $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
+                            datatable_sum(dt, false);
+                        },
+                        footer: true
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i title="print" class="fa fa-print"></i>',
+                        exportOptions: {
+                            columns: ':visible:Not(.not-exported)',
+                            rows: ':visible'
+                        },
+                        action: function(e, dt, button, config) {
+                            datatable_sum(dt, true);
+                            $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+                            datatable_sum(dt, false);
+                        },
+                        footer: true
+                    },
+                    {
+                        extend: 'colvis',
+                        text: '<i title="column visibility" class="fa fa-eye"></i>',
+                        columns: ':gt(0)'
+                    }
+                ],
+                drawCallback: function() {
+                    var api = this.api();
+                    datatable_sum(api, false);
                 }
-            ],
-            'select': {
-                style: 'multi',
-                selector: 'td:first-child'
-            },
-            'lengthMenu': [
-                [10, 25, 50, -1],
-                [10, 25, 50, "All"]
-            ],
-            dom: '<"row"lfB>rtip',
-            buttons: [{
-                    extend: 'pdf',
-                    text: '<i title="export to pdf" class="fa fa-file-pdf-o"></i>',
-                    exportOptions: {
-                        columns: ':visible:Not(.not-exported)',
-                        rows: ':visible'
-                    },
-                    action: function(e, dt, button, config) {
-                        datatable_sum(dt, true);
-                        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
-                        datatable_sum(dt, false);
-                    },
-                    footer: true
+            });
+        }
+        
+        initializePaymentTable();
+
+        function reloadPaymentTable() {
+            var formData = $('form').serialize();
+            $.ajax({
+                url: "{{ route('report.paymentByDate') }}",
+                data: formData,
+                method: 'POST',
+                beforeSend: function () {
+                    $('#table-container').html('<div class="text-center mt-4"><i class="fa fa-spin fa-spinner"></i> {{__("db.Loading")}}...</div>');
                 },
-                {
-                    extend: 'excel',
-                    text: '<i title="export to excel" class="dripicons-document-new"></i>',
-                    exportOptions: {
-                        columns: ':visible:Not(.not-exported)',
-                        rows: ':visible'
-                    },
-                    action: function(e, dt, button, config) {
-                        datatable_sum(dt, true);
-                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
-                        datatable_sum(dt, false);
-                    },
-                    footer: true
-                },
-                {
-                    extend: 'csv',
-                    text: '<i title="export to csv" class="fa fa-file-text-o"></i>',
-                    exportOptions: {
-                        columns: ':visible:Not(.not-exported)',
-                        rows: ':visible'
-                    },
-                    action: function(e, dt, button, config) {
-                        datatable_sum(dt, true);
-                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
-                        datatable_sum(dt, false);
-                    },
-                    footer: true
-                },
-                {
-                    extend: 'print',
-                    text: '<i title="print" class="fa fa-print"></i>',
-                    exportOptions: {
-                        columns: ':visible:Not(.not-exported)',
-                        rows: ':visible'
-                    },
-                    action: function(e, dt, button, config) {
-                        datatable_sum(dt, true);
-                        $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
-                        datatable_sum(dt, false);
-                    },
-                    footer: true
-                },
-                {
-                    extend: 'colvis',
-                    text: '<i title="column visibility" class="fa fa-eye"></i>',
-                    columns: ':gt(0)'
+                success: function (response) {
+                    $('#table-container').html(response);
+                    initializePaymentTable();
                 }
-            ],
-            drawCallback: function() {
-                var api = this.api();
-                datatable_sum(api, false);
-            }
-        });
+            });
+        }
 
         function datatable_sum(dt_selector, is_calling_first) {
             if (dt_selector.rows('.selected').any() && is_calling_first) {
@@ -240,6 +205,18 @@
                 }).data().sum().toFixed({{ $general_setting->decimal }}));
             }
         }
+
+        // payment method change
+        $('select[name="payment_method"]').on('change', function () {
+            reloadPaymentTable();
+        });
+
+        // date range change
+        $('.daterangepicker-field').on('apply.daterangepicker', function(ev, picker) {
+            $('input[name="start_date"]').val(picker.startDate.format('YYYY-MM-DD'));
+            $('input[name="end_date"]').val(picker.endDate.format('YYYY-MM-DD'));
+            reloadPaymentTable();
+        });
 
     </script>
 @endpush

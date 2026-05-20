@@ -31,7 +31,19 @@ class Common
         $todayDate = date("Y-m-d");
         if(config('database.connections.saleprosaas_landlord')) {
             $subdomain = $this->getTenantId();
-            if($general_setting->expiry_date) {
+            
+            $tenant = \App\Models\landlord\Tenant::find($subdomain);
+            $tenantStatus = 1;
+            if ($tenant) {
+                $tenantStatus = isset($tenant->status) ? $tenant->status : 1;
+            }
+
+            if ($tenantStatus == 0) {
+                auth()->logout();
+                if (!request()->is('login')) {
+                    return redirect('/login')->with('not_permitted', __('db.account_inactive'));
+                }
+            } elseif ($general_setting->expiry_date) {
                 $expiry_date = date("Y-m-d", strtotime($general_setting->expiry_date));
                 if($todayDate > $expiry_date) {
                     auth()->logout();
@@ -66,9 +78,14 @@ class Common
             return \App\Models\Currency::find($settingData->currency);
         });
 
+        $currency_list = Cache::remember('currency_list', 60*60*24*365, function () {
+            return \App\Models\Currency::where('is_active', true)->get();
+        });
+
         View::share('general_setting', $general_setting);
         View::share('currency', $currency);
-        config(['staff_access' => $general_setting->staff_access, 'is_packing_slip' => $general_setting->is_packing_slip, 'date_format' => $general_setting->date_format, 'currency' => $currency->symbol ?? $currency->code, 'currency_position' => $general_setting->currency_position, 'decimal' => $general_setting->decimal, 'is_zatca' => $general_setting->is_zatca, 'company_name' => $general_setting->company_name, 'vat_registration_number' => $general_setting->vat_registration_number, 'without_stock' => $general_setting->without_stock, 'addons' => $general_setting->modules]);
+        View::share('currency_list', $currency_list);
+        config(['staff_access' => $general_setting->staff_access, 'is_packing_slip' => $general_setting->is_packing_slip, 'date_format' => $general_setting->date_format, 'currency' => $currency->symbol ?? $currency->code, 'currency_position' => $general_setting->currency_position ?? 'prefix', 'decimal' => $general_setting->decimal ?? 2, 'is_zatca' => $general_setting->is_zatca, 'company_name' => $general_setting->company_name, 'vat_registration_number' => $general_setting->vat_registration_number, 'without_stock' => $general_setting->without_stock, 'addons' => $general_setting->modules]);
 
         $alert_product = DB::table('products')->where('is_active', true)->whereColumn('alert_quantity', '>', 'qty')->count();
         $dso_alert_product = DB::table('dso_alerts')->select('number_of_products')->whereDate('created_at', date("Y-m-d"))->first();
@@ -85,7 +102,7 @@ class Common
             ->join('products', 'products.id', '=', 'product_batches.product_id')
             ->where('products.is_active', true)
             ->where('product_batches.qty', '>', 0)
-            ->whereDate('product_batches.expired_date', '<=', now()->addDays($days)->format('Y-m-d'))
+            ->whereDate('product_batches.expired_date', '<=', now()->addDays((int) $days)->format('Y-m-d'))
             ->count();
 
         // View share (exact same style)

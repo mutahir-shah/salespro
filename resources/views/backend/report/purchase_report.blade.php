@@ -8,53 +8,47 @@
             <div class="card-header mt-2">
                 <h3 class="text-center">{{__('db.Purchase Report')}}</h3>
             </div>
-            <form action="{{ route('report.purchase') }}" method="POST">
-                @csrf
-            <div class="row mb-3 product-report-filter">
-                <div class="col-md-3 offset-md-2 mt-3">
-                    <div class="form-group top-fields">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <div class="input-group">
-                                <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
-                                <input type="hidden" name="start_date" value="{{$start_date}}" />
-                                <input type="hidden" name="end_date" value="{{$end_date}}" />
+            <form>
+                <div class="row mb-3 product-report-filter">
+                    <div class="col-md-3 offset-md-2 mt-3">
+                        <div class="form-group top-fields">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <div class="input-group">
+                                    <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
+                                    <input type="hidden" name="start_date" value="{{$start_date}}" />
+                                    <input type="hidden" name="end_date" value="{{$end_date}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mt-3">
+                        <div class="form-group top-fields">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Warehouse')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <select name="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" >
+                                    <option value="0">{{__('db.All Warehouse')}}</option>
+                                    @foreach($lims_warehouse_list as $warehouse)
+                                    <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mt-3">
+                        <div class="form-group top-fields">
+                            <label class="d-tc mt-2"><strong>{{__('db.category')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <select name="category_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" >
+                                    <option value="0">All Category</option>
+                                    @foreach($categories_list as $category)
+                                    <option value="{{$category->id}}">{{$category->name}}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mt-3">
-                    <div class="form-group top-fields">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Warehouse')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <select name="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" >
-                                <option value="0">{{__('db.All Warehouse')}}</option>
-                                @foreach($lims_warehouse_list as $warehouse)
-                                <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mt-3">
-                    <div class="form-group top-fields">
-                        <label class="d-tc mt-2"><strong>{{__('db.category')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <select name="category_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" >
-                                <option value="0">All Category</option>
-                                @foreach($categories_list as $category)
-                                <option value="{{$category->id}}">{{$category->name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-12 text-center mt-3">
-                    <div class="form-group">
-                        <button class="btn btn-primary" type="submit">{{__('db.submit')}}</button>
-                    </div>
-                </div>
-            </div>
             </form>
         </div>
     </div>
@@ -99,33 +93,20 @@
     $('.product-report-filter select[name="category_id"]').val(category_id);
     $('.selectpicker').selectpicker('refresh');
 
-    var start_date = $(".product-report-filter input[name=start_date]").val();
-    var end_date = $(".product-report-filter input[name=end_date]").val();
-    var warehouse_id = $(".product-report-filter select[name=warehouse_id]").val();
-    var category_id = $(".product-report-filter select[name=category_id]").val();
-
-    $('#product-report-table').DataTable( {
+    var purchase_table = $('#product-report-table').DataTable( {
         "processing": true,
         "serverSide": true,
         "ajax":{
             url:"purchase_report_data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                warehouse_id: warehouse_id,
-                category_id: category_id
+            data:function(d){
+                d.start_date = $(".product-report-filter input[name=start_date]").val();
+                d.end_date = $(".product-report-filter input[name=end_date]").val();
+                d.warehouse_id = $(".product-report-filter select[name=warehouse_id]").val();
+                d.category_id = $(".product-report-filter select[name=category_id]").val();
             },
             dataType: "json",
             type:"post",
-            /*success:function(data){
-                console.log(data);
-            }*/
         },
-        /*"createdRow": function( row, data, dataIndex ) {
-            console.log(data);
-            $(row).addClass('purchase-link');
-            //$(row).attr('data-purchase', data['purchase']);
-        },*/
         "columns": [
             {"data": "key"},
             {"data": "name"},
@@ -235,6 +216,21 @@
             datatable_sum(api, false);
         }
     } );
+
+    $('.daterangepicker-field').on('apply.daterangepicker', function(ev, picker) {
+        $('input[name="start_date"]').val(picker.startDate.format('YYYY-MM-DD'));
+        $('input[name="end_date"]').val(picker.endDate.format('YYYY-MM-DD'));
+
+        purchase_table.ajax.reload(null, false);
+    });
+    // warehouse change
+    $('.product-report-filter select[name="warehouse_id"]').on('change', function () {
+        purchase_table.ajax.reload(null, false);
+    });
+    // category change
+    $('.product-report-filter select[name="category_id"]').on('change', function () {
+        purchase_table.ajax.reload(null, false);
+    });
 
     function datatable_sum(dt_selector, is_calling_first) {
         if (dt_selector.rows( '.selected' ).any() && is_calling_first) {

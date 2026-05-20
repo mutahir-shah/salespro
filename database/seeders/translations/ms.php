@@ -130,7 +130,7 @@ return array (
   21 => 
   array (
     'locale' => 'ms',
-    'key' => 'The field labels marked with * are required input fields',
+    'key' => 'The field labels marked with are required input fields',
     'value' => 'Label medan yang ditandakan dengan * adalah medan input yang diperlukan',
   ),
   22 => 

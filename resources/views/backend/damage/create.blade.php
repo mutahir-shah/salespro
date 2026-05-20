@@ -9,7 +9,7 @@
                         <h4>{{ __('Add Damage Stock') }}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                        <p class="italic"><small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('damage-stock.store') }}" method="POST" enctype="multipart/form-data" id="damage-form">
                             @csrf
                             <div class="row">

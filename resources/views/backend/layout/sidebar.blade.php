@@ -1,5 +1,47 @@
-        <ul id="side-main-menu" class="side-menu list-unstyled d-print-none">
+﻿        <ul id="side-main-menu" class="side-menu list-unstyled" style="margin-top: -20px;">
             <li><a class="{{ request()->is('dashboard') ? 'active' : '' }}" href="{{url('/dashboard')}}"> <i class="dripicons-meter"></i><span>{{__('db.dashboard')}}</span></a></li>
+
+            @can('sidebar_people')
+                @php $showPeopleMenu = false; @endphp
+                @can('customers-index')
+                    @php $showPeopleMenu = true; @endphp
+                @endcan
+                @can('suppliers-index')
+                    @php $showPeopleMenu = true; @endphp
+                @endcan
+                @can('users-index')
+                    @php $showPeopleMenu = true; @endphp
+                @endcan
+                @can('sale-agents')
+                    @php $showPeopleMenu = true; @endphp
+                @endcan
+                @can('billers-index')
+                    @php $showPeopleMenu = true; @endphp
+                @endcan
+                @isset($showPeopleMenu)
+                    <li>
+                        <a href="#people" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-user"></i><span>{{__('db.People')}}</span></a>
+
+                        <ul id="people" class="collapse list-unstyled ">
+                            @can('customers-index')
+                                <li id="customer-list-menu"><a class="{{ request()->is('customer') ? 'active' : '' }}" href="{{route('customer.index')}}">{{__('db.Customer List')}}</a></li>
+                            @endcan
+                            @can('suppliers-index')
+                                <li id="supplier-list-menu"><a class="{{ request()->is('supplier') ? 'active' : '' }}" href="{{route('supplier.index')}}">{{__('db.Supplier List')}}</a></li>
+                            @endcan
+                            @can('users-index')
+                                <li id="user-list-menu"><a class="{{ request()->is('user') ? 'active' : '' }}" href="{{route('user.index')}}">{{__('db.User List')}}</a></li>
+                            @endcan
+                            @can('sale-agents')
+                            <li id="sale-agent-menu"><a class="{{ request()->is('sale-agents') ? 'active' : '' }}" href="{{route('sale-agents.index')}}">{{__('db.Sale Agents')}}</a></li>
+                            @endcan
+                            @can('billers-index')
+                                <li id="biller-list-menu"><a class="{{ request()->is('biller') ? 'active' : '' }}" href="{{route('biller.index')}}">{{__('db.Biller List')}}</a></li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endisset
+            @endcan
 
             @can('sidebar_product')
                 @php $showProductMenu = false; @endphp
@@ -32,7 +74,7 @@
                 @endcan
                 @isset($showProductMenu)
                     <li>
-                        <a href="#product" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-list"></i><span>{{__('db.product')}}</span><span></a>
+                        <a href="#product" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-list"></i><span>{{__('db.product')}}</span></a>
 
                         <ul id="product" class="collapse list-unstyled ">
                             @can('categories-index')
@@ -139,6 +181,7 @@
                         <ul id="sale" class="collapse list-unstyled ">
                             @can('sales-index')
                                 <li id="sale-list-menu"><a class="{{ request()->is('sales') ? 'active' : '' }}" href="{{route('sales.index')}}">{{__('db.Sale List')}}</a></li>
+                                <li id="installment-list-menu"><a class="{{ request()->is('installmentplan') ? 'active' : '' }}" href="{{route('installmentplan.index')}}">{{__('db.Instalment List')}}</a></li>
                             @endcan
                             @can('sales-add')
                                 <li><a class="{{ request()->is('pos') ? 'active' : '' }}" href="{{route('sale.pos')}}">POS</a></li>
@@ -172,7 +215,6 @@
                 @endisset
             @endcan
 
-
             @can('sidebar_quotation')
                 @php $showQuotationMenu = false; @endphp
                 @can('quotes-index')
@@ -183,7 +225,7 @@
                 @endcan
                 @isset($showQuotationMenu)
                     <li>
-                        <a href="#quotation" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-document"></i><span>{{__('db.Quotation')}}</span><span></a>
+                        <a href="#quotation" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-document"></i><span>{{__('db.Quotation')}}</span></a>
 
                         <ul id="quotation" class="collapse list-unstyled ">
                             @can('quotes-index')
@@ -279,58 +321,6 @@
                             @endcan
                             @can('incomes-add')
                                 <li><a id="add-income" href=""> {{__('db.Add Income')}}</a></li>
-                            @endcan
-                        </ul>
-                    </li>
-                @endisset
-            @endcan
-
-             {{-- Booking Menu --}}
-            @can('booking')
-                <li>
-                    <a class="{{ request()->is('bookings/calendar') ? 'active' : '' }}"
-                            href="{{ route('booking.index') }}">
-                        <i class="dripicons-calendar"></i><span>{{ __('db.Booking') }}</span>
-                    </a>
-                </li>
-            @endcan
-
-            @can('sidebar_people')
-                @php $showPeopleMenu = false; @endphp
-                @can('customers-index')
-                    @php $showPeopleMenu = true; @endphp
-                @endcan
-                @can('suppliers-index')
-                    @php $showPeopleMenu = true; @endphp
-                @endcan
-                @can('users-index')
-                    @php $showPeopleMenu = true; @endphp
-                @endcan
-                @can('sale-agents')
-                    @php $showPeopleMenu = true; @endphp
-                @endcan
-                @can('billers-index')
-                    @php $showPeopleMenu = true; @endphp
-                @endcan
-                @isset($showPeopleMenu)
-                    <li>
-                        <a href="#people" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-user"></i><span>{{__('db.People')}}</span></a>
-
-                        <ul id="people" class="collapse list-unstyled ">
-                            @can('customers-index')
-                                <li id="customer-list-menu"><a class="{{ request()->is('customer') ? 'active' : '' }}" href="{{route('customer.index')}}">{{__('db.Customer List')}}</a></li>
-                            @endcan
-                            @can('suppliers-index')
-                                <li id="supplier-list-menu"><a class="{{ request()->is('supplier') ? 'active' : '' }}" href="{{route('supplier.index')}}">{{__('db.Supplier List')}}</a></li>
-                            @endcan
-                            @can('users-index')
-                                <li id="user-list-menu"><a class="{{ request()->is('user') ? 'active' : '' }}" href="{{route('user.index')}}">{{__('db.User List')}}</a></li>
-                            @endcan
-                            @can('sale-agents')
-                            <li id="sale-agent-menu"><a class="{{ request()->is('sale-agents') ? 'active' : '' }}" href="{{route('sale-agents.index')}}">{{__('db.Sale Agents')}}</a></li>
-                            @endcan
-                            @can('billers-index')
-                                <li id="biller-list-menu"><a class="{{ request()->is('biller') ? 'active' : '' }}" href="{{route('biller.index')}}">{{__('db.Biller List')}}</a></li>
                             @endcan
                         </ul>
                     </li>
@@ -446,6 +436,178 @@
                 @endif
             @endcan
 
+            @if(\Auth::user()->role_id <= 2)
+                <li>
+                    <a class="{{ request()->is('qr/') ? 'active' : '' }}"
+                            href="{{ route('qr.index') }}">
+                        <i class="fa fa-qrcode" style="font-size: 20px"></i>
+                        <span>{{ __('db.Catalogue QR') }}</span>
+                    </a>
+                </li>
+            @endif
+
+            @can('booking')
+                <li>
+                    <a class="{{ request()->is('bookings/calendar') ? 'active' : '' }}"
+                            href="{{ route('booking.index') }}">
+                        <i class="dripicons-calendar"></i><span>{{ __('db.Booking') }}</span>
+                    </a>
+                </li>
+            @endcan
+
+            @can ('addons')
+                @if(\Auth::user()->role_id != 5)
+                    @if(in_array('manufacturing', explode(',', $general_setting->modules)))
+
+                        @can('sidebar_manufacturing')
+
+                            @can('production-view')
+                                @php $showManufacturingMenu = true; @endphp
+                            @endcan
+
+                            @can('production-add')
+                                @php $showManufacturingMenu = true; @endphp
+                            @endcan
+
+                            @can('recipe-view')
+                                @php $showManufacturingMenu = true; @endphp
+                            @endcan
+
+                            @isset($showManufacturingMenu)
+                                <li>
+                                    <a href="#manufacturing" aria-expanded="false" data-toggle="collapse">
+                                        <i class="fa fa-industry"></i>
+                                        <span>{{ __('db.Manufacturing') }}</span>
+                                    </a>
+
+                                    <ul id="manufacturing" class="collapse list-unstyled">
+
+                                        @can('production-view')
+                                            <li id="production-list-menu">
+                                                <a class="{{ request()->is('manufacturing/productions') ? 'active' : '' }}" href="{{ route('manufacturing.productions.index') }}">
+                                                    {{ __('db.Production List') }}
+                                                </a>
+                                            </li>
+                                        @endcan
+
+                                        @can('production-add')
+                                            <li id="production-create-menu">
+                                                <a class="{{ request()->is('manufacturing/productions/create') ? 'active' : '' }}" href="{{ route('manufacturing.productions.create') }}">
+                                                    {{ __('db.Add Production') }}
+                                                </a>
+                                            </li>
+                                        @endcan
+
+                                        @can('recipe-view')
+                                            <li id="recipe-list-menu">
+                                                <a class="{{ request()->is('manufacturing/recipes') ? 'active' : '' }}" href="{{ route('manufacturing.recipes.index') }}">
+                                                    {{ __('db.Recipe') }}
+                                                </a>
+                                            </li>
+                                        @endcan
+
+                                    </ul>
+                                </li>
+                            @endisset
+
+                        @endcan
+                    @endif
+
+                    @can('sidebar_repair')
+
+                        @can('repair-service-index')
+                            @php $showRepairMenu = true; @endphp
+                        @endcan
+
+                        @can('repair-service-add')
+                            @php $showRepairMenu = true; @endphp
+                        @endcan
+
+                        @isset($showRepairMenu)
+                            <li>
+                                <a href="#repair" aria-expanded="false" data-toggle="collapse">
+                                    <i class="fa fa-wrench"></i>
+                                    <span>{{ __('db.Repair') }}</span>
+                                </a>
+
+                                <ul id="repair" class="collapse list-unstyled">
+
+                                    @can('repair-dashboard')
+                                        <li id="repair-dashboard">
+                                            <a class="{{ request()->is('repair/') ? 'active' : '' }}"
+                                                href="{{ route('repair.dashboard') }}">
+                                                {{ __('db.Repair Dashboard') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('repair-service-index')
+                                        <li id="service-list-menu">
+                                            <a class="{{ request()->is('repair/service') ? 'active' : '' }}"
+                                                href="{{ route('repair.service.index') }}">
+                                                {{ __('db.Service Jobs') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('repair-service-add')
+                                        <li id="service-create-menu">
+                                            <a class="{{ request()->is('repair/service/create') ? 'active' : '' }}"
+                                                href="{{ route('repair.service.create') }}">
+                                                {{ __('db.Add Service Job') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('repair-device-type')
+                                        <li id="device-type-menu">
+                                            <a class="{{ request()->is('repair/device-types*') ? 'active' : '' }}"
+                                                href="{{ route('repair.device-types.index') }}">
+                                                <span>{{ __('db.Device Types') }}</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                </ul>
+                            </li>
+                        @endisset
+
+                    @endcan
+
+                    @if (in_array('woocommerce',explode(',',$general_setting->modules)))
+                        <li><a class="{{ request()->is('woocommerce') ? 'active' : '' }}" href="{{route('woocommerce.index')}}"> <i class="fa fa-wordpress"></i><span>WooCommerce</span></a></li>
+                    @endif
+                    @if(in_array('ecommerce',explode(',',$general_setting->modules)))
+                        <li>
+                            <a href="#ecommerce" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-shopping-bag"></i><span>eCommerce</span></a>
+                            <ul id="ecommerce" class="collapse list-unstyled ">
+                                @include('ecommerce::backend.layout.sidebar-menu')
+                            </ul>
+                        </li>
+                    @endif
+                    @if(in_array('project',explode(',',$general_setting->modules)))
+                        @include('project::backend.layout.sidebar-menu')
+                    @endif
+                    @if(in_array('restaurant',explode(',',$general_setting->modules)))
+                        @include('restaurant::backend.layout.sidebar-menu')
+                    @endif
+
+                    @if(in_array('gym', explode(',', $general_setting->modules)))
+                        <li>
+                            <a href="#gym" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-trophy"></i><span>Gym</span></a>
+                            <ul id="gym" class="collapse list-unstyled ">
+                                <li id="gym-dashboard-menu"><a class="{{ request()->is('gym/dashboard') ? 'active' : '' }}" href="{{route('gym.dashboard')}}">Dashboard</a></li>
+                                <li id="gym-member-menu"><a class="{{ request()->is('gym/members*') ? 'active' : '' }}" href="{{route('gym.members.index')}}">Members</a></li>
+                                <li id="gym-attendance-menu"><a class="{{ request()->is('gym/attendance*') ? 'active' : '' }}" href="{{route('gym.attendance.index')}}">Attendance</a></li>
+                                <li id="gym-package-menu"><a class="{{ request()->is('gym/packages*') ? 'active' : '' }}" href="{{route('gym.packages.index')}}">Packages</a></li>
+                                <li id="gym-class-menu"><a class="{{ request()->is('gym/classes*') ? 'active' : '' }}" href="{{route('gym.classes.index')}}">Classes</a></li>
+                                <li id="gym-setting-menu"><a class="{{ request()->is('gym/setting*') ? 'active' : '' }}" href="{{route('gym.settings.index')}}">Settings</a></li>
+                            </ul>
+                        </li>
+                    @endif
+                @endif
+            @endcan
+
             @can('sidebar_whatsapp')
                     <li class="">
                         <a href="#whatsapp" aria-expanded="false" data-toggle="collapse">
@@ -473,6 +635,7 @@
                         </ul>
                     </li>
             @endcan
+
             @can('sidebar_reports')
                 @php
                     $showReportMenu = false;
@@ -713,6 +876,7 @@
                                 <a id="biller-report-link" class="{{ request()->is('report/biller_report') ? 'active' : '' }}">{{__('db.Biller Report')}}</a>
                             </li>
                             @endcan
+                            <li id="installment-report-menu"><a class="{{ request()->is('report/installment') ? 'active' : '' }}" href="{{route('report.installment')}}">{{__('db.Instalment Report')}}</a></li>
                             <li id="cash-register-report-menu">
                                 <a class="{{ request()->is('cash-register') ? 'active' : '' }}" href="{{route('cashRegister.index')}}">{{__('db.Cash Register')}}</a>
                             </li>
@@ -852,7 +1016,9 @@
                                 <li><a class="{{ request()->is('backup') ? 'active' : '' }}" href="{{route('setting.backup')}}">{{__('db.Backup Database')}}</a></li>
                             @endcan
                             @can('general_setting')
-                                <li id="theme-settings-menu"><a class="{{ request()->is('setting/theme-settings') ? 'active' : '' }}" href="{{ route('setting.themeSettings.index') }}">{{__('db.Theme Settings')}}</a></li>
+                                @if (in_array('api',explode(',',$general_setting->modules)))
+                                <li id="theme-settings-menu"><a class="{{ request()->is('setting/theme-settings') ? 'active' : '' }}" href="{{ route('setting.themeSettings.index') }}">{{__('db.app_theme_settings')}}</a></li>
+                                @endif
                                 <li id="general-setting-menu"><a class="{{ request()->is('setting/general_setting') ? 'active' : '' }}" href="{{route('setting.general')}}">{{__('db.General Setting')}}</a></li>
                             @endcan
                             @can('mail_setting')
@@ -904,78 +1070,11 @@
                     @if (in_array('api',explode(',',$general_setting->modules)))
                         <li><a class="{{ request()->is('setting/app_setting') ? 'active' : '' }}" href="{{route('setting.app')}}"> <i class="dripicons-device-mobile"></i><span>{{__('db.App Setting')}}</span></a></li>
                     @endif
-                    @if(in_array('manufacturing', explode(',', $general_setting->modules)))
+                @endif
+            @endcan
 
-                        @can('sidebar_manufacturing')
-
-                            @can('production-view')
-                                @php $showManufacturingMenu = true; @endphp
-                            @endcan
-
-                            @can('production-add')
-                                @php $showManufacturingMenu = true; @endphp
-                            @endcan
-
-                            @can('recipe-view')
-                                @php $showManufacturingMenu = true; @endphp
-                            @endcan
-
-                            @isset($showManufacturingMenu)
-                                <li>
-                                    <a href="#manufacturing" aria-expanded="false" data-toggle="collapse">
-                                        <i class="fa fa-industry"></i>
-                                        <span>{{ __('db.Manufacturing') }}</span>
-                                    </a>
-
-                                    <ul id="manufacturing" class="collapse list-unstyled">
-
-                                        @can('production-view')
-                                            <li id="production-list-menu">
-                                                <a class="{{ request()->is('manufacturing/productions') ? 'active' : '' }}" href="{{ route('manufacturing.productions.index') }}">
-                                                    {{ __('db.Production List') }}
-                                                </a>
-                                            </li>
-                                        @endcan
-
-                                        @can('production-add')
-                                            <li id="production-create-menu">
-                                                <a class="{{ request()->is('manufacturing/productions/create') ? 'active' : '' }}" href="{{ route('manufacturing.productions.create') }}">
-                                                    {{ __('db.Add Production') }}
-                                                </a>
-                                            </li>
-                                        @endcan
-
-                                        @can('recipe-view')
-                                            <li id="recipe-list-menu">
-                                                <a class="{{ request()->is('manufacturing/recipes') ? 'active' : '' }}" href="{{ route('manufacturing.recipes.index') }}">
-                                                    {{ __('db.Recipe') }}
-                                                </a>
-                                            </li>
-                                        @endcan
-
-                                    </ul>
-                                </li>
-                            @endisset
-
-                        @endcan
-                    @endif
-                    @if (in_array('woocommerce',explode(',',$general_setting->modules)))
-                        <li><a class="{{ request()->is('woocommerce') ? 'active' : '' }}" href="{{route('woocommerce.index')}}"> <i class="fa fa-wordpress"></i><span>WooCommerce</span></a></li>
-                    @endif
-                    @if(in_array('ecommerce',explode(',',$general_setting->modules)))
-                        <li>
-                            <a href="#ecommerce" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-shopping-bag"></i><span>eCommerce</span></a>
-                            <ul id="ecommerce" class="collapse list-unstyled ">
-                                @include('ecommerce::backend.layout.sidebar-menu')
-                            </ul>
-                        </li>
-                    @endif
-                    @if(in_array('project',explode(',',$general_setting->modules)))
-                        @include('project::backend.layout.sidebar-menu')
-                    @endif
-                    @if(in_array('restaurant',explode(',',$general_setting->modules)))
-                        @include('restaurant::backend.layout.sidebar-menu')
-                    @endif
+            @can ('addons')
+                @if(\Auth::user()->role_id != 5)
 
                     @if(!config('database.connections.saleprosaas_landlord'))
                         <li><a class="{{ request()->is('addon-list') ? 'active' : '' }}" href="{{url('addon-list')}}" id="addon-list"> <i class="dripicons-flag"></i><span>{{__('db.Addons')}}</span></a></li>

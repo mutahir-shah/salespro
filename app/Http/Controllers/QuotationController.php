@@ -32,6 +32,10 @@ use App\Models\MailSetting;
 use App\Traits\MailInfo;
 use App\Traits\StaffAccess;
 use App\Traits\TenantInfo;
+use App\Models\Currency;
+use App\Models\Account;
+use App\Models\CustomField;
+use App\Models\RewardPointSetting;
 
 class QuotationController extends Controller
 {
@@ -1108,20 +1112,35 @@ class QuotationController extends Controller
         $lims_quotation_data = Quotation::find($id);
         $lims_product_quotation_data = ProductQuotation::where('quotation_id', $id)->get();
         $lims_pos_setting_data = PosSetting::latest()->first();
-        return view('backend.quotation.create_sale',compact('lims_customer_list', 'lims_warehouse_list', 'lims_biller_list', 'lims_tax_list', 'lims_quotation_data','lims_product_quotation_data', 'lims_pos_setting_data'));
+        $currency_list = Currency::where('is_active', true)->get();
+        $lims_account_list = Account::where('is_active', true)->get();
+        $lims_reward_point_setting_data = RewardPointSetting::latest()->first();
+
+        return view('backend.quotation.create_sale',compact('lims_customer_list', 'lims_warehouse_list', 'lims_biller_list', 'lims_tax_list', 'lims_quotation_data','lims_product_quotation_data', 'lims_pos_setting_data', 'currency_list', 'lims_account_list', 'lims_reward_point_setting_data'));
     }
 
     public function createPurchase($id)
     {
         $lims_supplier_list = Supplier::where('is_active', true)->get();
-        $lims_warehouse_list = Warehouse::where('is_active', true)->get();
+        if(Auth::user()->role_id > 2) {
+            $lims_warehouse_list = Warehouse::where([
+                ['is_active', true],
+                ['id', Auth::user()->warehouse_id]
+            ])->get();
+        }
+        else {
+            $lims_warehouse_list = Warehouse::where('is_active', true)->get();
+        }
         $lims_tax_list = Tax::where('is_active', true)->get();
         $lims_quotation_data = Quotation::find($id);
         $lims_product_quotation_data = ProductQuotation::where('quotation_id', $id)->get();
         $lims_product_list_without_variant = $this->productWithoutVariant();
         $lims_product_list_with_variant = $this->productWithVariant();
+        $currency_list = Currency::where('is_active', true)->get();
+        $custom_fields = CustomField::where('belongs_to', 'purchase')->get();
+        $lims_account_list = Account::select('id', 'name', 'account_no','total_balance', 'is_default')->where('is_active', true)->get();
 
-        return view('backend.quotation.create_purchase',compact('lims_product_list_without_variant', 'lims_product_list_with_variant', 'lims_supplier_list', 'lims_warehouse_list', 'lims_tax_list', 'lims_quotation_data','lims_product_quotation_data'));
+        return view('backend.quotation.create_purchase',compact('lims_product_list_without_variant', 'lims_product_list_with_variant', 'lims_supplier_list', 'lims_warehouse_list', 'lims_tax_list', 'lims_quotation_data','lims_product_quotation_data', 'currency_list', 'custom_fields', 'lims_account_list'));
     }
 
     public function productWithoutVariant()

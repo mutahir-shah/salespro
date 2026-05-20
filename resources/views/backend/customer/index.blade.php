@@ -38,13 +38,16 @@
 <div id="importCustomer" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
     <div role="document" class="modal-dialog">
       <div class="modal-content">
-        <form route ='{{route("customer.import")}}' method ='post' files= 'true'>
+
+
+        <form route ='{{route("customer.import")}}' method ='post' enctype="multipart/form-data">
+            @csrf
         <div class="modal-header">
           <h5 id="exampleModalLabel" class="modal-title">{{__('db.Import Customer')}}</h5>
           <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-          <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+          <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
            <p>{{__('db.The correct column order is')}} (customer_group*, name*, company_name, email, phone_number*, address*, city*, state, postal_code, country, deposit) {{__('db.and you must follow this')}}.</p>
             <div class="row">
                 <div class="col-md-6">
@@ -78,7 +81,7 @@
         </div>
         <div class="modal-body">
             <p class="italic">
-                <small>{{__('db.The field labels marked with * are required input fields')}}.</small>
+                <small>{{__('db.The field labels marked with are required input fields')}}.</small>
             </p>
             <div class="row">
                 <input type="hidden" name="customer_id">
@@ -195,7 +198,7 @@
           <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-          <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+          <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
             <div class="form-group">
                 <input type="hidden" name="customer_id">
                 <label>{{__('db.Amount')}} *</label>
@@ -222,7 +225,7 @@
           <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-          <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+          <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
             <div class="form-group">
                 <input type="hidden" name="customer_id">
                 <label>{{__('db.Points')}} *</label>
@@ -402,7 +405,6 @@
         $('input[name="paying_amount"]').val(balance);
         $('#clearDueModal input[name="balance"]').val(balance);
         $('#p_amount').val(balance);
-        // $('input[name="sale_id"]').val(sale_id);
   });
 
     $('select[name="paid_by_id"]').on("change", function() {

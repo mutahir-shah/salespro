@@ -8,52 +8,52 @@
 <section>
     <form id="profitLossForm">
         @csrf
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-body">
-                <h3 class="text-center">{{__('db.profit_loss_report')}}</h3>
-                <div class="row mt-4 justify-content-center">
-                    <!-- Warehouse Dropdown -->
-                    <div class="col-md-3">
-                        <div class="form-group top-fields">
-                            <label>{{__('db.Warehouse')}}</label>
-                            <select id="warehouse_id" name="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
-                                <option value="0">{{__('db.All Warehouse')}}</option>
-                                @foreach($lims_warehouse_list as $warehouse)
-                                    <option value="{{$warehouse->id}}" {{ isset($lims_warehouse) && @$lims_warehouse->id == $warehouse->id ? 'selected' : '' }}>
-                                        {{$warehouse->name}}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Date Range Picker -->
-                    <div class="col-md-3">
-                        <div class="form-group top-fields">
-                            <label>{{__('db.Choose Your Date')}}</label>
-                            <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
-                            <input type="hidden" name="start_date" value="" />
-                            <input type="hidden" name="end_date" value="" />
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="text-center">{{__('db.profit_loss_report')}}</h3>
+                    <div class="row mt-4 justify-content-center">
+                        <!-- Warehouse Dropdown -->
+                        <div class="col-md-3">
+                            <div class="form-group top-fields">
+                                <label>{{__('db.Warehouse')}}</label>
+                                <select id="warehouse_id" name="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
+                                    <option value="0">{{__('db.All Warehouse')}}</option>
+                                    @foreach($lims_warehouse_list as $warehouse)
+                                        <option value="{{$warehouse->id}}" {{ isset($lims_warehouse) && @$lims_warehouse->id == $warehouse->id ? 'selected' : '' }}>
+                                            {{$warehouse->name}}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
 
-                    </div>
+                        <!-- Date Range Picker -->
+                        <div class="col-md-3">
+                            <div class="form-group top-fields">
+                                <label>{{__('db.Choose Your Date')}}</label>
+                                <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
+                                <input type="hidden" name="start_date" value="" />
+                                <input type="hidden" name="end_date" value="" />
+                            </div>
 
-                    <div id="filter-loading" class="col-12 text-center my-2" style="display:none;">
-                        <span class="spinner-border text-primary spinner-border-sm" role="status"></span>
-                        <span>Loading results...</span>
-                    </div>
+                        </div>
 
+                        <div id="filter-loading" class="col-12 text-center my-2" style="display:none;">
+                            <span class="spinner-border text-primary spinner-border-sm" role="status"></span>
+                            <span>Loading results...</span>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="profitLossResult">
-        @if(isset($purchase))
-            @include('report.profit_loss_result')
-        @endif
-    </div>
+        <div id="profitLossResult">
+            @if(isset($purchase))
+                @include('report.profit_loss_result')
+            @endif
+        </div>
     </form>
 </section>
 

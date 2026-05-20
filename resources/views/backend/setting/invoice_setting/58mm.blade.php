@@ -204,12 +204,12 @@
                             // Warranty
                             if (isset($product_sale_data->warranty_duration)) {
                                 $product_name .= '<br>' . "<span style='font-weight: bold;'>Warranty</span>: " . $product_sale_data->warranty_duration;
-                                $product_name .= '<br>' . "<span style='font-weight: bold;'>Will Expire</span>: " . $product_sale_data->warranty_end;
+                                $product_name .= '<br>' . "<span style='font-weight: bold;'>Expire At</span>: " . $product_sale_data->warranty_end;
                             }
                             // Guarantee
                             if (isset($product_sale_data->guarantee_duration)) {
                                 $product_name .= '<br>' . "<span style='font-weight: bold;'>Guarantee</span>: " . $product_sale_data->guarantee_duration;
-                                $product_name .= '<br>' . "<span style='font-weight: bold;'>Will Expire</span>: " . $product_sale_data->guarantee_end;
+                                $product_name .= '<br>' . "<span style='font-weight: bold;'>Expire At</span>: " . $product_sale_data->guarantee_end;
                             }
 
                             $topping_names = [];
@@ -264,7 +264,7 @@
                                     @endif
                                 </td>
                                 <td style="vertical-align:bottom;width:40%">
-                                    <x-amount-currency-symbol :amount="$subtotal" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                    {{format_currency($subtotal, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                                 </td>
                             </tr>
                         @endforeach
@@ -273,29 +273,29 @@
                     <tr>
                         <th colspan="2" style="text-align:left;width:60%">{{ __('db.Total') }}</th>
                         <th style="width:40%">
-                            <x-amount-currency-symbol :amount="$lims_sale_data->total_price" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                            {{format_currency($lims_sale_data->total_price, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                         </th>
                     </tr>
                     @if ($general_setting->invoice_format == 'gst' && $general_setting->state == 1)
                         <tr>
                             <td colspan="2" style="width:60%">IGST</td>
                             <td style="width:40%">
-                                <x-amount-currency-symbol :amount="$total_product_tax" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($total_product_tax, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </td>
                         </tr>
                     @elseif($general_setting->invoice_format == 'gst' && $general_setting->state == 2)
                         <tr>
-                            <td colspan="2" style="width:60%">>SGST</td>
+                            <td colspan="2" style="width:60%">SGST</td>
                             <td style="width:40%">
                                 @php $total_product_tax_amount = ((float) ($total_product_tax / 2)); @endphp
-                                <x-amount-currency-symbol :amount="$total_product_tax_amount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($total_product_tax_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2" style="width:60%">>CGST</td>
+                            <td colspan="2" style="width:60%">CGST</td>
                             <td style="width:40%">
                                 @php $total_product_tax_amount = ((float) ($total_product_tax / 2)); @endphp
-                                <x-amount-currency-symbol :amount="$total_product_tax_amount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($total_product_tax_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </td>
                         </tr>
                     @endif
@@ -303,7 +303,7 @@
                         <tr>
                             <th colspan="2" style="text-align:left;width:60%">{{ __('db.Order Tax') }}</th>
                             <th style="width:40%">
-                                <x-amount-currency-symbol :amount="$lims_sale_data->order_tax" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($lims_sale_data->order_tax, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </th>
                         </tr>
                     @endif
@@ -311,7 +311,7 @@
                         <tr>
                             <th colspan="2" style="text-align:left;width:60%">{{ __('db.Order Discount') }}</th>
                             <th style="width:40%">
-                                <x-amount-currency-symbol :amount="$lims_sale_data->order_discount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($lims_sale_data->order_discount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </th>
                         </tr>
                     @endif
@@ -319,7 +319,7 @@
                         <tr>
                             <th colspan="2" style="text-align:left;width:60%">{{ __('db.Coupon Discount') }}</th>
                             <th style="width:40%">
-                                <x-amount-currency-symbol :amount="$lims_sale_data->coupon_discount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($lims_sale_data->coupon_discount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </th>
                         </tr>
                     @endif
@@ -327,21 +327,21 @@
                         <tr>
                             <th colspan="2" style="text-align:left;width:60%">{{ __('db.Shipping Cost') }}</th>
                             <th style="width:40%">
-                                <x-amount-currency-symbol :amount="$lims_sale_data->shipping_cost" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($lims_sale_data->shipping_cost, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </th>
                         </tr>
                     @endif
                     <tr>
                         <th colspan="2" style="text-align:left;width:60%">{{ __('db.grand total') }}</th>
                         <th style="width:40%">
-                            <x-amount-currency-symbol :amount="$lims_sale_data->grand_total" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                            {{format_currency($lims_sale_data->grand_total, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                         </th>
                     </tr>
                     @if ($lims_sale_data->grand_total - $lims_sale_data->paid_amount > 0)
                         <tr>
                             <th colspan="2" style="text-align:left;width:60%">{{ __('db.Due') }}</th>
                             <th style="width:40%">
-                                <x-amount-currency-symbol :amount="$lims_sale_data->grand_total - $lims_sale_data->paid_amount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($lims_sale_data->grand_total - $lims_sale_data->paid_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </th>
                         </tr>
                     @endif
@@ -350,17 +350,13 @@
                         <tr>
                             <th colspan="2" style="text-align:left">{{ __('db.Previous Due') }}</th>
                             <th style="text-align:right">
-                                <x-amount-currency-symbol
-                                    :amount="$prevDue"
-                                    :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($prevDue, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </th>
                         </tr>
                         <tr>
                             <th colspan="2" style="text-align:left">{{ __('db.Total Due') }}</th>
                             <th style="text-align:right">
-                                <x-amount-currency-symbol
-                                    :amount="$totalDue"
-                                    :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                {{format_currency($totalDue, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                             </th>
                         </tr>
                         @endif
@@ -382,13 +378,33 @@
                     </tr>
 
                     <tr>
-                        @if (isset($show->show_sale_note) && isset($lims_sale_data->sale_note) && $show->show_sale_note)
-                            <td colspan="3">
-                               <p class=""> <strong>{{ __('db.Sale Note') }}:</strong>{{ $lims_sale_data->sale_note }}</p>
-                            </td>
-                        @endif
+                        @php
+                        $lims_installment_plan_data = DB::table('installment_plans')->where([
+                            ['reference_type', 'sale'],
+                            ['reference_id', $lims_sale_data->id]
+                        ])->first();
+                    @endphp
+                    @if($lims_installment_plan_data)
+                    @php
+                        $inst_all   = DB::table('installments')->where('installment_plan_id', $lims_installment_plan_data->id)->get();
+                        $inst_total = $inst_all->count();
+                        $inst_paid  = $inst_all->where('status', 'completed')->count();
+                        $inst_next  = $inst_all->where('status', 'pending')->sortBy('payment_date')->first();
+                    @endphp
+                    <tr>
+                        <td colspan="3" style="border: 1px dotted #ddd; padding: 5px;">
+                            <p style="text-align: center; margin: 0; font-weight: bold; border-bottom: 1px dotted #ddd;">INSTALMENT SALE</p>
+                            <p style="margin: 2px 0;">Plan: {{$lims_installment_plan_data->name}}</p>
+                            <p style="margin: 2px 0;">Duration: {{$lims_installment_plan_data->months}} Mo</p>
+                            <p style="margin: 2px 0;">Add. Amt: {{format_currency($lims_installment_plan_data->additional_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$')}}</p>
+                            <p style="margin: 2px 0;">Down Pay: {{format_currency($lims_installment_plan_data->down_payment, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$')}}</p>
+                            <p style="margin: 2px 0; font-weight: bold;">Paid: {{$inst_paid}}/{{$inst_total}} Instalments</p>
+                            @if($inst_next)
+                            <p style="margin: 2px 0;">Next Due: {{\Carbon\Carbon::parse($inst_next->payment_date)->format('d M Y')}}</p>
+                            @endif
+                        </td>
                     </tr>
-
+                    @endif
 
                     @foreach ($lims_payment_data as $payment_data)
                         @if (isset($show->show_paid_info) && $show->show_paid_info == 1)
@@ -396,10 +412,10 @@
                                 <td style="text-align:center;padding: 5px;width:30">{{ __('db.Paid By') }}:<br>
                                     {{ $payment_data->paying_method }}</td>
                                 <td style="text-align:center;padding: 5px;width:30%">{{ __('db.Amount') }}:<br>
-                                    <x-amount-currency-symbol :amount="$payment_data->amount + $payment_data->change" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                    {{format_currency($payment_data->amount + $payment_data->change, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                                 </td>
                                 <td style="text-align:center;padding: 5px;width:30%">{{ __('db.Change') }}:<br>
-                                    <x-amount-currency-symbol :amount="$payment_data->change" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                                    {{format_currency($payment_data->change, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                                 </td>
                             </tr>
                         @endif

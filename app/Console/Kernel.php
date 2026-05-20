@@ -26,11 +26,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('purchase:auto')->everyFiveMinutes();
+        $schedule->command('purchase:auto')->everyFifteenMinutes()->withoutOverlapping();
         $schedule->command('dsoalert:find')->dailyAt('00:00');
-        $schedule->command('reset:db')->everyMinute();
-        // Testing Purpose
-        $schedule->command('quote:daily')->everyMinute();
+        $schedule->command('reset:db')->twiceDaily(1, 13)->withoutOverlapping();
     }
 
     /**

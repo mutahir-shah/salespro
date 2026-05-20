@@ -177,6 +177,7 @@
     $('#return-table').DataTable( {
         "processing": true,
         "serverSide": true,
+        "searchDelay": 500,
         "ajax":{
             url:"return-purchase/return-data",
             data:{

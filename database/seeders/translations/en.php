@@ -130,7 +130,7 @@ return array(
     21 =>
     array(
         'locale' => 'en',
-        'key' => 'The field labels marked with * are required input fields',
+        'key' => 'The field labels marked with are required input fields',
         'value' => 'The field labels marked with * are required input fields',
     ),
     22 =>
@@ -3347,7 +3347,7 @@ return array(
     array(
         'locale' => 'en',
         'key' => 'This product has different price for different warehouse',
-        'value' => 'This product has different price for different warehouse',
+        'value' => 'This product has different price for different store',
     ),
     558 =>
     array(
@@ -7109,7 +7109,7 @@ return array(
     array(
         'locale' => 'en',
         'key' => 'Select warehouse',
-        'value' => 'Select warehouse',
+        'value' => 'Select store',
     ),
     1185 =>
     array(
@@ -8681,7 +8681,7 @@ return array(
     array(
         'locale' => 'en',
         'key' => 'Loading products for selected warehouse',
-        'value' => 'Loading products for selected warehouse',
+        'value' => 'Loading products for selected store',
     ),
     1447 =>
     array(
@@ -9083,7 +9083,7 @@ return array(
     array(
         'locale' => 'en',
         'key' => 'This warehouse already has a printer assigned',
-        'value' => 'This warehouse already has a printer assigned',
+        'value' => 'This store already has a printer assigned',
     ),
     1514 =>
     array(
@@ -9101,7 +9101,7 @@ return array(
     array(
         'locale' => 'en',
         'key' => 'When you assign a receipt printer to this warehouse, browser printing will be turned off. Receipts will be printed using the assigned printer, following the template you set in the invoice settings',
-        'value' => 'When you assign a receipt printer to this warehouse, browser printing will be turned off. Receipts will be printed using the assigned printer, following the template you set in the invoice settings',
+        'value' => 'When you assign a receipt printer to this store, browser printing will be turned off. Receipts will be printed using the assigned printer, following the template you set in the invoice settings',
     ),
     1517 =>
     array(
@@ -9329,17 +9329,17 @@ return array(
     1560 => array(
         'locale' => 'en',
         'key' => 'Installment Plan',
-        'value' => 'Installment Plan',
+        'value' => 'Instalment Plan',
     ),
     1561 => array(
         'locale' => 'en',
         'key' => 'Enable Installment Plan',
-        'value' => 'Enable Installment Plan',
+        'value' => 'Enable Instalment Plan',
     ),
     1562 => array(
         'locale' => 'en',
-        'key' => 'Installment',
-        'value' => 'Installment',
+        'key' => 'Instalment',
+        'value' => 'Instalment',
     ),
     1563 => array(
         'locale' => 'en',
@@ -10054,8 +10054,8 @@ return array(
     ),
     1702 => array(
         'locale' => 'en',
-        'key' => 'Theme Settings',
-        'value' => 'Theme Settings',
+        'key' => 'app_theme_settings',
+        'value' => 'App Theme Settings',
     ),
     1703 => array(
         'locale' => 'en',
@@ -10302,5 +10302,1604 @@ return array(
         'key' => 'Secret Key',
         'value' => 'Secret Key',
     ),
-
+    1747 => array(
+        'locale' => 'en',
+        'key' => 'Loading',
+        'value' => 'Loading',
+    ),
+    1748 => array(
+        'locale' => 'en',
+        'key' => 'All categories',
+        'value' => 'All categories',
+    ),
+    1749 => array(
+        'locale' => 'en',
+        'key' => 'Order Summary',
+        'value' => 'Order Summary',
+    ),
+    1750 => array(
+        'locale' => 'en',
+        'key' => 'payment_receipt',
+        'value' => 'Payment Receipt',
+    ),
+    1751 => array(
+        'locale' => 'en',
+        'key' => 'Payment Details',
+        'value' => 'Payment Details',
+    ),
+    1752 => array(
+        'locale' => 'en',
+        'key' => 'due_date',
+        'value' => 'Due Date',
+    ),
+    1753 => array(
+        'locale' => 'en',
+        'key' => 'issue_refund',
+        'value' => 'Issue Refund',
+    ),
+    1754 => array(
+        'locale' => 'en',
+        'key' => 'Download QR',
+        'value' => 'Download QR',
+    ),
+    1755 => array(
+        'locale' => 'en',
+        'key' => 'Subtitle',
+        'value' => 'Subtitle',
+    ),
+    1756 => array(
+        'locale' => 'en',
+        'key' => 'QR Code Color',
+        'value' => 'QR Code Color',
+    ),
+    1757 => array(
+        'locale' => 'en',
+        'key' => 'Show Logo',
+        'value' => 'Show Logo',
+    ),
+    1758 => array(
+        'locale' => 'en',
+        'key' => 'QR Code',
+        'value' => 'QR Code',
+    ),
+    1759 => array(
+        'locale' => 'en',
+        'key' => 'Catalogue QR',
+        'value' => 'Catalogue QR',
+    ),
+    1760 => array(
+        'locale' => 'en',
+        'key' => 'Generate QR Code',
+        'value' => 'Generate QR Code',
+    ),
+    1761 => array(
+        'locale' => 'en',
+        'key' => 'Total Members',
+        'value' => 'Total Members',
+    ),
+    1762 => array(
+        'locale' => 'en',
+        'key' => 'Active Members',
+        'value' => 'Active Members',
+    ),
+    1763 => array(
+        'locale' => 'en',
+        'key' => 'New Members',
+        'value' => 'New Members',
+    ),
+    1764 => array(
+        'locale' => 'en',
+        'key' => 'Inside Gym',
+        'value' => 'Inside Gym',
+    ),
+    1765 => array(
+        'locale' => 'en',
+        'key' => 'Today\'s Attendance Summary',
+        'value' => 'Today\'s Attendance Summary',
+    ),
+    1766 => array(
+        'locale' => 'en',
+        'key' => 'Total Attendance Today',
+        'value' => 'Total Attendance Today',
+    ),
+    1767 => array(
+        'locale' => 'en',
+        'key' => 'Currently Inside',
+        'value' => 'Currently Inside',
+    ),
+    1768 => array(
+        'locale' => 'en',
+        'key' => 'Subscription Summary',
+        'value' => 'Subscription Summary',
+    ),
+    1769 => array(
+        'locale' => 'en',
+        'key' => 'Expiring Soon (Next 7 Days)',
+        'value' => 'Expiring Soon (Next 7 Days)',
+    ),
+    1770 => array(
+        'locale' => 'en',
+        'key' => 'No Record Found',
+        'value' => 'No Record Found',
+    ),
+    1771 => array(
+        'locale' => 'en',
+        'key' => 'Soon',
+        'value' => 'Soon',
+    ),
+    1772 => array(
+        'locale' => 'en',
+        'key' => 'Instalment List',
+        'value' => 'Instalment List',
+    ),
+    1773 => array(
+        'locale' => 'en',
+        'key' => 'Return Select Product',
+        'value' => 'Return Select Product',
+    ),
+    1774 => array(
+        'locale' => 'en',
+        'key' => 'Price Edit in Sale',
+        'value' => 'Price Edit in Sale',
+    ),
+    1775 => array(
+        'locale' => 'en',
+        'key' => 'Quick Scanner',
+        'value' => 'Quick Scanner',
+    ),
+    1776 => array(
+        'locale' => 'en',
+        'key' => 'Camera Scanner',
+        'value' => 'Camera Scanner',
+    ),
+    1777 => array(
+        'locale' => 'en',
+        'key' => 'Payment History',
+        'value' => 'Payment History',
+    ),
+    1778 => array(
+        'locale' => 'en',
+        'key' => 'Expired',
+        'value' => 'Expired',
+    ),
+    1779 => array(
+        'locale' => 'en',
+        'key' => 'Check In',
+        'value' => 'Check In',
+    ),
+    1780 => array(
+        'locale' => 'en',
+        'key' => 'Check Out',
+        'value' => 'Check Out',
+    ),
+    1781 => array(
+        'locale' => 'en',
+        'key' => 'Still Inside',
+        'value' => 'Still Inside',
+    ),
+    1782 => array(
+        'locale' => 'en',
+        'key' => 'Today\'s Attendance',
+        'value' => 'Today\'s Attendance',
+    ),
+    1783 => array(
+        'locale' => 'en',
+        'key' => 'Add Member',
+        'value' => 'Add Member',
+    ),
+    1784 => array(
+        'locale' => 'en',
+        'key' => 'Add Class',
+        'value' => 'Add Class',
+    ),
+    1785 => array(
+        'locale' => 'en',
+        'key' => 'Workout Plan',
+        'value' => 'Workout Plan',
+    ),
+    1786 => array(
+        'locale' => 'en',
+        'key' => 'Monday',
+        'value' => 'Monday',
+    ),
+    1787 => array(
+        'locale' => 'en',
+        'key' => 'Tuesday',
+        'value' => 'Tuesday',
+    ),
+    1788 => array(
+        'locale' => 'en',
+        'key' => 'Wednesday',
+        'value' => 'Wednesday',
+    ),
+    1789 => array(
+        'locale' => 'en',
+        'key' => 'Thursday',
+        'value' => 'Thursday',
+    ),
+    1790 => array(
+        'locale' => 'en',
+        'key' => 'Friday',
+        'value' => 'Friday',
+    ),
+    1791 => array(
+        'locale' => 'en',
+        'key' => 'Saturday',
+        'value' => 'Saturday',
+    ),
+    1792 => array(
+        'locale' => 'en',
+        'key' => 'Sunday',
+        'value' => 'Sunday',
+    ),
+    1793 => array(
+        'locale' => 'en',
+        'key' => 'Rest Day Activities',
+        'value' => 'Rest Day Activities',
+    ),
+    1794 => array(
+        'locale' => 'en',
+        'key' => 'Warm Up',
+        'value' => 'Warm Up',
+    ),
+    1795 => array(
+        'locale' => 'en',
+        'key' => 'Cool Down',
+        'value' => 'Cool Down',
+    ),
+    1796 => array(
+        'locale' => 'en',
+        'key' => 'Remarks',
+        'value' => 'Remarks',
+    ),
+    1797 => array(
+        'locale' => 'en',
+        'key' => 'Save Workout Plan',
+        'value' => 'Save Workout Plan',
+    ),
+    1798 => array(
+        'locale' => 'en',
+        'key' => 'Diet Plan',
+        'value' => 'Diet Plan',
+    ),
+    1799 => array(
+        'locale' => 'en',
+        'key' => 'Morning',
+        'value' => 'Morning',
+    ),
+    1800 => array(
+        'locale' => 'en',
+        'key' => 'Breakfast',
+        'value' => 'Breakfast',
+    ),
+    1801 => array(
+        'locale' => 'en',
+        'key' => 'Before Lunch',
+        'value' => 'Before Lunch',
+    ),
+    1802 => array(
+        'locale' => 'en',
+        'key' => 'Lunch',
+        'value' => 'Lunch',
+    ),
+    1803 => array(
+        'locale' => 'en',
+        'key' => 'Afternoon',
+        'value' => 'Afternoon',
+    ),
+    1804 => array(
+        'locale' => 'en',
+        'key' => 'Evening',
+        'value' => 'Evening',
+    ),
+    1805 => array(
+        'locale' => 'en',
+        'key' => 'Dinner',
+        'value' => 'Dinner',
+    ),
+    1806 => array(
+        'locale' => 'en',
+        'key' => 'Before Sleep',
+        'value' => 'Before Sleep',
+    ),
+    1807 => array(
+        'locale' => 'en',
+        'key' => 'Before Workout',
+        'value' => 'Before Workout',
+    ),
+    1808 => array(
+        'locale' => 'en',
+        'key' => 'After Workout',
+        'value' => 'After Workout',
+    ),
+    1809 => array(
+        'locale' => 'en',
+        'key' => 'Save Diet Plan',
+        'value' => 'Save Diet Plan',
+    ),
+    1810 => array(
+        'locale' => 'en',
+        'key' => 'Health Profile',
+        'value' => 'Health Profile',
+    ),
+    1811 => array(
+        'locale' => 'en',
+        'key' => 'Save And Add Health',
+        'value' => 'Save And Add Health',
+    ),
+    1812 => array(
+        'locale' => 'en',
+        'key' => 'Subscription History',
+        'value' => 'Subscription History',
+    ),
+    1813 => array(
+        'locale' => 'en',
+        'key' => 'Add Subscription',
+        'value' => 'Add Subscription',
+    ),
+    1814 => array(
+        'locale' => 'en',
+        'key' => 'Gym Settings',
+        'value' => 'Gym Settings',
+    ),
+    1815 => array(
+        'locale' => 'en',
+        'key' => 'Gym Name',
+        'value' => 'Gym Name',
+    ),
+    1816 => array(
+        'locale' => 'en',
+        'key' => 'Website',
+        'value' => 'Website',
+    ),
+    1817 => array(
+        'locale' => 'en',
+        'key' => 'Logo',
+        'value' => 'Logo',
+    ),
+    1818 => array(
+        'locale' => 'en',
+        'key' => 'Member ID Prefix',
+        'value' => 'Member ID Prefix',
+    ),
+    1819 => array(
+        'locale' => 'en',
+        'key' => 'Prefix added before member ID on cards and scanners. Format: PREFIX-{ID}',
+        'value' => 'Prefix added before member ID on cards and scanners. Format: PREFIX-{ID}',
+    ),
+    1820 => array(
+        'locale' => 'en',
+        'key' => 'Update Settings',
+        'value' => 'Update Settings',
+    ),
+    1821 => array(
+        'locale' => 'en',
+        'key' => 'Member Profile',
+        'value' => 'Member Profile',
+    ),
+    1822 => array(
+        'locale' => 'en',
+        'key' => 'Date of Birth',
+        'value' => 'Date of Birth',
+    ),
+    1823 => array(
+        'locale' => 'en',
+        'key' => 'Active Package',
+        'value' => 'Active Package',
+    ),
+    1824 => array(
+        'locale' => 'en',
+        'key' => 'Valid till',
+        'value' => 'Valid till',
+    ),
+    1825 => array(
+        'locale' => 'en',
+        'key' => 'No Active Package',
+        'value' => 'No Active Package',
+    ),
+    1826 => array(
+        'locale' => 'en',
+        'key' => 'Member ID Card',
+        'value' => 'Member ID Card',
+    ),
+    1827 => array(
+        'locale' => 'en',
+        'key' => 'Age',
+        'value' => 'Age',
+    ),
+    1828 => array(
+        'locale' => 'en',
+        'key' => 'Are you sure you want to delete?',
+        'value' => 'Are you sure you want to delete?',
+    ),
+    1829 => array(
+        'locale' => 'en',
+        'key' => 'BMI',
+        'value' => 'BMI',
+    ),
+    1830 => array(
+        'locale' => 'en',
+        'key' => 'Body Fat (%)',
+        'value' => 'Body Fat (%)',
+    ),
+    1831 => array(
+        'locale' => 'en',
+        'key' => 'Calf',
+        'value' => 'Calf',
+    ),
+    1832 => array(
+        'locale' => 'en',
+        'key' => 'Chest',
+        'value' => 'Chest',
+    ),
+    1833 => array(
+        'locale' => 'en',
+        'key' => 'Classes',
+        'value' => 'Classes',
+    ),
+    1834 => array(
+        'locale' => 'en',
+        'key' => 'Click here and scan card...',
+        'value' => 'Click here and scan card...',
+    ),
+    1835 => array(
+        'locale' => 'en',
+        'key' => 'Create Package',
+        'value' => 'Create Package',
+    ),
+    1836 => array(
+        'locale' => 'en',
+        'key' => 'Date of birth',
+        'value' => 'Date of birth',
+    ),
+    1837 => array(
+        'locale' => 'en',
+        'key' => 'Diets',
+        'value' => 'Diets',
+    ),
+    1838 => array(
+        'locale' => 'en',
+        'key' => 'Duration',
+        'value' => 'Duration',
+    ),
+    1839 => array(
+        'locale' => 'en',
+        'key' => 'Edit Class',
+        'value' => 'Edit Class',
+    ),
+    1840 => array(
+        'locale' => 'en',
+        'key' => 'Edit Member',
+        'value' => 'Edit Member',
+    ),
+    1841 => array(
+        'locale' => 'en',
+        'key' => 'Edit Package',
+        'value' => 'Edit Package',
+    ),
+    1842 => array(
+        'locale' => 'en',
+        'key' => 'Edit Subscription',
+        'value' => 'Edit Subscription',
+    ),
+    1843 => array(
+        'locale' => 'en',
+        'key' => 'Enter',
+        'value' => 'Enter',
+    ),
+    1844 => array(
+        'locale' => 'en',
+        'key' => 'Expire Date',
+        'value' => 'Expire Date',
+    ),
+    1845 => array(
+        'locale' => 'en',
+        'key' => 'Female',
+        'value' => 'Female',
+    ),
+    1846 => array(
+        'locale' => 'en',
+        'key' => 'Gender',
+        'value' => 'Gender',
+    ),
+    1847 => array(
+        'locale' => 'en',
+        'key' => 'Health Record Details',
+        'value' => 'Health Record Details',
+    ),
+    1848 => array(
+        'locale' => 'en',
+        'key' => 'Height',
+        'value' => 'Height',
+    ),
+    1849 => array(
+        'locale' => 'en',
+        'key' => 'Height (cm)',
+        'value' => 'Height (cm)',
+    ),
+    1850 => array(
+        'locale' => 'en',
+        'key' => 'Hips',
+        'value' => 'Hips',
+    ),
+    1851 => array(
+        'locale' => 'en',
+        'key' => 'In Time',
+        'value' => 'In Time',
+    ),
+    1852 => array(
+        'locale' => 'en',
+        'key' => 'Left Arm',
+        'value' => 'Left Arm',
+    ),
+    1853 => array(
+        'locale' => 'en',
+        'key' => 'Left Thigh',
+        'value' => 'Left Thigh',
+    ),
+    1854 => array(
+        'locale' => 'en',
+        'key' => 'Lower Waist',
+        'value' => 'Lower Waist',
+    ),
+    1855 => array(
+        'locale' => 'en',
+        'key' => 'Male',
+        'value' => 'Male',
+    ),
+    1856 => array(
+        'locale' => 'en',
+        'key' => 'Name',
+        'value' => 'Name',
+    ),
+    1857 => array(
+        'locale' => 'en',
+        'key' => 'Neck',
+        'value' => 'Neck',
+    ),
+    1858 => array(
+        'locale' => 'en',
+        'key' => 'No packages found.',
+        'value' => 'No packages found.',
+    ),
+    1859 => array(
+        'locale' => 'en',
+        'key' => 'Notes',
+        'value' => 'Notes',
+    ),
+    1860 => array(
+        'locale' => 'en',
+        'key' => 'Other',
+        'value' => 'Other',
+    ),
+    1861 => array(
+        'locale' => 'en',
+        'key' => 'Out Time',
+        'value' => 'Out Time',
+    ),
+    1862 => array(
+        'locale' => 'en',
+        'key' => 'Previous Health Records',
+        'value' => 'Previous Health Records',
+    ),
+    1863 => array(
+        'locale' => 'en',
+        'key' => 'Profile Photo',
+        'value' => 'Profile Photo',
+    ),
+    1864 => array(
+        'locale' => 'en',
+        'key' => 'Resume Camera Next Scan',
+        'value' => 'Resume Camera Next Scan',
+    ),
+    1865 => array(
+        'locale' => 'en',
+        'key' => 'Right Arm',
+        'value' => 'Right Arm',
+    ),
+    1866 => array(
+        'locale' => 'en',
+        'key' => 'Right Thigh',
+        'value' => 'Right Thigh',
+    ),
+    1867 => array(
+        'locale' => 'en',
+        'key' => 'Save Record',
+        'value' => 'Save Record',
+    ),
+    1868 => array(
+        'locale' => 'en',
+        'key' => 'Save Subscription',
+        'value' => 'Save Subscription',
+    ),
+    1869 => array(
+        'locale' => 'en',
+        'key' => 'Select Classes...',
+        'value' => 'Select Classes...',
+    ),
+    1870 => array(
+        'locale' => 'en',
+        'key' => 'Select Member',
+        'value' => 'Select Member',
+    ),
+    1871 => array(
+        'locale' => 'en',
+        'key' => 'Select Member to Check In',
+        'value' => 'Select Member to Check In',
+    ),
+    1872 => array(
+        'locale' => 'en',
+        'key' => 'Select Package',
+        'value' => 'Select Package',
+    ),
+    1873 => array(
+        'locale' => 'en',
+        'key' => 'Shoulders',
+        'value' => 'Shoulders',
+    ),
+    1874 => array(
+        'locale' => 'en',
+        'key' => 'Subscription',
+        'value' => 'Subscription',
+    ),
+    1875 => array(
+        'locale' => 'en',
+        'key' => 'Subscription Details',
+        'value' => 'Subscription Details',
+    ),
+    1876 => array(
+        'locale' => 'en',
+        'key' => 'Summary',
+        'value' => 'Summary',
+    ),
+    1877 => array(
+        'locale' => 'en',
+        'key' => 'The field labels marked with * are required input fields.',
+        'value' => 'The field labels marked with * are required input fields.',
+    ),
+    1878 => array(
+        'locale' => 'en',
+        'key' => 'Update Member',
+        'value' => 'Update Member',
+    ),
+    1879 => array(
+        'locale' => 'en',
+        'key' => 'Update Subscription',
+        'value' => 'Update Subscription',
+    ),
+    1880 => array(
+        'locale' => 'en',
+        'key' => 'Upper Waist',
+        'value' => 'Upper Waist',
+    ),
+    1881 => array(
+        'locale' => 'en',
+        'key' => 'Use standard USB/Bluetooth barcode scanner here.',
+        'value' => 'Use standard USB/Bluetooth barcode scanner here.',
+    ),
+    1882 => array(
+        'locale' => 'en',
+        'key' => 'View Full',
+        'value' => 'View Full',
+    ),
+    1883 => array(
+        'locale' => 'en',
+        'key' => 'Waist',
+        'value' => 'Waist',
+    ),
+    1884 => array(
+        'locale' => 'en',
+        'key' => 'Weight',
+        'value' => 'Weight',
+    ),
+    1885 => array(
+        'locale' => 'en',
+        'key' => 'Weight (kg)',
+        'value' => 'Weight (kg)',
+    ),
+    1886 => array(
+        'locale' => 'en',
+        'key' => 'Workout',
+        'value' => 'Workout',
+    ),
+    1887 => array(
+        'locale' => 'en',
+        'key' => 'Zip Code',
+        'value' => 'Zip Code',
+    ),
+    1888 => array(
+        'locale' => 'en',
+        'key' => 'view',
+        'value' => 'view',
+    ),
+    1889 => array(
+        'locale' => 'en',
+        'key' => 'New Select Product',
+        'value' => 'New Select Product',
+    ),
+    1890 => array(
+        'locale' => 'en',
+        'key' => 'Add Sale Exchange',
+        'value' => 'Add Sale Exchange',
+    ),
+    1891 => array(
+        'locale' => 'en',
+        'key' => 'Optional',
+        'value' => 'Optional',
+    ),
+    1892 => array(
+        'locale' => 'en',
+        'key' => 'Continue to Exchange',
+        'value' => 'Continue to Exchange',
+    ),
+    1893 => array(
+        'locale' => 'en',
+        'key' => 'Continue Without Reference',
+        'value' => 'Continue Without Reference',
+    ),
+    1894 => array(
+        'locale' => 'en',
+        'key' => 'Active WhatsApp Order',
+        'value' => 'Active WhatsApp Order',
+    ),
+    1895 => array(
+        'locale' => 'en',
+        'key' => 'Cost Edit in Products',
+        'value' => 'Cost Edit in Products',
+    ),
+    1896 => array(
+        'locale' => 'en',
+        'key' => 'Price Edit in Sale',
+        'value' => 'Price Edit in Sale',
+    ),
+    1897 => array(
+        'locale' => 'en',
+        'key' => 'repair_service_jobs',
+        'value' => 'Repair Service Jobs',
+    ),
+    1898 => array(
+        'locale' => 'en',
+        'key' => 'add_service_job',
+        'value' => 'Add Service Job',
+    ),
+    1899 => array(
+        'locale' => 'en',
+        'key' => 'filter_service_jobs',
+        'value' => 'Filter Service Jobs',
+    ),
+    1900 => array(
+        'locale' => 'en',
+        'key' => 'service_type',
+        'value' => 'Service Type',
+    ),
+    1901 => array(
+        'locale' => 'en',
+        'key' => 'all_types',
+        'value' => 'All Types',
+    ),
+    1902 => array(
+        'locale' => 'en',
+        'key' => 'device',
+        'value' => 'Device',
+    ),
+    1903 => array(
+        'locale' => 'en',
+        'key' => 'vehicle',
+        'value' => 'Vehicle',
+    ),
+    1904 => array(
+        'locale' => 'en',
+        'key' => 'all_status',
+        'value' => 'All Status',
+    ),
+    1905 => array(
+        'locale' => 'en',
+        'key' => 'diagnosed',
+        'value' => 'Diagnosed',
+    ),
+    1906 => array(
+        'locale' => 'en',
+        'key' => 'in_progress',
+        'value' => 'In Progress',
+    ),
+    1907 => array(
+        'locale' => 'en',
+        'key' => 'loading_results',
+        'value' => 'Loading Results',
+    ),
+    1908 => array(
+        'locale' => 'en',
+        'key' => 'service_job_details',
+        'value' => 'Service Job Details',
+    ),
+    1909 => array(
+        'locale' => 'en',
+        'key' => 'expected_delivery',
+        'value' => 'Expected Delivery',
+    ),
+    1910 => array(
+        'locale' => 'en',
+        'key' => 'technician',
+        'value' => 'Technician',
+    ),
+    1911 => array(
+        'locale' => 'en',
+        'key' => 'no_parts_added',
+        'value' => 'No Parts Added',
+    ),
+    1912 => array(
+        'locale' => 'en',
+        'key' => 'parts_total',
+        'value' => 'Parts Total',
+    ),
+    1913 => array(
+        'locale' => 'en',
+        'key' => 'service_charge',
+        'value' => 'Service Charge',
+    ),
+    1914 => array(
+        'locale' => 'en',
+        'key' => 'edit_service_job',
+        'value' => 'Edit Service Job',
+    ),
+    1915 => array(
+        'locale' => 'en',
+        'key' => 'back_to_job',
+        'value' => 'Back To Job',
+    ),
+    1916 => array(
+        'locale' => 'en',
+        'key' => 'basic_information',
+        'value' => 'Basic Information',
+    ),
+    1917 => array(
+        'locale' => 'en',
+        'key' => 'job_title',
+        'value' => 'Job Title',
+    ),
+    1918 => array(
+        'locale' => 'en',
+        'key' => 'expected_delivery_date',
+        'value' => 'Expected Delivery Date',
+    ),
+    1919 => array(
+        'locale' => 'en',
+        'key' => 'amount_paid',
+        'value' => 'Amount Paid',
+    ),
+    1920 => array(
+        'locale' => 'en',
+        'key' => 'status_update_note',
+        'value' => 'Status Update Note',
+    ),
+    1921 => array(
+        'locale' => 'en',
+        'key' => 'device_details',
+        'value' => 'Device Details',
+    ),
+    1922 => array(
+        'locale' => 'en',
+        'key' => 'device_type',
+        'value' => 'Device Type',
+    ),
+    1923 => array(
+        'locale' => 'en',
+        'key' => 'model',
+        'value' => 'Model',
+    ),
+    1924 => array(
+        'locale' => 'en',
+        'key' => 'serial_number',
+        'value' => 'Serial Number',
+    ),
+    1925 => array(
+        'locale' => 'en',
+        'key' => 'imei',
+        'value' => 'Imei',
+    ),
+    1926 => array(
+        'locale' => 'en',
+        'key' => 'password_hint',
+        'value' => 'Password Hint',
+    ),
+    1927 => array(
+        'locale' => 'en',
+        'key' => 'accessories',
+        'value' => 'Accessories',
+    ),
+    1928 => array(
+        'locale' => 'en',
+        'key' => 'issue_reported',
+        'value' => 'Issue Reported',
+    ),
+    1929 => array(
+        'locale' => 'en',
+        'key' => 'condition_notes',
+        'value' => 'Condition Notes',
+    ),
+    1930 => array(
+        'locale' => 'en',
+        'key' => 'vehicle_details',
+        'value' => 'Vehicle Details',
+    ),
+    1931 => array(
+        'locale' => 'en',
+        'key' => 'vehicle_type',
+        'value' => 'Vehicle Type',
+    ),
+    1932 => array(
+        'locale' => 'en',
+        'key' => 'year',
+        'value' => 'Year',
+    ),
+    1933 => array(
+        'locale' => 'en',
+        'key' => 'registration_no',
+        'value' => 'Registration No',
+    ),
+    1934 => array(
+        'locale' => 'en',
+        'key' => 'engine_no',
+        'value' => 'Engine No',
+    ),
+    1935 => array(
+        'locale' => 'en',
+        'key' => 'chassis_no',
+        'value' => 'Chassis No',
+    ),
+    1936 => array(
+        'locale' => 'en',
+        'key' => 'mileage',
+        'value' => 'Mileage',
+    ),
+    1937 => array(
+        'locale' => 'en',
+        'key' => 'fuel_level',
+        'value' => 'Fuel Level',
+    ),
+    1938 => array(
+        'locale' => 'en',
+        'key' => 'save_changes',
+        'value' => 'Save Changes',
+    ),
+    1939 => array(
+        'locale' => 'en',
+        'key' => 'add_service_job_title',
+        'value' => 'Add Service Job Title',
+    ),
+    1940 => array(
+        'locale' => 'en',
+        'key' => 'select_customer',
+        'value' => 'Select Customer',
+    ),
+    1941 => array(
+        'locale' => 'en',
+        'key' => 'select_type',
+        'value' => 'Select Type',
+    ),
+    1942 => array(
+        'locale' => 'en',
+        'key' => 'device_mobile_laptop',
+        'value' => 'Device Mobile Laptop',
+    ),
+    1943 => array(
+        'locale' => 'en',
+        'key' => 'vehicle_bike_car',
+        'value' => 'Vehicle Bike Car',
+    ),
+    1944 => array(
+        'locale' => 'en',
+        'key' => 'select_technician',
+        'value' => 'Select Technician',
+    ),
+    1945 => array(
+        'locale' => 'en',
+        'key' => 'select_brand',
+        'value' => 'Select Brand',
+    ),
+    1946 => array(
+        'locale' => 'en',
+        'key' => 'note_remarks',
+        'value' => 'Note Remarks',
+    ),
+    1947 => array(
+        'locale' => 'en',
+        'key' => 'internal_notes',
+        'value' => 'Internal Notes',
+    ),
+    1948 => array(
+        'locale' => 'en',
+        'key' => 'create_service_job',
+        'value' => 'Create Service Job',
+    ),
+    1949 => array(
+        'locale' => 'en',
+        'key' => 'customer_complaint',
+        'value' => 'Customer Complaint',
+    ),
+    1950 => array(
+        'locale' => 'en',
+        'key' => 'vehicle_brand',
+        'value' => 'Vehicle Brand',
+    ),
+    1951 => array(
+        'locale' => 'en',
+        'key' => 'vehicle_model',
+        'value' => 'Vehicle Model',
+    ),
+    1952 => array(
+        'locale' => 'en',
+        'key' => 'vehicle_condition',
+        'value' => 'Vehicle Condition',
+    ),
+    1953 => array(
+        'locale' => 'en',
+        'key' => 'describe_issue',
+        'value' => 'Describe Issue',
+    ),
+    1954 => array(
+        'locale' => 'en',
+        'key' => 'parts_billing',
+        'value' => 'Parts Billing',
+    ),
+    1955 => array(
+        'locale' => 'en',
+        'key' => 'parts_items_used',
+        'value' => 'Parts Items Used',
+    ),
+    1956 => array(
+        'locale' => 'en',
+        'key' => 'search_product',
+        'value' => 'Search Product',
+    ),
+    1957 => array(
+        'locale' => 'en',
+        'key' => 'duplicates_merge',
+        'value' => 'Duplicates Merge',
+    ),
+    1958 => array(
+        'locale' => 'en',
+        'key' => 'product_already_added',
+        'value' => 'Product Already Added',
+    ),
+    1959 => array(
+        'locale' => 'en',
+        'key' => 'search_product_to_add',
+        'value' => 'Search Product To Add',
+    ),
+    1960 => array(
+        'locale' => 'en',
+        'key' => 'remove_part_confirm',
+        'value' => 'Remove Part Confirm',
+    ),
+    1961 => array(
+        'locale' => 'en',
+        'key' => 'service_charges',
+        'value' => 'Service Charges',
+    ),
+    1962 => array(
+        'locale' => 'en',
+        'key' => 'save_charges',
+        'value' => 'Save Charges',
+    ),
+    1963 => array(
+        'locale' => 'en',
+        'key' => 'totals_update_after_saving',
+        'value' => 'Totals Update After Saving',
+    ),
+    1964 => array(
+        'locale' => 'en',
+        'key' => 'payments_received',
+        'value' => 'Payments Received',
+    ),
+    1965 => array(
+        'locale' => 'en',
+        'key' => 'collect_new_payment',
+        'value' => 'Collect New Payment',
+    ),
+    1966 => array(
+        'locale' => 'en',
+        'key' => 'collect_payment',
+        'value' => 'Collect Payment',
+    ),
+    1967 => array(
+        'locale' => 'en',
+        'key' => 'no_payments_yet',
+        'value' => 'No Payments Yet',
+    ),
+    1968 => array(
+        'locale' => 'en',
+        'key' => 'delete_payment_confirm',
+        'value' => 'Delete Payment Confirm',
+    ),
+    1969 => array(
+        'locale' => 'en',
+        'key' => 'payment_ref',
+        'value' => 'Payment Ref',
+    ),
+    1970 => array(
+        'locale' => 'en',
+        'key' => 'billing_summary',
+        'value' => 'Billing Summary',
+    ),
+    1971 => array(
+        'locale' => 'en',
+        'key' => 'fully_paid',
+        'value' => 'Fully Paid',
+    ),
+    1972 => array(
+        'locale' => 'en',
+        'key' => 'amount_due',
+        'value' => 'Amount Due',
+    ),
+    1973 => array(
+        'locale' => 'en',
+        'key' => 'job_info',
+        'value' => 'Job Info',
+    ),
+    1974 => array(
+        'locale' => 'en',
+        'key' => 'view_job',
+        'value' => 'View Job',
+    ),
+    1975 => array(
+        'locale' => 'en',
+        'key' => 'all_jobs',
+        'value' => 'All Jobs',
+    ),
+    1976 => array(
+        'locale' => 'en',
+        'key' => 'quick_status_update',
+        'value' => 'Quick Status Update',
+    ),
+    1977 => array(
+        'locale' => 'en',
+        'key' => 'new_status',
+        'value' => 'New Status',
+    ),
+    1978 => array(
+        'locale' => 'en',
+        'key' => 'update_status',
+        'value' => 'Update Status',
+    ),
+    1979 => array(
+        'locale' => 'en',
+        'key' => 'optional_note',
+        'value' => 'Optional Note',
+    ),
+    1980 => array(
+        'locale' => 'en',
+        'key' => 'activity_timeline',
+        'value' => 'Activity Timeline',
+    ),
+    1981 => array(
+        'locale' => 'en',
+        'key' => 'no_updates_yet',
+        'value' => 'No Updates Yet',
+    ),
+    1982 => array(
+        'locale' => 'en',
+        'key' => 'no_parts_used',
+        'value' => 'No Parts Used',
+    ),
+    1983 => array(
+        'locale' => 'en',
+        'key' => 'date_created',
+        'value' => 'Date Created',
+    ),
+    1984 => array(
+        'locale' => 'en',
+        'key' => 'delivered_on',
+        'value' => 'Delivered On',
+    ),
+    1985 => array(
+        'locale' => 'en',
+        'key' => 'unassigned',
+        'value' => 'Unassigned',
+    ),
+    1986 => array(
+        'locale' => 'en',
+        'key' => 'assign_technician',
+        'value' => 'Assign Technician',
+    ),
+    1987 => array(
+        'locale' => 'en',
+        'key' => 'issue_reported_by_customer',
+        'value' => 'Issue Reported By Customer',
+    ),
+    1988 => array(
+        'locale' => 'en',
+        'key' => 'condition_on_arrival',
+        'value' => 'Condition On Arrival',
+    ),
+    1989 => array(
+        'locale' => 'en',
+        'key' => 'accessories_received',
+        'value' => 'Accessories Received',
+    ),
+    1990 => array(
+        'locale' => 'en',
+        'key' => 'password_unlock_hint',
+        'value' => 'Password Unlock Hint',
+    ),
+    1991 => array(
+        'locale' => 'en',
+        'key' => 'stock_exceeded',
+        'value' => 'Stock Exceeded',
+    ),
+    1992 => array(
+        'locale' => 'en',
+        'key' => 'part_added',
+        'value' => 'Part Added',
+    ),
+    1993 => array(
+        'locale' => 'en',
+        'key' => 'part_removed',
+        'value' => 'Part Removed',
+    ),
+    1994 => array(
+        'locale' => 'en',
+        'key' => 'charges_saved',
+        'value' => 'Charges Saved',
+    ),
+    1995 => array(
+        'locale' => 'en',
+        'key' => 'enter_valid_amount',
+        'value' => 'Enter Valid Amount',
+    ),
+    1996 => array(
+        'locale' => 'en',
+        'key' => 'select_account',
+        'value' => 'Select Account',
+    ),
+    1997 => array(
+        'locale' => 'en',
+        'key' => 'amount_exceeds_due',
+        'value' => 'Amount Exceeds Due',
+    ),
+    1998 => array(
+        'locale' => 'en',
+        'key' => 'payment_collected',
+        'value' => 'Payment Collected',
+    ),
+    1999 => array(
+        'locale' => 'en',
+        'key' => 'payment_removed',
+        'value' => 'Payment Removed',
+    ),
+    2000 => array(
+        'locale' => 'en',
+        'key' => 'status_updated_refresh',
+        'value' => 'Status Updated Refresh',
+    ),
+    2001 => array(
+        'locale' => 'en',
+        'key' => 'low',
+        'value' => 'Low',
+    ),
+    2002 => array(
+        'locale' => 'en',
+        'key' => 'medium',
+        'value' => 'Medium',
+    ),
+    2003 => array(
+        'locale' => 'en',
+        'key' => 'high',
+        'value' => 'High',
+    ),
+    2004 => array(
+        'locale' => 'en',
+        'key' => 'priority',
+        'value' => 'Priority',
+    ),
+    2005 => array(
+        'locale' => 'en',
+        'key' => 'Add Type',
+        'value' => 'Add Type',
+    ),
+    2006 => array(
+        'locale' => 'en',
+        'key' => 'type_example_smart_watch_motorcycle',
+        'value' => 'Type Example Smart Watch Motorcycle',
+    ),
+    2007 => array(
+        'locale' => 'en',
+        'key' => 'error_creating_customer',
+        'value' => 'Error Creating Customer',
+    ),
+    2008 => array(
+        'locale' => 'en',
+        'key' => 'error_creating_brand',
+        'value' => 'Error Creating Brand',
+    ),
+    2009 => array(
+        'locale' => 'en',
+        'key' => 'error_saving_type',
+        'value' => 'Error Saving Type',
+    ),
+    2010 => array(
+        'locale' => 'en',
+        'key' => 'error_creating_technician',
+        'value' => 'Error Creating Technician',
+    ),
+    2011 => array(
+        'locale' => 'en',
+        'key' => 'name_is_required',
+        'value' => 'Name Is Required',
+    ),
+    2012 => array(
+        'locale' => 'en',
+        'key' => 'category_missing_reopen',
+        'value' => 'Category Missing Reopen',
+    ),
+    2013 => array(
+        'locale' => 'en',
+        'key' => 'unexpected_response_refresh',
+        'value' => 'Unexpected Response Refresh',
+    ),
+    2014 => array(
+        'locale' => 'en',
+        'key' => 'no_amount_due',
+        'value' => 'No Amount Due',
+    ),
+    2015 => array(
+        'locale' => 'en',
+        'key' => 'total_entered_exceeds_due',
+        'value' => 'Total Entered Exceeds Due',
+    ),
+    2016 => array(
+        'locale' => 'en',
+        'key' => 'repair_service_dashboard',
+        'value' => 'Repair Service Dashboard',
+    ),
+    2017 => array(
+        'locale' => 'en',
+        'key' => 'repair_dashboard_overview',
+        'value' => 'Repair Dashboard Overview',
+    ),
+    2018 => array(
+        'locale' => 'en',
+        'key' => 'Start date',
+        'value' => 'Start Date',
+    ),
+    2019 => array(
+        'locale' => 'en',
+        'key' => 'End date',
+        'value' => 'End Date',
+    ),
+    2020 => array(
+        'locale' => 'en',
+        'key' => 'Overdue Job',
+        'value' => 'Overdue Job',
+    ),
+    2021 => array(
+        'locale' => 'en',
+        'key' => 'High Priority',
+        'value' => 'High Priority',
+    ),
+    2022 => array(
+        'locale' => 'en',
+        'key' => 'New Today',
+        'value' => 'New Today',
+    ),
+    2023 => array(
+        'locale' => 'en',
+        'key' => 'Outstanding',
+        'value' => 'Outstanding',
+    ),
+    2024 => array(
+        'locale' => 'en',
+        'key' => 'Total Revenue',
+        'value' => 'Total Revenue',
+    ),
+    2025 => array(
+        'locale' => 'en',
+        'key' => 'Jobs',
+        'value' => 'Jobs',
+    ),
+    2026 => array(
+        'locale' => 'en',
+        'key' => 'Avg',
+        'value' => 'Avg',
+    ),
+    2027 => array(
+        'locale' => 'en',
+        'key' => 'job',
+        'value' => 'Job',
+    ),
+    2028 => array(
+        'locale' => 'en',
+        'key' => 'Collected',
+        'value' => 'Collected',
+    ),
+    2029 => array(
+        'locale' => 'en',
+        'key' => 'Collection Rate',
+        'value' => 'Collection Rate',
+    ),
+    2030 => array(
+        'locale' => 'en',
+        'key' => 'Total Jobs',
+        'value' => 'Total Jobs',
+    ),
+    2031 => array(
+        'locale' => 'en',
+        'key' => 'Monthly Trend',
+        'value' => 'Monthly Trend',
+    ),
+    2032 => array(
+        'locale' => 'en',
+        'key' => 'last_6_months',
+        'value' => 'Last 6 Months',
+    ),
+    2033 => array(
+        'locale' => 'en',
+        'key' => 'View All',
+        'value' => 'View All',
+    ),
+    2034 => array(
+        'locale' => 'en',
+        'key' => 'Job Status',
+        'value' => 'Job Status',
+    ),
+    2035 => array(
+        'locale' => 'en',
+        'key' => 'no_data_for_period',
+        'value' => 'No Data For Period',
+    ),
+    2036 => array(
+        'locale' => 'en',
+        'key' => 'Recent Service Jobs',
+        'value' => 'Recent Service Jobs',
+    ),
+    2037 => array(
+        'locale' => 'en',
+        'key' => 'New Job',
+        'value' => 'New Job',
+    ),
+    2038 => array(
+        'locale' => 'en',
+        'key' => 'Pri',
+        'value' => 'Pri',
+    ),
+    2039 => array(
+        'locale' => 'en',
+        'key' => 'no_service_jobs_yet',
+        'value' => 'No Service Jobs Yet',
+    ),
+    2040 => array(
+        'locale' => 'en',
+        'key' => 'create_one',
+        'value' => 'Create One',
+    ),
+    2041 => array(
+        'locale' => 'en',
+        'key' => 'Top Technicians',
+        'value' => 'Top Technicians',
+    ),
+    2042 => array(
+        'locale' => 'en',
+        'key' => 'Unknown',
+        'value' => 'Unknown',
+    ),
+    2043 => array(
+        'locale' => 'en',
+        'key' => 'earned',
+        'value' => 'Earned',
+    ),
+    2044 => array(
+        'locale' => 'en',
+        'key' => 'Payment Methods',
+        'value' => 'Payment Methods',
+    ),
+    2045 => array(
+        'locale' => 'en',
+        'key' => 'Revenue',
+        'value' => 'Revenue',
+    ),
+    2046 => array(
+        'locale' => 'en',
+        'key' => 'Repair Dashboard',
+        'value' => 'Repair Dashboard',
+    ),
+    2047 => array(
+        'locale' => 'en',
+        'key' => 'Service Jobs',
+        'value' => 'Service Jobs',
+    ),
+    2048 => array(
+        'locale' => 'en',
+        'key' => 'Add Service Job',
+        'value' => 'Add Service Job',
+    ),
+    2049 => array(
+        'locale' => 'en',
+        'key' => 'Device Types',
+        'value' => 'Device Types',
+    ),
+    2050 => array(
+        'locale' => 'en',
+        'key' => 'Repair',
+        'value' => 'Repair',
+    ),
+    2051 => array(
+        'locale' => 'en',
+        'key' => 'Add Device Type',
+        'value' => 'Add Device Type',
+    ),
+    2052 => array(
+        'locale' => 'en',
+        'key' => 'Type device type name',
+        'value' => 'Type device type name',
+    ),
+    2053 => array(
+        'locale' => 'en',
+        'key' => 'Type description',
+        'value' => 'Type description',
+    ),
+    2054 => array(
+        'locale' => 'en',
+        'key' => 'New Select Product',
+        'value' => 'New Select Product',
+    ),
+    2055 => array(
+        'locale' => 'en',
+        'key' => 'delete_service_job',
+        'value' => 'Delete Service Job',
+    ),
+    2056 => array(
+        'locale' => 'en',
+        'key' => 'service_jobs_list',
+        'value' => 'Service Jobs List',
+    ),
+    2057 => array(
+        'locale' => 'en',
+        'key' => 'view_service_jobs',
+        'value' => 'View Service Jobs',
+    ),
+    2058 => array(
+        'locale' => 'en',
+        'key' => 'Instalment Report',
+        'value' => 'Instalment Report',
+    ),
+    2059 => array(
+        'locale' => 'en',
+        'key' => 'floorplan_save_info_message',
+        'value' => 'Drag and drop tables to position them on the floor plan. It will be saved automatically.',
+    ),
+    2060 => array(
+        'locale' => 'en',
+        'key' => 'Floorplan',
+        'value' => 'Floor Plan',
+    ),
+    2061 => array(
+        'locale' => 'en',
+        'key' => 'Add Floor',
+        'value' => 'Add Floor',
+    ),
+    2062 => array(
+        'locale' => 'en',
+        'key' => 'Add Reservation',
+        'value' => 'Add Reservation',
+    ),
+    2063 => array(
+        'locale' => 'en',
+        'key' => 'Edit Reservation',
+        'value' => 'Edit Reservation',
+    ),
+    2064 => array(
+        'locale' => 'en',
+        'key' => 'Save Reservation',
+        'value' => 'Save Reservation',
+    ),
+    2065 => array(
+        'locale' => 'en',
+        'key' => 'Check Availability',
+        'value' => 'Check Availability',
+    ),
+    2066 => array(
+        'locale' => 'en',
+        'key' => 'Book Table',
+        'value' => 'Book Table',
+    ),
 );

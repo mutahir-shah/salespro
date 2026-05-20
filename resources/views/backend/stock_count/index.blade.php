@@ -120,7 +120,7 @@
           <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-          <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+          <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
             <div class="row">
                 <div class="col-md-4 form-group">
                     <label>{{__('db.Warehouse')}} *</label>
@@ -174,7 +174,7 @@
             <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-            <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.<strong>{{__('db.You just need to update the Counted column in the initial file')}}</strong> </small></p>
+            <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.<strong>{{__('db.You just need to update the Counted column in the initial file')}}</strong> </small></p>
             <div class="form-group">
                 <label>{{__('db.Upload File')}} *</label>
                 <input required type="file" name="final_file" class="form-control" />

@@ -21,7 +21,7 @@
 
                 $passed = '';
                 $ltext = '';
-                if (1) {
+                if (version_compare(PHP_VERSION, '8.3') >= 0) {
                     $ltext .= '<i class="fa fa-check"></i>Your PHP Version is: ' . PHP_VERSION . '<br/>';
                     $passed .= '1';
 

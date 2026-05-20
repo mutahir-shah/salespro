@@ -78,9 +78,9 @@ class PackingSlipController extends Controller
             foreach ($packing_slips as $key => $packing_slip)
             {
                 $nestedData['id'] = $packing_slip->id;
-                $nestedData['reference'] = 'P' . $packing_slip->reference_no;
-                $nestedData['sale_reference'] = $packing_slip->sale->reference_no;
-                $nestedData['delivery_reference'] = $packing_slip->delivery->reference_no;
+                $nestedData['reference'] = 'P' . $packing_slip->reference_no ?? 'N/A';
+                $nestedData['sale_reference'] = $packing_slip->sale->reference_no ?? 'N/A';
+                $nestedData['delivery_reference'] = $packing_slip->delivery->reference_no ?? 'N/A';
                 //$nestedData['delivery_reference'] = 'j';
                 $nestedData['amount'] = $packing_slip->amount;
                 $nestedData['item_list'] = '';

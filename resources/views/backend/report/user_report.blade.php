@@ -5,41 +5,35 @@
             <div class="card-header mt-2">
                 <h3 class="text-center">{{__('db.User Report')}}</h3>
             </div>
-            <form action="{{ route('report.user') }}" method="POST">
-                @csrf
-            <div class="row mb-3">
-                <div class="col-md-4 offset-md-2 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <div class="input-group">
-                                <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
-                                <input type="hidden" name="start_date" value="{{$start_date}}" />
-                                <input type="hidden" name="end_date" value="{{$end_date}}" />
+            <form id="filter-form">
+                <div class="row mb-3">
+                    <div class="col-md-4 offset-md-2 mt-3">
+                        <div class="form-group row">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <div class="input-group">
+                                    <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
+                                    <input type="hidden" name="start_date" value="{{$start_date}}" />
+                                    <input type="hidden" name="end_date" value="{{$end_date}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <div class="form-group row">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose User')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <input type="hidden" name="user_id_hidden" value="{{$user_id}}" />
+                                <select id="user_id" name="user_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
+                                    @foreach($lims_user_list as $user)
+                                    <option value="{{$user->id}}">{{$user->name}} ({{$user->phone}})</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose User')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <input type="hidden" name="user_id_hidden" value="{{$user_id}}" />
-                            <select id="user_id" name="user_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
-                                @foreach($lims_user_list as $user)
-                                <option value="{{$user->id}}">{{$user->name}} ({{$user->phone}})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2 mt-3">
-                    <div class="form-group">
-                        <button class="btn btn-primary" type="submit">{{__('db.submit')}}</button>
-                    </div>
-                </div>
-            </div>
-            <input type="hidden" name="user_id_hidden" value="{{$user_id}}" />
+                <input type="hidden" name="user_id_hidden" value="{{$user_id}}" />
             </form>
         </div>
     </div>
@@ -313,15 +307,15 @@
     $('#user_id').val($('input[name="user_id_hidden"]').val());
     $('.selectpicker').selectpicker('refresh');
 
-    $('#sale-table').DataTable({
+    var sale_table = $('#sale-table').DataTable({
         "processing": true,
         "serverSide": true,
         "ajax":{
             url:"user-sale-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                user_id: user_id
+            data:function(d){
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.user_id = user_id;
             },
             dataType: "json",
             type:"post"
@@ -443,15 +437,15 @@
         }
     }
 
-    $('#purchase-table').DataTable({
+    var purchase_table = $('#purchase-table').DataTable({
         "processing": true,
         "serverSide": true,
         "ajax":{
             url:"user-purchase-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                user_id: user_id
+            data:function(d){
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.user_id = user_id;
             },
             dataType: "json",
             type:"post"
@@ -554,11 +548,11 @@
         ],
         drawCallback: function () {
             var api = this.api();
-            datatable_sum_sale(api, false);
+            datatable_sum_purchase(api, false);
         }
     });
 
-    function datatable_sum_sale(dt_selector, is_calling_first) {
+    function datatable_sum_purchase(dt_selector, is_calling_first) {
         if (dt_selector.rows( '.selected' ).any() && is_calling_first) {
             var rows = dt_selector.rows( '.selected' ).indexes();
 
@@ -573,15 +567,15 @@
         }
     }
 
-    $('#quotation-table').DataTable({
+    var quotation_table = $('#quotation-table').DataTable({
         "processing": true,
         "serverSide": true,
         "ajax":{
             url:"user-quotation-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                user_id: user_id
+            data:function(d){
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.user_id = user_id;
             },
             dataType: "json",
             type:"post"
@@ -697,15 +691,15 @@
         }
     }
 
-    $('#transfer-table').DataTable({
+    var transfer_table = $('#transfer-table').DataTable({
         "processing": true,
         "serverSide": true,
         "ajax":{
             url:"user-transfer-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                user_id: user_id
+            data:function(d){
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.user_id = user_id;
             },
             dataType: "json",
             type:"post"
@@ -822,15 +816,15 @@
         }
     }
 
-    $('#payment-table').DataTable({
+    var payment_table = $('#payment-table').DataTable({
         "processing": true,
         "serverSide": true,
         "ajax":{
             url:"user-payment-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                user_id: user_id
+            data:function(d){
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.user_id = user_id;
             },
             dataType: "json",
             type:"post"
@@ -943,15 +937,15 @@
         }
     }
 
-    $('#expense-table').DataTable({
+    var expense_table = $('#expense-table').DataTable({
         "processing": true,
         "serverSide": true,
         "ajax":{
             url:"user-expense-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                user_id: user_id
+            data:function(d){
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.user_id = user_id;
             },
             dataType: "json",
             type:"post"
@@ -1066,15 +1060,15 @@
         }
     }
 
-    $('#payroll-table').DataTable({
+    var payroll_table = $('#payroll-table').DataTable({
         "processing": true,
         "serverSide": true,
         "ajax":{
             url:"user-payroll-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                user_id: user_id
+            data:function(d){
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.user_id = user_id;
             },
             dataType: "json",
             type:"post"
@@ -1187,6 +1181,31 @@
             $( dt_selector.column( 4 ).footer() ).html(dt_selector.column( 4, {page:'current'} ).data().sum().toFixed({{$general_setting->decimal}}));
         }
     }
+
+    $('#filter-form').on('submit', function(e) {
+        e.preventDefault();
+
+        // get updated values
+        start_date = $('input[name="start_date"]').val();
+        end_date = $('input[name="end_date"]').val();
+        user_id = $('#user_id').val();
+
+        // reload all tables
+        sale_table.ajax.reload();
+        purchase_table.ajax.reload();
+        quotation_table.ajax.reload();
+        transfer_table.ajax.reload();
+        payment_table.ajax.reload();
+        expense_table.ajax.reload();
+        payroll_table.ajax.reload();
+    });
+
+    $('.daterangepicker-field').on('apply.daterangepicker', function(){
+        $('#filter-form').submit();
+    });
+    $('#user_id').on('change', function(){
+        $('#filter-form').submit();
+    });
 
 </script>
 @endpush

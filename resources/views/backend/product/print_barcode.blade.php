@@ -33,7 +33,7 @@
 	                <form id = 'preview_setting_form' onsubmit = 'return false'>
                         @csrf
                         <div class="card-body">
-                            <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                            <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="row">

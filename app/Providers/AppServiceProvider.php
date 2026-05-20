@@ -29,12 +29,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // Path relative to the root of your project
+        $helperFile = app_path('Helpers/helpers.php');
+
+        if (file_exists($helperFile)) {
+            require_once($helperFile);
+        }
     }
 
 
     public function boot()
     {
+        \Illuminate\Database\Eloquent\Relations\Relation::morphMap([
+            'sale' => 'App\Models\Sale',
+        ]);
         Schema::defaultStringLength(191);
         $this->app->bind(\App\ViewModels\ISmsModel::class, \App\ViewModels\SmsModel::class);
 
@@ -128,7 +136,9 @@ class AppServiceProvider extends ServiceProvider
             ///new code for superadmin//
             if (!app()->bound('tenancy')) {
                 $locale = null;
-                if (config('database.connections.mysql.database') && Schema::hasTable('languages')) {
+                if (!request()->is('superadmin*') && isset($_COOKIE['frontend_language'])) {
+                    $locale = $_COOKIE['frontend_language'];
+                } elseif (config('database.connections.saleprosaas_landlord.database') && Schema::hasTable('languages')) {
                     // Fallback to default language
                     $default_language = DB::table('languages')->where('is_default', true)->first();
                     $locale = $default_language->code ?? 'en';

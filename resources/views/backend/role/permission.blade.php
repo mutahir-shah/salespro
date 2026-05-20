@@ -31,7 +31,7 @@
 						            </th>
 						        </tr>
 						        <tr>
-						            <th class="text-center">{{__('db.Index')}}</th>
+						            <th class="text-center">{{__('db.List')}}</th>
 						            <th class="text-center">{{__('db.View')}}</th>
 						            <th class="text-center">{{__('db.add')}}</th>
 						            <th class="text-center">{{__('db.edit')}}</th>
@@ -912,6 +912,142 @@
 										@endforeach
 									</td>
 								</tr>
+
+
+                                {{-- ═══════════════════════════════════════════════════════════════
+                                    REPAIR MODULE PERMISSIONS
+                                    Add this block right after the </tr> closing tag of manufacturing-row
+                                ════════════════════════════════════════════════════════════════ --}}
+
+                                <tr class="repair-row">
+                                    <td>{{ __('db.Repair') }}</td>
+                                    <td class="report-permissions" colspan="5">
+
+                                        {{-- ── Service Jobs (CRUD) ─────────────────────────────── --}}
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-dashboard" name="repair-dashboard"
+                                                    {{ in_array('repair-dashboard', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-dashboard" class="padding05">{{ __('db.Repair Dashboard') }} &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-service-index" name="repair-service-index"
+                                                    {{ in_array('repair-service-index', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-service-index" class="padding05">{{ __('db.service_jobs_list') }} &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-service-view" name="repair-service-view"
+                                                    {{ in_array('repair-service-view', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-service-view" class="padding05">{{ __('db.view_service_jobs') }} &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-service-add" name="repair-service-add"
+                                                    {{ in_array('repair-service-add', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-service-add" class="padding05">{{ __('db.add_service_job') }} &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-service-edit" name="repair-service-edit"
+                                                    {{ in_array('repair-service-edit', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-service-edit" class="padding05">{{ __('db.edit_service_job') }} &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-service-delete" name="repair-service-delete"
+                                                    {{ in_array('repair-service-delete', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-service-delete" class="padding05">{{ __('db.delete_service_job') }} &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        {{-- ── Parts & Billing ──────────────────────────────────── --}}
+
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-parts-view" name="repair-parts-view"
+                                                    {{ in_array('repair-parts-view', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-parts-view" class="padding05">View Parts &amp; Billing &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-parts-add" name="repair-parts-add"
+                                                    {{ in_array('repair-parts-add', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-parts-add" class="padding05">Add Part &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-parts-edit" name="repair-parts-edit"
+                                                    {{ in_array('repair-parts-edit', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-parts-edit" class="padding05">Edit Parts (Qty / Price) &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-parts-delete" name="repair-parts-delete"
+                                                    {{ in_array('repair-parts-delete', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-parts-delete" class="padding05">Remove Parts &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-charges-edit" name="repair-charges-edit"
+                                                    {{ in_array('repair-charges-edit', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-charges-edit" class="padding05">Edit Service Charges &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <br>
+
+                                        {{-- ── Payments ─────────────────────────────────────────── --}}
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-payment-add" name="repair-payment-add"
+                                                    {{ in_array('repair-payment-add', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-payment-add" class="padding05">Collect Payment &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-payment-delete" name="repair-payment-delete"
+                                                    {{ in_array('repair-payment-delete', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-payment-delete" class="padding05">Delete Payment &nbsp;&nbsp;</label>
+                                            </div>
+                                        </span>
+
+                                        {{-- device type --}}
+                                        {{-- ── Device Type (Single Permission) ───────────────────────── --}}
+                                        <span>
+                                            <div class="checkbox">
+                                                <input type="checkbox" value="1" id="repair-device-type" name="repair-device-type"
+                                                    {{ in_array('repair-device-type', $all_permission) ? 'checked' : '' }}>
+                                                <label for="repair-device-type" class="padding05">Device Type</label>
+                                            </div>
+                                        </span>
+
+                                    </td>
+                                </tr>
 
                                  <tr class="manufacturing-row">
                                     <td>{{ __('db.Manufacturing') }}</td>
@@ -2217,6 +2353,30 @@
 								                </div>
 								            </div>
 						                </span>
+										<span>
+								            <div aria-checked="false" aria-disabled="false">
+								                <div class="checkbox">
+							                    	@if(in_array("cost_edit_in_products", $all_permission))
+							                    	<input type="checkbox" value="1" id="cost_edit_in_products" name="cost_edit_in_products" checked>
+							                    	@else
+							                    	<input type="checkbox" value="1" id="cost_edit_in_products" name="cost_edit_in_products">
+							                    	@endif
+								                    <label for="cost_edit_in_products" class="padding05">{{__('db.Cost Edit in Products')}} &nbsp;&nbsp;</label>
+								                </div>
+								            </div>
+						            	</span>
+										<span>
+								            <div aria-checked="false" aria-disabled="false">
+								                <div class="checkbox">
+							                    	@if(in_array("price_edit_in_sale", $all_permission))
+							                    	<input type="checkbox" value="1" id="price_edit_in_sale" name="price_edit_in_sale" checked>
+							                    	@else
+							                    	<input type="checkbox" value="1" id="price_edit_in_sale" name="price_edit_in_sale">
+							                    	@endif
+								                    <label for="price_edit_in_sale" class="padding05">{{__('db.Price Edit in Sale')}} &nbsp;&nbsp;</label>
+								                </div>
+								            </div>
+						            	</span>
 						            </td>
 						        </tr>
 						        </tbody>

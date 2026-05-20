@@ -31,7 +31,15 @@
                     <x-error-message key="not_permitted" />
 
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
+                        <!-- Start Custom Alert -->
+                        <div id="alert-container" class="alert alert-dismissible fade show d-none" role="alert">
+                            <span id="alert-message"></span>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <!-- End Custom Alert -->
                         <form id="product-form">
                             <input type="hidden" name="id" value="{{$lims_product_data->id}}" />
                             <div class="row">
@@ -255,16 +263,29 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div id="cost" class="col-md-4 @if(Auth::user()->role_id > 2) d-none @endif">
-                                    <div class="form-group">
-                                        <label>{{__('db.Product Cost')}} * </label>
-                                        <input type="number" name="cost" value="{{$lims_product_data->cost}}" required class="form-control product_cost" step="any">
-                                        <div class="alert alert-warning very-small-text d-none p-2 position-absolute" id="product-cost-warning">
-                                            Cost must be higher than 0!
+                                @can('cost_edit_in_products')
+                                    <div id="cost" class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Product Cost')}} * </label>
+                                            <input type="number" name="cost" value="{{$lims_product_data->cost}}" required class="form-control product_cost" step="any">
+                                            <div class="alert alert-warning very-small-text d-none p-2 position-absolute" id="product-cost-warning">
+                                                Cost must be higher than 0!
+                                            </div>
+                                            <span class="validation-msg"></span>
                                         </div>
-                                        <span class="validation-msg"></span>
                                     </div>
-                                </div>
+                                @else
+                                    <div id="cost" class="col-md-4 d-none">
+                                        <div class="form-group">
+                                            <label>{{__('db.Product Cost')}} * </label>
+                                            <input type="number" name="cost" value="{{$lims_product_data->cost}}" required class="form-control product_cost" step="any">
+                                            <div class="alert alert-warning very-small-text d-none p-2 position-absolute" id="product-cost-warning">
+                                                Cost must be higher than 0!
+                                            </div>
+                                            <span class="validation-msg"></span>
+                                        </div>
+                                    </div>
+                                @endcan
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>{{ __('db.profit_margin_type') }}</label>
@@ -773,6 +794,26 @@
 <script type="text/javascript">
 
     calculate_price();
+
+    function showAlert(message, type) {
+        const container = $('#alert-container');
+        const messageSpan = $('#alert-message');
+        
+        container.removeClass('alert-success alert-danger alert-warning alert-info d-none');
+        container.addClass(`alert-${type}`);
+        messageSpan.text(message);
+        
+        // Scroll to top
+        $('html, body').animate({ scrollTop: 0 }, 'slow');
+        
+        // Ensure visible
+        container.show();
+        
+        // Auto-fade after 8 seconds
+        setTimeout(() => {
+            container.fadeOut('slow');
+        }, 8000);
+    }
 
     $.ajaxSetup({
         headers: {
@@ -1579,7 +1620,7 @@
                     var flag = 1;
                     $(".product-id").each(function() {
                         if ($(this).val() == data[8]) {
-                            alert('Duplicate input is not allowed!')
+                            showAlert('Duplicate input is not allowed!', 'danger');
                             flag = 0;
                         }
                     });
@@ -1903,16 +1944,16 @@
         var exp = /^\d+$/;
 
         if(!(product_code.match(exp)) && (barcode_symbology == 'UPCA' || barcode_symbology == 'UPCE' || barcode_symbology == 'EAN8' || barcode_symbology == 'EAN13') ) {
-            alert('Product code must be numeric.');
+            showAlert('Product code must be numeric.', 'danger');
             return false;
         }
         else if(product_code.match(exp)) {
             if(barcode_symbology == 'UPCA' && product_code.length > 11){
-                alert('Product code length must be less than 12');
+                showAlert('Product code length must be less than 12', 'danger');
                 return false;
             }
             else if(barcode_symbology == 'EAN8' && product_code.length > 7){
-                alert('Product code length must be less than 8');
+                showAlert('Product code length must be less than 8', 'danger');
                 return false;
             }
             /*else if(barcode_symbology == 'EAN13' && product_code.length > 12){
@@ -1924,7 +1965,7 @@
         if( $("#type").val() == 'combo' ) {
             var rownumber = $('table.order-list tbody tr:last').index();
             if (rownumber < 0) {
-                alert("Please insert product to table!")
+                showAlert("Please insert product to table!", 'danger');
                 return false;
             }
         }
@@ -2000,7 +2041,8 @@
                             contentType: false,
                             processData: false,
                             success:function(response) {
-                                window.location.reload(true);
+                                showAlert(response.message, 'success');
+                                $('#submit-btn').removeAttr('disabled').html("{{__('db.submit')}}");
                             },
                             error:function(response) {
                                 //console.log(response);
@@ -2064,9 +2106,8 @@
             }*/
         },
         successmultiple: function (file, response) {
-                window.location.reload();
-            // location.href = redirectUrl;
-            //console.log('sss: '+ response);
+                                showAlert(response.message, 'success');
+                                $('#submit-btn').removeAttr('disabled').html("{{__('db.submit')}}");
         },
         completemultiple: function (file, response) {
             console.log(file, response, "completemultiple");

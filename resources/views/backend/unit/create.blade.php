@@ -88,7 +88,7 @@
             <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
           </div>
           <div class="modal-body">
-          <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+          <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
             <form>
                 <input type="hidden" name="unit_id">
                 <div class="form-group">
@@ -145,7 +145,7 @@
             <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
           </div>
           <div class="modal-body">
-            <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+            <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
             <p>{{__('db.The correct column order is')}} (unit_code*, unit_name*, base_unit [unit code], operator, operation_value) {{__('db.and you must follow this')}}.</p>
             <div class="row">
                 <div class="col-md-6">

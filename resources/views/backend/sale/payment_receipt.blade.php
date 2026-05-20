@@ -76,10 +76,8 @@
             <tr>
                 <td><a href="{{ $url }}" class="btn btn-info"><i class="fa fa-arrow-left"></i>
                         {{ __('db.Back') }}</a></td>
-                <td><button onclick="window.print();" class="btn btn-primary"><i class="dripicons-print"></i>
-                        {{ __('db.Print') }}</button></td>
-                <td><button id="download-btn" onclick="downloadPDF()"><i class="fa fa-download"></i>
-                        {{ __('db.download_pdf') }}</button></td>
+                <td><button onclick="window.print();" class="btn btn-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-printer"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" /><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" /><path d="M7 15a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2l0 -4" /></svg></button></td>
+                <td><button id="download-btn" onclick="downloadPDF()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-type-pdf"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" /><path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6" /><path d="M17 18h2" /><path d="M20 15h-3v6" /><path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1" /></svg></button></td>
             </tr>
         </table>
         <br>
@@ -153,7 +151,7 @@
                     <td colspan="3" style="padding:4px 0;width:30%;vertical-align:top">
                         <h2
                             style="background-color: {{ $primary_color }}; color: white; padding: 3px 10px; margin-bottom: 0;">
-                            {{ __('db.Payment Receipt') }}
+                            {{ __('db.payment_receipt') }}
                         </h2>
                         <div style="margin-top:10px;margin-left:10px">
                             <span>{{ __('db.customer') }}: {{ $lims_customer_data->name }}</span>

@@ -8,7 +8,7 @@
                         <h4>{{__('db.Update Biller')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('biller.update', $lims_biller_data->id) }}" method="post" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')

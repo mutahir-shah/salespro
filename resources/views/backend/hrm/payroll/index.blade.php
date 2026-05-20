@@ -273,7 +273,7 @@
 
                 <div class="modal-body">
                     <p class="italic text-muted">
-                        <small>{{ __('db.The field labels marked with * are required input fields') }}.</small>
+                        <small>{{ __('db.The field labels marked with are required input fields') }}.</small>
                     </p>
 
                     <form action="{{ route('payroll.store') }}" method="POST" enctype="multipart/form-data">
@@ -399,7 +399,7 @@
 
                 <div class="modal-body">
                     <p class="italic text-muted">
-                        <small>{{ __('db.The field labels marked with * are required input fields') }}.</small>
+                        <small>{{ __('db.The field labels marked with are required input fields') }}.</small>
                     </p>
 
                     <form action="{{ route('payroll.update', 1) }}" method="POST" enctype="multipart/form-data">

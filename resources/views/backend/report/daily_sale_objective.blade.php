@@ -24,11 +24,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2 mt-3">
-                    <div class="form-group">
-                        <button class="btn btn-primary" id="filter-btn" type="submit">{{__('db.submit')}}</button>
-                    </div>
-                </div>
             </div>
             </form>
         </div>
@@ -149,6 +144,13 @@
                 columns: ':gt(0)'
             },
         ]
+    });
+
+    $('.daterangepicker-field').on('apply.daterangepicker', function(ev, picker) {
+        starting_date = picker.startDate.format('YYYY-MM-DD');
+        ending_date = picker.endDate.format('YYYY-MM-DD');
+
+        $('#sale-table').DataTable().ajax.reload();
     });
 
 </script>

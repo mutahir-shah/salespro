@@ -86,8 +86,27 @@ class AddonInstallController extends Controller
             $remote_file_path = $response;
             $remote_file_name = basename($remote_file_path);
             $local_file_path = base_path($path.$remote_file_name);
-            $copy = copy($remote_file_path, $local_file_path);
-            if ($copy) {
+
+            $fp = fopen($local_file_path, 'w+');
+            if($fp === false){
+                return false;
+            }
+
+            $ch = curl_init($remote_file_path);
+            curl_setopt($ch, CURLOPT_FILE, $fp);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+
+            // SSL সমস্যা এড়াতে (প্রয়োজন হলে)
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+
+            $curl_exec = curl_exec($ch);
+            curl_close($ch);
+            fclose($fp);
+            
+            // ডাউনলোড সফল হলে আনজিপ শুরু হবে
+            if ($curl_exec) {
                 // ****** Unzip ********
                 $zip = new ZipArchive;
                 $file = $local_file_path;

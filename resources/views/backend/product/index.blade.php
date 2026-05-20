@@ -11,6 +11,7 @@
 <x-success-message key="create_message" />
 <x-success-message key="import_message" />
 <x-error-message key="not_permitted" />
+<x-errors-message key="import_errors" />
 <x-error-message key="message" />
 
 <section>
@@ -107,7 +108,8 @@
                         <div class="form-group top-fields">
                             <label>{{__('db.Product with')}}</label>
                             <select name="imeiorvariant" required class="form-control selectpicker" id="imeiorvariant">
-                                <option value="0" selected>Select IMEI/Variant</option>
+                                <option value="0" selected>Select IMEI/Variant/Batch</option>
+                                <option value="batch">Batch/Expiry</option>
                                 <option value="imei">IMEI</option>
                                 <option value="variant">Variant</option>
                             </select>
@@ -169,7 +171,7 @@
           <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-          <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+          <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
            <p>{{__('db.The correct column order is')}} (image, name*, code*, type*, brand, category*, unit_code*, cost*, profit_margin(%), price, wholesale price, product_details, variant_name, item_code, additional_price) {{__('db.and you must follow this')}}.</p>
            <p>If you provide profit_margin, then price will be calculated based on profit_margin: <strong>price = cost * (1 + profit_margin / 100)</strong></p>
            <p>{{__('db.To display Image it must be stored in')}} images/product {{__('db.directory')}}. {{__('db.Image name must be same as product name')}}</p>

@@ -99,27 +99,33 @@
 
 <script>
     
-    function addLanguage() {
-        let language = $('#language_code').val();
-        let name = $('#language_name').val();
-
-        $.ajax({
-            url: '{{url("/")}}/languages/create',
-            method: 'POST',
-            headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-            contentType: 'application/json',
-            data: JSON.stringify({ language, name }),
-            success: function () {
-                $('#language_code, #language_name').val('');
-                location.reload();
-            },
-            error: function () {
-                showErrorMessage("Error adding language.");
-            }
-        });
-    }
-
     let languageId = null;
+    let user_verified = @json(env('USER_VERIFIED'));
+
+    function addLanguage() {
+        if(user_verified == '1') {
+            let language = $('#language_code').val();
+            let name = $('#language_name').val();
+
+            $.ajax({
+                url: '{{url("/")}}/languages/create',
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                contentType: 'application/json',
+                data: JSON.stringify({ language, name }),
+                success: function () {
+                    $('#language_code, #language_name').val('');
+                    location.reload();
+                },
+                error: function () {
+                    showErrorMessage("Error adding language.");
+                }
+            });
+        }
+        else {
+         alert('This feature is disable for demo!');
+        }
+    }
 
     function showUpdateModal(id, code, name) {
         $('#update_id').val(id);
@@ -129,28 +135,34 @@
     }
 
     function updateLanguage() {
-        languageId = $('#update_id').val();
-        let language = $('#update_language_code').val();
-        let name = $('#update_language_name').val();
+        if(user_verified == '1') {
+            languageId = $('#update_id').val();
+            let language = $('#update_language_code').val();
+            let name = $('#update_language_name').val();
 
-        $.ajax({
-            url: `{{url("/")}}/languages/${languageId}`,
-            method: 'PUT',
-            headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-            contentType: 'application/json',
-            data: JSON.stringify({ language, name }),
-            success: function (response) {
-                if (response.error) {
-                    showErrorMessage(response.error);
-                } else {
-                    $('#updateLanguageModal').modal('hide');
-                    location.reload();
+            $.ajax({
+                url: `{{url("/")}}/languages/${languageId}`,
+                method: 'PUT',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                contentType: 'application/json',
+                data: JSON.stringify({ language, name }),
+                success: function (response) {
+                    if (response.error) {
+                        showErrorMessage(response.error);
+                    } else {
+                        $('#updateLanguageModal').modal('hide');
+                        location.reload();
+                    }
+                },
+                error: function () {
+                    showErrorMessage("An error occurred while updating the language.");
                 }
-            },
-            error: function () {
-                showErrorMessage("An error occurred while updating the language.");
-            }
-        });
+            });
+        }
+        else {
+         alert('This feature is disable for demo!');
+        }
+
     }
 
     function showErrorMessage(message, isSuccess = false) {
@@ -167,32 +179,42 @@
     }
 
     function setDefault(id) {
-        $.ajax({
-            url: `{{url("/")}}/languages/${id}/set-default`,
-            method: 'POST',
-            headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-            success: function () {
-                location.reload();
-            },
-            error: function () {
-                showErrorMessage("Failed to set default language.");
-            }
-        });
-    }
-
-    function deleteLanguage(id) {
-        if (confirm('Are you sure?')) {
+        if(user_verified == '1') {
             $.ajax({
-                url: `{{url("/")}}/languages/${id}`,
-                method: 'DELETE',
+                url: `{{url("/")}}/languages/${id}/set-default`,
+                method: 'POST',
                 headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
                 success: function () {
                     location.reload();
                 },
                 error: function () {
-                    showErrorMessage("Error deleting language.");
+                    showErrorMessage("Failed to set default language.");
                 }
             });
+        }
+        else {
+         alert('This feature is disable for demo!');
+        }
+    }
+
+    function deleteLanguage(id) {
+        if(user_verified == '1') {
+            if (confirm('Are you sure?')) {
+                $.ajax({
+                    url: `{{url("/")}}/languages/${id}`,
+                    method: 'DELETE',
+                    headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                    success: function () {
+                        location.reload();
+                    },
+                    error: function () {
+                        showErrorMessage("Error deleting language.");
+                    }
+                });
+            }
+        }
+        else {
+         alert('This feature is disable for demo!');
         }
     }
 </script>

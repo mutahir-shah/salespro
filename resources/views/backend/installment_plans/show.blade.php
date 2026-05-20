@@ -26,7 +26,7 @@
 <div class="container-fluid">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Installment Plan Details</h5>
+            <h5 class="mb-0">Instalment Plan Details</h5>
         </div>
 
         <div class="card-body">
@@ -41,7 +41,7 @@
 
             <hr>
 
-            <h6>Installments</h6>
+            <h6>Instalments</h6>
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-light">
                     <tr>
@@ -136,8 +136,28 @@
                             <div class="form-group">
                                 <label for="paid_by_id" class="form-label d-block">Paid By *</label>
                                 <select name="paid_by_id" id="paid_by_id" class="form-select w-100">
+                                    @if(in_array("cash", $options))
+                                        <option value="1">{{ __('db.Cash') }}</option>
+                                    @endif
+                                    @if(in_array("gift_card", $options))
+                                        <option value="2">{{ __('db.Gift Card') }}</option>
+                                    @endif
+                                    @if(in_array("card", $options))
+                                        <option value="3">{{ __('db.Credit Card') }}</option>
+                                    @endif
+                                    @if(in_array("cheque", $options))
+                                        <option value="4">{{ __('db.Cheque') }}</option>
+                                    @endif
+                                    @if(in_array("deposit", $options))
+                                        <option value="6">{{ __('db.Deposit') }}</option>
+                                    @endif
+                                    @if($lims_reward_point_setting_data && $lims_reward_point_setting_data->is_active)
+                                        <option value="7">{{ __('db.Points') }}</option>
+                                    @endif
                                     @foreach($options as $option)
-                                        <option value="{{ $option }}">{{ ucfirst($option) }}</option>
+                                        @if(!in_array($option, ['cash', 'card', 'cheque', 'gift_card', 'deposit', 'paypal', 'pesapal']))
+                                            <option value="{{ $option }}">{{ ucfirst($option) }}</option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>

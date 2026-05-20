@@ -915,6 +915,7 @@
                 cols += '<td>' + paying_method[index] + '</td>';
                 cols += '<td>' + payment_at[index] + '</td>';
                 cols += '<td><div class="btn-group"><button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{__("db.action")}}<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu edit-options dropdown-menu-right dropdown-default" user="menu">';
+                cols += '<li><a href="{{ url("sales/payment-receipt")}}/' + payment_id[index] + '" target="_blank"><button type="button" class="btn btn-link"><i class="dripicons-document-new"></i> {{__("db.payment_receipt")}}</button></a></li> ';
                 if(paying_method[index] == 'QR Code' && all_permission.indexOf("sale-payment-edit") != -1)
                     cols += '<li><a href="{{url("frontend/images/payment-proof")}}/'+payment_proof+'" target="_blank"><button type="button" class="btn btn-link"><i class="fa fa-eye"></i> {{__("db.Payment Proof")}}</button></a></li> ';
                 if(payment_document[index])

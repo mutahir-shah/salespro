@@ -80,7 +80,7 @@
                     </div>
                 <div class="modal-body">
                     <p class="italic">
-                        <small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                        <small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                     <div class="form-group">
                         <label>{{ __('Title') }} *</label>
                         <input type="text" name="title" required class="form-control" placeholder="{{ __('db.Type brand title') }}">
@@ -127,7 +127,7 @@
                     </div>
                 <div class="modal-body">
                     <p class="italic">
-                        <small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                        <small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                     <p>{{ __('db.The correct column order is') }} (title*, image [file name])
                         {{ __('db.and you must follow this') }}.</p>
                     <p>{{ __('db.To display Image it must be stored in') }} images/brand {{ __('db.directory') }}</p>
@@ -167,7 +167,7 @@
                     </div>
                 <div class="modal-body">
                     <p class="italic">
-                        <small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                        <small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                     <div class="form-group">
                         <label>{{ __('db.Title') }} *</label>
                         <input type="text" name="title" class="form-control" required>

@@ -4,17 +4,6 @@
 @push('css')
 <style>
 .bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn) {width: auto;}
-.dashboard-counts{color:#333;padding:10px 0}
-.count-title{border-radius:10px;box-shadow:rgba(37, 83, 185, 0.1) 0px 2px 6px 0px;display:flex;padding:20px 10px;overflow:hidden}
-.dashboard-counts .count-title i{font-size:2em;color:#7c5cc4;}
-.count-title .icon {width: 70px;text-align: center;}
-.dashboard-counts .count-title span{top:7px;right:7px;position:absolute;font-size:.8em;color:#aaa;display:block}
-.dashboard-counts .count-title span::before{line-height: 1;}
-.dashboard-counts strong{font-size:.9em;font-weight:500;color:#555;}
-.dashboard-counts .count-number{display:inline-block;font-size:1.3em;font-weight:500;line-height:0.9}
-.count-title {margin-top: 15px;position:relative}
-.dashboard-counts .count-link{color:#7c5cc4!important;font-size:15px!important; transform:rotate(-45deg);}
-.dashboard-counts strong {font-size: 1rem;margin-top: 5px}
 .legend{width: 10px;height: 10px;border-radius: 50%;margin: 0 5px;display: inline-block;}
 .legend-label{font-size: 0.8em!important;color: #555;}
 </style>
@@ -102,11 +91,11 @@
                 @endphp
                 @if ($revenue_profit_summary)
                     <div class="filter-toggle btn-group d-inline-block">
-                        <div class="d-flex justify-content-center align-items-end gap-3">
+                        <div class="dashboard-filters">
                             @if (\Auth::user()->role_id <= 2)
                             {{-- Warehouse --}}
                             
-                            <div class="filter-toggle btn-group d-inline-block mt-0" style=" border: 1px solid #7c5cc4; border-radius: 5px;">
+                            <div class="filter-toggle btn-group mt-0" style=" border: 1px solid #7c5cc4; border-radius: 5px;">
                                 <select name="warehouse_id" class="selectpicker" id="warehouse_btn"
                                     data-live-search="true" data-live-search-style="begins">
                                     <option value="0" data-content="<i class='dripicons-location mr-1'></i> {{ __('db.All Warehouse') }}">{{ __('db.All Warehouse') }}</option>
@@ -122,14 +111,14 @@
                             <div id="dashboard-datepicker" class="ml-2">
                                 <div class="input-group input-group-md">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text bg-white">
+                                        <span class="input-group-text">
                                             <i class="dripicons-calendar text-primary"></i>
                                         </span>
                                     </div>
 
                                     <input type="text"
                                         class="daterangepicker-field form-control border-left-0"
-                                        placeholder="Select Date"/>
+                                        placeholder="Select Date" style="padding-left:0;min-width: 200px;"/>
 
                                     <input type="hidden" name="start_date" value="" />
                                     <input type="hidden" name="end_date" value="" />
@@ -149,140 +138,223 @@
         <div class="container-fluid">
             <div class="row">
                 @if ($revenue_profit_summary)
-                    <div class="col-md-12 form-group">
+                    <style>
+                        .dashboard-filters {
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                        /* Modern Dashboard Widget Styles */
+                        .dashboard-widget {
+                            background: #fff;
+                            border-radius: 15px; /* Large rounded corners */
+                            padding: 20px;
+                            margin-bottom: 24px;
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Soft shadow */
+                            display: flex;
+                            align-items: center;
+                            transition: transform 0.2s;
+                            border: 1px solid #f0f0f0;
+                            text-decoration: none !important;
+                        }
+
+                        @media (max-width: 767px) {
+                            .dashboard-filters {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                gap: 10px;
+                            }
+                            .dashboard-widget {
+                                flex-direction: column;
+                                text-align: center;
+                                margin-bottom: 15px
+                            }
+                            .widget-icon-container {
+                                margin-right: 0 !important;
+                                margin-bottom: 10px;
+                            }
+                        }
+
+                        .dashboard-widget:hover {
+                            transform: translateY(-5px);
+                        }
+
+                        .widget-icon-container {
+                            width: 56px;
+                            height: 56px;
+                            border-radius: 12px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 24px;
+                            margin-right: 15px;
+                        }
+
+                        /* Light backgrounds for icons */
+                        .bg-light-purple { background-color: #f3e8ff; color: #733686; }
+                        .bg-light-cyan { background-color: #e0f7fa; color: #0584a0; }
+                        .bg-light-orange { background-color: #fff3e0; color: #ff8952; }
+                        .bg-light-red { background-color: #ffebee; color: #f66162; }
+                        .bg-light-gold { background-color: #fef9c3; color: #d48519; }
+                        .bg-light-yellow { background-color: #fefce8; color: #bdbb39; }
+                        .bg-light-green { background-color: #ecfdf5; color: #00c689; }
+                        .bg-light-blue { background-color: #eff6ff; color: #297ff9; }
+
+                        .widget-content {
+                            flex-grow: 1;
+                        }
+
+                        .widget-label {
+                            font-size: 0.85rem;
+                            color: #64748b;
+                            margin-bottom: 4px;
+                            font-weight: 500;
+                            display: block;
+                        }
+
+                        .widget-value {
+                            font-size: 1.1rem !important;
+                            font-weight: 600;
+                            color: #1e293b;
+                            display: block;
+                        }
+                        .dark-mode .dashboard-widget {
+                            background: #283046;
+                            border: 1px solid #283046;
+                        }
+                        .dark-mode .widget-label {
+                            color: #d0d2d6;
+                        }
+
+                        .dark-mode .widget-value {
+                            color: #f0f0f0;
+                        }
+                    </style>
+                    <div class="col-md-12 mt-3">
                         <div class="row">
-                            <!-- Count item widget-->
-                            <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <x-info title="Grand Total - Shipping Cost = Total Sale" type="info" />
-                                    <div class="icon"><i class="dripicons-graph-bar" style="color: #733686"></i></div>
-                                    <a href="{{route('sales.index')}}">
-                                        <div>
-                                            <div class="count-number total_sale-data">
-                                                {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                            </div>
-                                            <div class="name">
-                                                <strong style="color: #733686">{{ __('db.Sale') }}
-                                                </strong> <i class="dripicons-arrow-thin-right count-link"></i>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Count item widget invoice due-->
-                            <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <x-info title="Grand Total - Paid Amount = Invoice Due" type="info" />
-                                    <div class="icon">
-                                        <i class="dripicons-document" style="color: #0584a0"></i>
+                            <div class="col-6 col-lg-3">
+                                <a href="{{route('sales.index')}}" class="dashboard-widget">
+                                    <div class="widget-icon-container bg-light-purple">
+                                        <i class="dripicons-graph-bar"></i>
                                     </div>
-                                    <div>
-                                        <div class="count-number invoice-due-data">
+                                    <div class="widget-content">
+                                        <span class="widget-label">{{ __('db.Sale') }}</span>
+                                        <span class="widget-value total_sale-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                        </div>
-                                        <div class="name"><strong style="color: #0584a0">{{ __('db.sale_due') }}</strong></div>
+                                        </span>
                                     </div>
-                                </div>
-                            </div>
-                            <!-- Count item widget-->
-                            <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <x-info title="Total Sale Return Amount" type="info" />
-                                    <div class="icon"><i class="dripicons-return" style="color: #ff8952"></i></div>
-                                    <a href="{{route('return-sale.index')}}">
-                                        <div>
-                                            <div class="count-number return-data">
-                                                {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                            </div>
-                                            <div class="name"><strong style="color: #ff8952">{{ __('db.Sale Return') }}</strong><i class="dripicons-arrow-thin-right count-link"></i>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
+                                </a>
                             </div>
 
-                            <!-- Count item widget-->
-                            <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <div class="icon"><i class="dripicons-wallet" style="color: #f66162"></i></div>
-                                    <div>
-                                        <div class="count-number expense-data">
+                            <div class="col-6 col-lg-3">
+                                <div class="dashboard-widget">
+                                    <div class="widget-icon-container bg-light-cyan">
+                                        <i class="dripicons-document"></i>
+                                    </div>
+                                    <div class="widget-content">
+                                        <span class="widget-label">{{ __('db.sale_due') }}</span>
+                                        <span class="widget-value invoice-due-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                        </div>
-                                        <div class="name"><strong style="color: #f66162">{{ __('db.Expense') }}</strong>
-                                        </div>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Count item widget-->
-                            <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <div class="icon"><i class="dripicons-download" aria-hidden="true" style="color:#d48519; "></i></div>
-                                    <a href="{{route('purchases.index')}}">
-                                        <div>
-                                            <div class="count-number total_purchase-data">
-                                                {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                            </div>
-                                            <div class="name"><strong style="color: #d48519">{{ __('db.Purchase') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-
-
-                            <!-- Count item widget-->
-                            <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <div class="icon"><i class="dripicons-warning" style="color: #bdbb39"></i></div>
-                                    <div>
-                                        <div class="count-number purchase_due-data">
+                            <div class="col-6 col-lg-3">
+                                <a href="{{route('return-sale.index')}}" class="dashboard-widget">
+                                    <div class="widget-icon-container bg-light-orange">
+                                        <i class="dripicons-return"></i>
+                                    </div>
+                                    <div class="widget-content">
+                                        <span class="widget-label">{{ __('db.Sale Return') }}</span>
+                                        <span class="widget-value return-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                        </div>
-                                        <div class="name"><strong style="color: #bdbb39">{{ __('db.purchase_due') }}</strong></div>
+                                        </span>
                                     </div>
-                                </div>
+                                </a>
                             </div>
 
-                            <!-- Count item widget-->
-                            <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <div class="icon"><i class="dripicons-return" style="color: #00c689;transform:rotate(180deg)"></i></div>
-                                    <a href="{{route('return-purchase.index')}}">
-                                        <div>
-                                            <div class="count-number purchase_return-data">
-                                                {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                            </div>
-                                            <div class="name"><strong style="color: #00c689">{{ __('db.Purchase Return') }}</strong><i class="dripicons-arrow-thin-right count-link"></i></div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Count item widget-->
-                            <div class="col-sm-3">
-                                <div class="wrapper count-title">
-                                    <x-info title="Revenue + Purchase Return - Product Cost - Expense" type="info" />
-                                    <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
-                                    <div>
-                                        <div class="count-number profit-data">
+                            <div class="col-6 col-lg-3">
+                                <div class="dashboard-widget">
+                                    <div class="widget-icon-container bg-light-red">
+                                        <i class="dripicons-wallet"></i>
+                                    </div>
+                                    <div class="widget-content">
+                                        <span class="widget-label">{{ __('db.Expense') }}</span>
+                                        <span class="widget-value expense-data">
                                             {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                        </div>
-                                        <div class="name"><strong style="color: #297ff9">{{ __('db.profit') }}</strong>
-                                        </div>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
-            
+
+                            <div class="col-6 col-lg-3">
+                                <a href="{{route('purchases.index')}}" class="dashboard-widget">
+                                    <div class="widget-icon-container bg-light-gold">
+                                        <i class="dripicons-download"></i>
+                                    </div>
+                                    <div class="widget-content">
+                                        <span class="widget-label">{{ __('db.Purchase') }}</span>
+                                        <span class="widget-value total_purchase-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- Count item widget-->
+                            <div class="col-6 col-lg-3">
+                                <div class="dashboard-widget">
+                                    <div class="widget-icon-container bg-light-yellow">
+                                        <i class="dripicons-warning"></i>
+                                    </div>
+                                    <div class="widget-content">
+                                        <span class="widget-label">{{ __('db.purchase_due') }}</span>
+                                        <span class="widget-value purchase_due-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Count item widget-->
+                            <div class="col-6 col-lg-3">
+                                <a href="{{route('return-purchase.index')}}"  class="dashboard-widget">
+                                    <div class="widget-icon-container bg-light-green">
+                                        <i class="dripicons-return"></i>
+                                    </div>
+                                    <div class="widget-content">
+                                        <span class="widget-label">{{ __('db.Purchase Return') }}</span>
+                                        <span class="widget-value purchase_return-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-6 col-lg-3">
+                                <div class="dashboard-widget">
+                                    <div class="widget-icon-container bg-light-blue">
+                                        <i class="dripicons-trophy"></i>
+                                    </div>
+                                    <div class="widget-content">
+                                        <span class="widget-label">{{ __('db.profit') }}</span>
+                                        <span class="widget-value profit-data">
+                                            {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 @endif
+                
                 @php
                     $cash_flow = $role_has_permissions_list->where('name', 'cash_flow')->first();
                 @endphp
                 @if ($cash_flow)
-                    <div class="col-md-8 mt-4">
+                    <div class="col-md-8 mt-2">
                         <div class="card line-chart">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4>{{ __('db.Cash Flow') }}</h4>
@@ -313,15 +385,15 @@
                     $monthly_summary = $role_has_permissions_list->where('name', 'monthly_summary')->first();
                 @endphp
                 @if ($monthly_summary)
-                    <div class="col-md-4 mt-4">
+                    <div class="col-md-4 mt-2">
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h4>{{ date('F') }} {{ date('Y') }}</h4>
                             </div>
                             <div class="pie-chart mb-2">
                                 <canvas id="transactionChart" data-color = "{{ $color }}"
-                                    data-color_rgba = "{{ $color_rgba }}" data-revenue={{ $revenue }}
-                                    data-purchase={{ $purchase }} data-expense={{ $expense }}
+                                    data-color_rgba = "{{ $color_rgba }}" data-revenue="{{ $revenue }}"
+                                    data-purchase="{{ $purchase }}" data-expense="{{ $expense }}"
                                     data-label1="{{ __('db.Purchase') }}" data-label2="{{ __('db.revenue') }}"
                                     data-label3="{{ __('db.Expense') }}" width="100" height="95"> </canvas>
                             </div>
@@ -557,7 +629,7 @@
                             url + '/' + images[0] +
                             '" width="30" height="25" class="ml-3 mr-3"> ' + item
                             .product_name + ' [' + item.product_code + ']</div></td><td>' +
-                            (item.total_price / item.exchange_rate).toFixed({{ $general_setting->decimal }}) + '</td></tr>');
+                            formatCurrency(item.total_price / item.exchange_rate) + '</td></tr>');
                     })
                 }
             });
@@ -630,7 +702,7 @@
                         }
                         $('#recent-sale').find('tbody').append('<tr><td>' + sale_date +
                             '</td><td>' + item.reference_no + '</td><td>' + item.name +
-                            '</td><td>' + status + '</td><td>' + (item.grand_total/item.exchange_rate).toString()
+                            '</td><td>' + status + '</td><td>' + formatCurrency(item.grand_total/item.exchange_rate).toString()
                             .replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</td></tr>');
                     })
                 }
@@ -661,7 +733,7 @@
                         }
                         $('#recent-purchase').find('tbody').append('<tr><td>' + payment_date +
                             '</td><td>' + item.reference_no + '</td><td>' + item.name +
-                            '</td><td>' + status + '</td><td>' + (item.grand_total/item.exchange_rate).toString()
+                            '</td><td>' + status + '</td><td>' + formatCurrency(item.grand_total/item.exchange_rate).toString()
                             .replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</td></tr>');
                     })
                 }
@@ -686,8 +758,8 @@
                         }
                         $('#recent-quotation').find('tbody').append('<tr><td>' +
                             quotation_date + '</td><td>' + item.reference_no + '</td><td>' +
-                            item.name + '</td><td>' + status + '</td><td>' + item
-                            .grand_total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                            item.name + '</td><td>' + status + '</td><td>' + formatCurrency(item
+                            .grand_total).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
                             '</td></tr>');
                     })
                 }
@@ -704,7 +776,7 @@
                         var payment_date = dateFormat(item.created_at.split('T')[0],
                             '{{ $general_setting->date_format }}')
                         $('#recent-payment').find('tbody').append('<tr><td>' + payment_date +
-                            '</td><td>' + item.payment_reference + '</td><td>' + (item.amount/item.exchange_rate)
+                            '</td><td>' + item.payment_reference + '</td><td>' + formatCurrency(item.amount/item.exchange_rate)
                             .toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
                             '</td><td>' + item.paying_method + '</td></tr>');
                     })
@@ -783,39 +855,39 @@
             // [revenue, sale_return, profit, purchase_return, total_sale, invoice_due, total_purchase, purchase_due]
 
             $('.total_sale-data').hide();
-            $('.total_sale-data').html(parseFloat(data[4] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.total_sale-data').html(formatCurrency(parseFloat(data[4] ?? 0)));
             $('.total_sale-data').show(500);
 
             $('.revenue-data').hide();
-            $('.revenue-data').html(parseFloat(data[0] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.revenue-data').html(formatCurrency(parseFloat(data[0] ?? 0)));
             $('.revenue-data').show(500);
 
             $('.invoice-due-data').hide();
-            $('.invoice-due-data').html(parseFloat(data[5] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.invoice-due-data').html(formatCurrency(parseFloat(data[5] ?? 0)));
             $('.invoice-due-data').show(500);
 
             $('.return-data').hide();
-            $('.return-data').html(parseFloat(data[1] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.return-data').html(formatCurrency(parseFloat(data[1] ?? 0)));
             $('.return-data').show(500);
 
             $('.total_purchase-data').hide();
-            $('.total_purchase-data').html(parseFloat(data[6] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.total_purchase-data').html(formatCurrency(data[6] ?? 0));
             $('.total_purchase-data').show(500);
 
             $('.purchase_due-data').hide();
-            $('.purchase_due-data').html(parseFloat(data[7] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.purchase_due-data').html(formatCurrency(data[7] ?? 0));
             $('.purchase_due-data').show(500);
 
             $('.expense-data').hide();
-            $('.expense-data').html(parseFloat(data[8] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.expense-data').html(formatCurrency(data[8] ?? 0));
             $('.expense-data').show(500);
 
             $('.purchase_return-data').hide();
-            $('.purchase_return-data').html(parseFloat(data[3] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.purchase_return-data').html(formatCurrency(data[3] ?? 0));
             $('.purchase_return-data').show(500);
 
             $('.profit-data').hide();
-            $('.profit-data').html(parseFloat(data[2] ?? 0).toFixed({{ $general_setting->decimal }}));
+            $('.profit-data').html(formatCurrency(data[2] ?? 0));
             $('.profit-data').show(500);
         }
 

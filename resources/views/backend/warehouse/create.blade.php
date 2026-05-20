@@ -58,6 +58,21 @@
                                     <button type="button" data-id="{{$warehouse->id}}" class="open-EditWarehouseDialog btn btn-link" data-toggle="modal" data-target="#editModal"><i class="dripicons-document-edit"></i> {{__('db.edit')}}
                                 </button>
                                 </li>
+                                @if(\Auth::user()->role_id <= 2)
+                                    @if($warehouse->qr_code_id)
+                                        <li>
+                                            <button type="button" data-id="{{$warehouse->qr_code_id}}" class="btn btn-link btn-view-qr">
+                                                <i class="fa fa-qrcode"></i> View QR</button>
+                                        </li>
+                                        <li>
+                                            <a href="{{ url('qr/download/'.$warehouse->qr_code_id) }}" class="btn btn-link"><i class="dripicons-download"></i> Download QR</a>
+                                        </li>
+                                    @else
+                                        <li>
+                                            <button type="button" data-id="{{$warehouse->id}}" data-type="warehouse" class="btn btn-link btn-generate-qr"><i class="fa fa-qrcode"></i> Generate QR</button>
+                                        </li>
+                                    @endif
+                                @endif
                                 <li class="divider"></li>
                                 <form action="{{ route('warehouse.destroy', $warehouse->id) }}" method="POST">
                                     @csrf
@@ -86,7 +101,7 @@
         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
       </div>
       <div class="modal-body">
-        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
           <div class="form-group">
             <label>{{__('db.name')}} *</label>
             <input type="text" placeholder="{{ __('db.Type WareHouse Name') }}" name="name" required="required" class="form-control">
@@ -123,7 +138,7 @@
         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
       </div>
       <div class="modal-body">
-        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
           <div class="form-group">
             <input type="hidden" name="warehouse_id">
             <label>{{__('db.name')}} *</label>
@@ -160,7 +175,7 @@
         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
       </div>
       <div class="modal-body">
-        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
          <p>{{__('db.The correct column order is')}} (name*, phone, email, address*) {{__('db.and you must follow this')}}.</p>
         <div class="row">
               <div class="col-md-6">
@@ -181,6 +196,15 @@
       </form>
     </div>
   </div>
+</div>
+
+<!-- QR Modal -->
+<div class="modal fade" id="qrModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @include('backend.qr-menu.includes')
+        </div>
+    </div>
 </div>
 
 
@@ -215,12 +239,12 @@
         }
     });
 
-  function confirmDelete() {
-      if (confirm("Are you sure want to delete?")) {
-          return true;
-      }
-      return false;
-  }
+    function confirmDelete() {
+        if (confirm("Are you sure want to delete?")) {
+            return true;
+        }
+        return false;
+    }
 
     $(document).ready(function() {
 
@@ -238,9 +262,32 @@
 
             });
         });
-  });
 
-  $('#warehouse-table').DataTable( {
+        // QR Generate
+        $(document).on('click', '.btn-generate-qr', function() {
+            let id = $(this).data('id');
+            let type = 'warehouse';
+
+            // open modal
+            $('#qrModal').modal('show');
+
+        });
+
+        // QR View Modal
+        $(document).on('click', '.btn-view-qr', function() {
+            var id = $(this).data('id');
+            let type = 'warehouse';
+            $.get('{{url("qr/show") }}/' + id, function(data) {
+                if(data.success) {
+                    $('#qr-image').attr('src', data.image_url);
+                    $('#qr-url').val(data.redirect);
+                    $('#qrModal').modal('show');
+                }
+            });
+        });
+    });
+
+    $('#warehouse-table').DataTable( {
         "order": [],
         'language': {
             'lengthMenu': '_MENU_ {{__("db.records per page")}}',
@@ -345,41 +392,41 @@
                 columns: ':gt(0)'
             },
         ],
-    } );
-
-$.ajaxSetup({
-    headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    }
-});
-
-$( "#select_all" ).on( "change", function() {
-    if ($(this).is(':checked')) {
-        $("tbody input[type='checkbox']").prop('checked', true);
-    }
-    else {
-        $("tbody input[type='checkbox']").prop('checked', false);
-    }
-});
-
-$("#export").on("click", function(e){
-    e.preventDefault();
-    var warehouse = [];
-    $(':checkbox:checked').each(function(i){
-      warehouse[i] = $(this).val();
     });
-    $.ajax({
-       type:'POST',
-       url:'/exportwarehouse',
-       data:{
 
-            warehouseArray: warehouse
-        },
-       success:function(data){
-        alert('Exported to CSV file successfully! Click Ok to download file');
-        window.location.href = data;
-       }
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
     });
-});
+
+    $( "#select_all" ).on( "change", function() {
+        if ($(this).is(':checked')) {
+            $("tbody input[type='checkbox']").prop('checked', true);
+        }
+        else {
+            $("tbody input[type='checkbox']").prop('checked', false);
+        }
+    });
+
+    $("#export").on("click", function(e){
+        e.preventDefault();
+        var warehouse = [];
+        $(':checkbox:checked').each(function(i){
+        warehouse[i] = $(this).val();
+        });
+        $.ajax({
+        type:'POST',
+        url:'/exportwarehouse',
+        data:{
+
+                warehouseArray: warehouse
+            },
+        success:function(data){
+            alert('Exported to CSV file successfully! Click Ok to download file');
+            window.location.href = data;
+        }
+        });
+    });
 </script>
 @endpush

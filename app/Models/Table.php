@@ -9,5 +9,10 @@ class Table extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'number_of_person', 'description', 'floor_id', 'is_active'];
+    protected $fillable = ['name', 'number_of_person', 'description', 'floor_id', 'qr_code_id', 'is_active'];
+
+    public function qrCode()
+    {
+        return $this->morphOne(QrCode::class, 'qrable');
+    }
 }

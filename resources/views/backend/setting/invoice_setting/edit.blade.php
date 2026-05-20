@@ -18,7 +18,7 @@
                         </div>
                         <div class="card-body">
                             <p class="italic">
-                                <small>{{ __('db.The field labels marked with * are required input fields') }}.</small>
+                                <small>{{ __('db.The field labels marked with are required input fields') }}.</small>
                             </p>
 
                             <form action="{{ route('settings.invoice.update', $invoice->id) }}" method="POST"

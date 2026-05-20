@@ -11,7 +11,7 @@
                         <h4>{{__('db.Add Quotation')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('quotations.store') }}" method="POST" enctype="multipart/form-data" id="quotation-form">
                             @csrf
                         <div class="row">

@@ -10,37 +10,32 @@
             </div>
             <form action="{{ route('report.customer_group') }}" method="POST">
                 @csrf
-            <div class="row mb-3">
-                <div class="col-md-4 offset-md-2 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <div class="input-group">
-                                <input type="text" class="daterangepicker-field form-control" value="{{$starting_date}} To {{$ending_date}}" required />
-                                <input type="hidden" name="starting_date" value="{{$starting_date}}" />
-                                <input type="hidden" name="ending_date" value="{{$ending_date}}" />
+                <div class="row mb-3">
+                    <div class="col-md-4 offset-md-2 mt-3">
+                        <div class="form-group row">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <div class="input-group">
+                                    <input type="text" class="daterangepicker-field form-control" value="{{$starting_date}} To {{$ending_date}}" required />
+                                    <input type="hidden" name="starting_date" value="{{$starting_date}}" />
+                                    <input type="hidden" name="ending_date" value="{{$ending_date}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <div class="form-group row">
+                            <label class="d-tc mt-2"><strong>{{__('db.Customer Group')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <select id="customer_group_id" name="customer_group_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
+                                    @foreach($lims_customer_group_list as $customer_group)
+                                    <option value="{{$customer_group->id}}">{{$customer_group->name}}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Customer Group')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <select id="customer_group_id" name="customer_group_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
-                                @foreach($lims_customer_group_list as $customer_group)
-                                <option value="{{$customer_group->id}}">{{$customer_group->name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2 mt-3">
-                    <div class="form-group">
-                        <button class="btn btn-primary" type="submit">{{__('db.submit')}}</button>
-                    </div>
-                </div>
-            </div>
             </form>
         </div>
     </div>
@@ -216,10 +211,10 @@
         "serverSide": true,
         "ajax":{
             url:"customer-group-sale-data",
-            data:{
-                starting_date: starting_date,
-                ending_date: ending_date,
-                customer_group_id: customer_group_id
+            data: function(d){
+                d.starting_date = $('input[name="starting_date"]').val();
+                d.ending_date = $('input[name="ending_date"]').val();
+                d.customer_group_id = $('#customer_group_id').val();
             },
             dataType: "json",
             type:"post"
@@ -347,10 +342,10 @@
         "serverSide": true,
         "ajax":{
             url:"customer-group-payment-data",
-            data:{
-                starting_date: starting_date,
-                ending_date: ending_date,
-                customer_group_id: customer_group_id
+            data: function(d){
+                d.starting_date = $('input[name="starting_date"]').val();
+                d.ending_date = $('input[name="ending_date"]').val();
+                d.customer_group_id = $('#customer_group_id').val();
             },
             dataType: "json",
             type:"post"
@@ -471,10 +466,10 @@
         "serverSide": true,
         "ajax":{
             url:"customer-group-quotation-data",
-            data:{
-                starting_date: starting_date,
-                ending_date: ending_date,
-                customer_group_id: customer_group_id
+            data: function(d){
+                d.starting_date = $('input[name="starting_date"]').val();
+                d.ending_date = $('input[name="ending_date"]').val();
+                d.customer_group_id = $('#customer_group_id').val();
             },
             dataType: "json",
             type:"post"
@@ -597,10 +592,10 @@
         "serverSide": true,
         "ajax":{
             url:"customer-group-return-data",
-            data:{
-                starting_date: starting_date,
-                ending_date: ending_date,
-                customer_group_id: customer_group_id
+            data: function(d){
+                d.starting_date = $('input[name="starting_date"]').val();
+                d.ending_date = $('input[name="ending_date"]').val();
+                d.customer_group_id = $('#customer_group_id').val();
             },
             dataType: "json",
             type:"post"
@@ -714,6 +709,27 @@
             $( dt_selector.column( 6 ).footer() ).html(dt_selector.cells( rows, 6, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
         }
     }
+
+    function reloadTables() {
+        $('#sale-table').DataTable().ajax.reload();
+        $('#payment-table').DataTable().ajax.reload();
+        $('#quotation-table').DataTable().ajax.reload();
+        $('#return-table').DataTable().ajax.reload();
+    }
+
+    // Trigger reload when customer group changes
+    $('#customer_group_id').on('changed.bs.select', function () {
+        reloadTables();
+    });
+
+    // Trigger reload when date changes
+    $('.daterangepicker-field').on('apply.daterangepicker', function(ev, picker) {
+        // Update hidden inputs
+        $('input[name="starting_date"]').val(picker.startDate.format('YYYY-MM-DD'));
+        $('input[name="ending_date"]').val(picker.endDate.format('YYYY-MM-DD'));
+
+        reloadTables();
+    });
     
 </script>
 @endpush

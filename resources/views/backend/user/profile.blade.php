@@ -15,7 +15,7 @@
                         <h4>{{__('db.Update User Profile')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('user.profileUpdate', Auth::id()) }}" method="post">
                             @csrf
                             @method('PUT')

@@ -5,40 +5,31 @@
             <div class="card-header mt-2">
                 <h3 class="text-center">{{__('db.Supplier Report')}}</h3>
             </div>
-            <form action="{{ route('report.supplier') }}" method="POST">
-                @csrf
-            <div class="row mb-3">
-                <div class="col-md-4 offset-md-1 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <div class="input-group">
-                                <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
-                                <input type="hidden" name="start_date" value="{{$start_date}}" />
-                                <input type="hidden" name="end_date" value="{{$end_date}}" />
+            <form>
+                <div class="row mb-3">
+                    <div class="col-md-4 offset-md-1 mt-3">
+                        <div class="form-group row">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <div class="input-group">
+                                    <input type="text" id="daterange" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <div class="form-group row">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Supplier')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <select id="supplier_id" name="supplier_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
+                                    @foreach($lims_supplier_list as $supplier)
+                                    <option value="{{$supplier->id}}">{{$supplier->name}} ({{$supplier->phone_number}})</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Supplier')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <input type="hidden" name="supplier_id_hidden" value="{{$supplier_id}}" />
-                            <select id="supplier_id" name="supplier_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" >
-                                @foreach($lims_supplier_list as $supplier)
-                                <option value="{{$supplier->id}}">{{$supplier->name}} ({{$supplier->phone_number}})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mt-3">
-                    <div class="form-group">
-                        <button class="btn btn-primary" type="submit">{{__('db.submit')}}</button>
-                    </div>
-                </div>
-            </div>
             </form>
         </div>
     </div>
@@ -202,15 +193,15 @@
     $('#supplier_id').val($('input[name="supplier_id_hidden"]').val());
     $('.selectpicker').selectpicker('refresh');
 
-    $('#purchase-table').DataTable({
+    var purchaseTable = $('#purchase-table').DataTable({
         "processing": true,
         "serverSide": true,
         "ajax":{
             url:"supplier-purchase-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                supplier_id: supplier_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.supplier_id = supplier_id;
             },
             dataType: "json",
             type:"post"
@@ -697,6 +688,25 @@
         else {
             $( dt_selector.column( 6 ).footer() ).html(dt_selector.column( 6, {page:'current'} ).data().sum().toFixed({{$general_setting->decimal}}));
         }
+    }
+
+    // Supplier change
+    $('#supplier_id').on('changed.bs.select', function() {
+        supplier_id = $(this).val();
+        reloadAllTables();
+    });
+    // Date range change
+    $('#daterange').on('apply.daterangepicker', function(ev, picker) {
+        start_date = picker.startDate.format('YYYY-MM-DD');
+        end_date = picker.endDate.format('YYYY-MM-DD');
+        reloadAllTables();
+    });
+    // Reload function
+    function reloadAllTables() {
+        purchaseTable.ajax.reload();
+        $('#payment-table').DataTable().ajax.reload();
+        $('#return-table').DataTable().ajax.reload();
+        $('#quotation-table').DataTable().ajax.reload();
     }
 
 </script>

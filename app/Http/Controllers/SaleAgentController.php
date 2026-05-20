@@ -95,6 +95,7 @@ class SaleAgentController extends Controller
     }
     public function store(Request $request)
     {
+        
         try {
             $data = $request->except('image');
             $message = 'Sale Agent created successfully';
@@ -167,13 +168,11 @@ class SaleAgentController extends Controller
             return redirect('sale-agents')->with('message', $message);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            dd($e);
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
 
         } catch (\Exception $e) {
-            // dd($e);
             Log::error('Sale Agent Store Error: '.$e->getMessage());
             return redirect()->back()
                 ->with('error', 'Something went wrong: ' . $e->getMessage())

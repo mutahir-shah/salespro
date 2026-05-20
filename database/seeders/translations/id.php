@@ -130,7 +130,7 @@ return array (
   21 => 
   array (
     'locale' => 'id',
-    'key' => 'The field labels marked with * are required input fields',
+    'key' => 'The field labels marked with are required input fields',
     'value' => 'Label bidang yang ditandai dengan * adalah bidang masukan yang wajib diisi',
   ),
   22 => 

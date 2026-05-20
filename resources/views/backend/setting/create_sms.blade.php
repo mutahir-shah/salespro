@@ -12,7 +12,7 @@
                         <h4>{{__('db.Create SMS')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.<strong>{{__('db.Add mobile numbers by selecting the customers')}}</strong></small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.<strong>{{__('db.Add mobile numbers by selecting the customers')}}</strong></small></p>
                         <form action="{{ route('setting.sendSms') }}" method="POST">
                             @csrf
                             <div class="row">
@@ -31,7 +31,7 @@
                                     </div>
                                     <div class="form-group twilio">
                                         <label>{{__('db.Mobile')}} *</label>
-                                        <input type="text" name="mobile" id="mobile" class="form-control" placeholder="{{ __('db.example : +8801*********,+8801*********') }}" required />
+                                        <input type="text" name="mobile" id="mobile" class="form-control" placeholder="+8801xxxxxxxxx, +8801xxxxxxxxx" required />
                                     </div>
                                     <div class="form-group twilio">
                                         <label>{{__('db.Message')}} *</label>

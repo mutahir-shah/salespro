@@ -269,8 +269,7 @@
                         <span
                             style="font-weight: bold;">Warranty</span>{{ ': ' . $product_sale_data->warranty_duration }}
                         <br>
-                        <span style="font-weight: bold;">Will
-                            Expire</span>{{ ': ' . $product_sale_data->warranty_end }}
+                        <span style="font-weight: bold;">Expire At</span>{{ ': ' . $product_sale_data->warranty_end }}
                     @endif
                     <!-- guarantee -->
                     @if (isset($product_sale_data->guarantee_duration))
@@ -278,28 +277,27 @@
                         <span
                             style="font-weight: bold;">Guarantee</span>{{ ': ' . $product_sale_data->guarantee_duration }}
                         <br>
-                        <span style="font-weight: bold;">Will
-                            Expire</span>{{ ': ' . $product_sale_data->guarantee_end }}
+                        <span style="font-weight: bold;">Expire At</span>{{ ': ' . $product_sale_data->guarantee_end }}
                     @endif
                 </td>
                 <td style="border:1px solid #222;padding:1px 3px;text-align:center">
                     {{ $product_sale_data->qty . ' ' . $unit_code . ' ' . $variant_name }}</td>
                 <td style="border:1px solid #222;padding:1px 3px;text-align:center">
-                    <x-amount-currency-symbol :amount="$product_sale_data->net_unit_price" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{format_currency($product_sale_data->net_unit_price, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                     @if (!empty($topping_prices))
                         <br><small>+
                             {{ implode(' + ', array_map(fn($price) => number_format($price, $general_setting->decimal, '.', ','), $topping_prices)) }}</small>
                     @endif
                 </td>
                 <td style="border:1px solid #222;padding:1px 3px;text-align:center">
-                    <x-amount-currency-symbol :amount="$total" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{format_currency($total, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                 </td>
                 <td style="border:1px solid #222;padding:1px 3px;text-align:center">
-                    <x-amount-currency-symbol :amount="$product_sale_data->tax" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{format_currency($product_sale_data->tax, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                 </td>
                 <td
                     style="border:1px solid #222;border-right:1px solid #222;padding:1px 3px;text-align:center;font-size: 15px;">
-                    <x-amount-currency-symbol :amount="$subtotal" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{format_currency($subtotal, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                 </td>
             </tr>
         @endforeach
@@ -313,6 +311,32 @@
                 @if (isset($show->show_sale_note) && isset($lims_sale_data->sale_note) && $show->show_sale_note)
                     <p class=""> <strong>{{ __('db.Sale Note') }}:</strong>{{ $lims_sale_data->sale_note }}</p>
                 @endif
+
+                @php
+                    $lims_installment_plan_data = DB::table('installment_plans')->where([
+                        ['reference_type', 'sale'],
+                        ['reference_id', $lims_sale_data->id]
+                    ])->first();
+                @endphp
+                @if($lims_installment_plan_data)
+                    @php
+                        $inst_all   = DB::table('installments')->where('installment_plan_id', $lims_installment_plan_data->id)->get();
+                        $inst_total = $inst_all->count();
+                        $inst_paid  = $inst_all->where('status', 'completed')->count();
+                        $inst_next  = $inst_all->where('status', 'pending')->sortBy('payment_date')->first();
+                    @endphp
+                    <div style="border: 1px solid #222; padding: 5px; margin-top: 5px; text-align: left;">
+                        <h4 style="margin: 0; text-align: center; border-bottom: 1px solid #222;">INSTALMENT SALE</h4>
+                        <p style="margin: 5px 0;"><strong>Plan:</strong> {{$lims_installment_plan_data->name}}</p>
+                        <p style="margin: 5px 0;"><strong>Duration:</strong> {{$lims_installment_plan_data->months}} Months</p>
+                        <p style="margin: 5px 0;"><strong>Additional Amount:</strong> {{format_currency($lims_installment_plan_data->additional_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$')}}</p>
+                        <p style="margin: 5px 0;"><strong>Down Payment:</strong> {{format_currency($lims_installment_plan_data->down_payment, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$')}}</p>
+                        <p style="margin: 5px 0;"><strong>Instalments Paid:</strong> {{$inst_paid}}/{{$inst_total}}</p>
+                        @if($inst_next)
+                        <p style="margin: 5px 0;"><strong>Next Due:</strong> {{\Carbon\Carbon::parse($inst_next->payment_date)->format('d M Y')}}</p>
+                        @endif
+                    </div>
+                @endif
             </td>
             <td class="td-text" colspan="3"
                 style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);">
@@ -320,7 +344,7 @@
             </td>
             <td class="td-text"
                 style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                <x-amount-currency-symbol :amount="$lims_sale_data->total_price - ($lims_sale_data->total_tax + $lims_sale_data->order_tax)" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                {{ format_currency($lims_sale_data->total_price - ($lims_sale_data->total_tax + $lims_sale_data->order_tax), $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
             </td>
         </tr>
         @if ($general_setting->invoice_format == 'gst' && $general_setting->state == 1)
@@ -331,7 +355,7 @@
                 </td>
                 <td class="td-text"
                     style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                    <x-amount-currency-symbol :amount="$lims_sale_data->total_tax + $lims_sale_data->order_tax" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{ format_currency($lims_sale_data->total_tax + $lims_sale_data->order_tax, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                 </td>
             </tr>
         @elseif($general_setting->invoice_format == 'gst' && $general_setting->state == 2)
@@ -343,7 +367,7 @@
                 <td class="td-text"
                     style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
                     @php $total_tax_amount = ($lims_sale_data->total_tax + $lims_sale_data->order_tax) / 2; @endphp
-                    <x-amount-currency-symbol :amount="$total_tax_amount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{ format_currency($total_tax_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                 </td>
             </tr>
             <tr>
@@ -354,7 +378,7 @@
                 <td class="td-text"
                     style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
                     @php $total_tax_amount = ($lims_sale_data->total_tax + $lims_sale_data->order_tax) / 2; @endphp
-                    <x-amount-currency-symbol :amount="$total_tax_amount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{ format_currency($total_tax_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                 </td>
             </tr>
         @else
@@ -365,7 +389,7 @@
                 </td>
                 <td class="td-text"
                     style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                    <x-amount-currency-symbol :amount="$lims_sale_data->total_tax + $lims_sale_data->order_tax" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{ format_currency($lims_sale_data->total_tax + $lims_sale_data->order_tax, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                 </td>
             </tr>
         @endif
@@ -376,7 +400,7 @@
             </td>
             <td class="td-text"
                 style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                <x-amount-currency-symbol :amount="$lims_sale_data->total_discount + $lims_sale_data->order_discount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                {{ format_currency($lims_sale_data->total_discount + $lims_sale_data->order_discount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
             </td>
         </tr>
         <tr>
@@ -386,7 +410,7 @@
             </td>
             <td class="td-text"
                 style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                <x-amount-currency-symbol :amount="$lims_sale_data->shipping_cost ?? 0" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                {{ format_currency($lims_sale_data->shipping_cost ?? 0, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
             </td>
 
         </tr>
@@ -396,7 +420,7 @@
                 {{ __('db.grand total') }}</td>
             <td class="td-text"
                 style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                <x-amount-currency-symbol :amount="$lims_sale_data->grand_total" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                {{ format_currency($lims_sale_data->grand_total, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
             </td>
         </tr>
         <tr>
@@ -426,7 +450,7 @@
             </td>
             <td class="td-text"
                 style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                <x-amount-currency-symbol :amount="$lims_sale_data->paid_amount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                {{ format_currency($lims_sale_data->paid_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
             </td>
         </tr>
         <tr>
@@ -437,7 +461,7 @@
                 </td>
                 <td class="td-text"
                     style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                    <x-amount-currency-symbol :amount="$change_amount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{ format_currency($change_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                 </td>
             @else
                 <td class="td-text" colspan="3"
@@ -446,7 +470,7 @@
                 </td>
                 <td class="td-text"
                     style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                    <x-amount-currency-symbol :amount="$lims_sale_data->grand_total - $lims_sale_data->paid_amount" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                    {{ format_currency($lims_sale_data->grand_total - $lims_sale_data->paid_amount, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                 </td>
             @endif
         </tr>
@@ -460,7 +484,7 @@
                     </td>
                     <td class="td-text" colspan="4"
                         style="border:1px solid #222;padding:1px 3px;background-color:rgb(205, 218, 235);text-align: center;font-size: 15px;">
-                        <x-amount-currency-symbol :amount="$totalDue" :currency_symbol="$lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code" />
+                        {{ format_currency($totalDue, $lims_sale_data->currency->symbol ?? $lims_sale_data->currency->code ?? '$') }}
                     </td>
                 @endif
             </tr>

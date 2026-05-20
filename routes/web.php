@@ -21,6 +21,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\LeaveController;
@@ -133,6 +134,7 @@ Route::get('clear', function () {
     cache()->forget('permissions');
     cache()->forget('role_has_permissions');
     cache()->forget('role_has_permissions_list');
+    dd('cleared');
 });
 
 Route::get('update-coupon', [CouponController::class, 'updateCoupon']);
@@ -323,6 +325,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::get('customers/{customer_id}', 'customerPayments')->name('customers.payments');
         Route::get('customers/ledger/{id}', 'ledger')->name('customers.ledger');
         Route::get('customers/installments/{id}', 'installments')->name('customers.installments');
+        Route::get('/customer/{id}/due','getCustomerDue');
     });
 
     Route::resource('customer', CustomerController::class)->where(['customer' => '[0-9]+']);
@@ -354,6 +357,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::get('sales/lims_sale_search', 'limsSaleSearch')->name('sale.search');
         Route::get('sales/lims_product_search', 'limsProductSearch')->name('product_sale.search');
         Route::get('sales/getcustomergroup/{id}', 'getCustomerGroup')->name('sale.getcustomergroup');
+        Route::get('sales/customer-discounts/{id}', 'getCustomerDiscounts')->name('sale.customer-discounts');
 
         Route::get('sales/getproduct/{id}', 'getProduct')->name('sale.getproduct');
 
@@ -367,6 +371,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::get('sales/gen_invoice/{id}', 'genInvoice')->name('sale.invoice');
         Route::post('sales/add_payment', 'addPayment')->name('sale.add-payment');
         Route::get('sales/getpayment/{id}', 'getPayment')->name('sale.get-payment');
+        Route::get('sales/payment-receipt/{id}', 'paymentReceipt')->name('sale.payment-receipt');
         Route::post('sales/updatepayment', 'updatePayment')->name('sale.update-payment');
         Route::post('sales/deletepayment', 'deletePayment')->name('sale.delete-payment');
         Route::get('sales/{id}/create', 'createSale')->name('sale.draft');
@@ -385,7 +390,11 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
     });
     Route::resource('sales', SaleController::class)->except('show');
 
-    Route::get('/installmentplan/{id}', [InstallmentPlanController::class, 'show'])->name('installmentplan.show');
+    Route::controller(InstallmentPlanController::class)->group(function () {
+        Route::get('/installmentplan', 'index')->name('installmentplan.index');
+        Route::get('/installmentplan/{id}', 'show')->name('installmentplan.show');
+        Route::get('/report/installment', 'report')->name('report.installment');
+    });
 
     Route::post('/razorpay/pay', [RazorpayController::class, 'createOrder']);
     Route::post('/razorpay/verify', [RazorpayController::class, 'verifyPayment']);
@@ -410,6 +419,8 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::get('money-reciept/{id}', 'moneyReciept')->name('challan.moneyReciept');
             Route::get('finalize/{id}', 'finalize')->name('challan.finalize');
             Route::post('update/{id}', 'update')->name('challan.update');
+            Route::post('add-payment', 'addPayment')->name('challan.add-payment');
+            Route::get('get-packing-slips/{id}', 'getPackingSlips')->name('challan.getPackingSlips');
         });
     });
 
@@ -425,6 +436,9 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::post('update', 'update')->name('delivery.update');
             Route::post('deletebyselection', 'deleteBySelection');
             Route::post('delete/{id}', 'delete')->name('delivery.delete');
+            Route::get('{id}/track','track')->name('delivery.track');
+            Route::post('{id}/send-to-pathao', 'sendToPathao')->name('delivery.sendToPathao');
+
         });
     });
 
@@ -861,10 +875,27 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
 
     // booking route..........
     Route::controller(BookingController::class)->group(function () {
-        Route::get('bookings/calendar',           'index')            ->name('booking.index');
-        Route::get('bookings/events',             'getEvents')        ->name('booking.events');
+        Route::get('bookings/calendar', 'index')->name('booking.index');
+        Route::get('bookings/events', 'getEvents')->name('booking.events');
         Route::post('bookings/deletebyselection', 'deleteBySelection');
     });
     Route::resource('bookings', BookingController::class)->except(['create', 'edit']);
 
+    // QR Code routes (Protected)
+    Route::prefix('qr')->group(function () {
+        Route::get('/', [QrCodeController::class, 'index'])->name('qr.index');
+        Route::post('/generate/{type}/{id}', [QrCodeController::class, 'generate']);
+        Route::get('/show/{id}', [QrCodeController::class, 'show']);
+        Route::get('/download/{id}', [QrCodeController::class, 'download']);
+    });
+
 });
+
+
+// Public QR Menu — no authentication required
+Route::get('/menu/{slug}', [\App\Http\Controllers\PublicMenuController::class, 'index'])->name('public.menu');
+Route::get('/menu/{slug}/products', [\App\Http\Controllers\PublicMenuController::class, 'getProducts'])->name('public.menu.products');
+
+// QR Code Redirect Route (Public)
+Route::get('/q/{code}', [QrCodeController::class, 'redirect']);
+

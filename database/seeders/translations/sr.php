@@ -130,7 +130,7 @@ return array (
   21 => 
   array (
     'locale' => 'sr',
-    'key' => 'The field labels marked with * are required input fields',
+    'key' => 'The field labels marked with are required input fields',
     'value' => 'Ознаке поља означене са * су обавезна поља за унос',
   ),
   22 => 

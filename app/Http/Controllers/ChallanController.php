@@ -10,9 +10,13 @@ use App\Models\Sale;
 use App\Models\Courier;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\PackingSlipProduct;
 use App\Models\Account;
 use App\Models\Payment;
 use App\Models\CashRegister;
+use App\Models\GiftCard;
+use App\Models\PosSetting;
+use App\Models\RewardPointSetting;
 use App\Helpers\DateHelper;
 use Auth;
 use AdnSms\AdnSms;
@@ -31,7 +35,16 @@ class ChallanController extends Controller
         else
             $courier_id = 'All Courier';
         $courier_list = Courier::where('is_active', true)->get();
-        return view('backend.challan.index', compact('courier_id', 'courier_list', 'status'));
+        $lims_gift_card_list = GiftCard::where("is_active", true)->get();
+        $lims_pos_setting_data = PosSetting::latest()->first();
+        $lims_reward_point_setting_data = RewardPointSetting::latest()->first();
+        $lims_account_list = Account::where('is_active', true)->get();
+        if($lims_pos_setting_data)
+            $options = explode(',', $lims_pos_setting_data->payment_options);
+        else
+            $options = [];
+
+        return view('backend.challan.index', compact('courier_id', 'courier_list', 'status', 'options', 'lims_pos_setting_data', 'lims_reward_point_setting_data', 'lims_gift_card_list', 'lims_account_list'));
     }
 
     public function challanData(Request $request)
@@ -180,14 +193,14 @@ class ChallanController extends Controller
                 $nestedData['id'] = $challan->id;
                 $nestedData['key'] = $key;
                 $nestedData['date'] = date(config('date_format').' h:i:s', strtotime($challan->created_at));
-                $nestedData['reference'] = 'DC-' . $challan->reference_no;
+                $nestedData['reference'] = 'DC-' . $challan->reference_no ?? 'N/A';
                 $nestedData['sale_reference'] = '';
                 foreach($packingSlipList as $index => $packingSlipId) {
                     $packingSlip = PackingSlip::with('sale')->find($packingSlipId);
                     if($packingSlip) {
                         if($index)
                             $nestedData['sale_reference'] .= ', ';
-                        $nestedData['sale_reference'] .= $packingSlip->sale->reference_no;
+                        $nestedData['sale_reference'] .= $packingSlip->sale->reference_no ?? 'N/A';
                     }
                 }
 
@@ -210,8 +223,17 @@ class ChallanController extends Controller
                 else
                     $nestedData['closing_date'] = 'N/A';
 
-                $nestedData['total_amount'] = array_sum($amountList);
-                //$nestedData['net_cash'] = array_sum($cashList) - array_sum($deliveryChargeList);
+                $total_amount = array_sum($amountList);
+                $total_due = 0;
+                foreach($packingSlipList as $packingSlipId) {
+                    $packingSlip = PackingSlip::with('sale')->find($packingSlipId);
+                    if($packingSlip && $packingSlip->sale) {
+                        $total_due += ($packingSlip->sale->grand_total - $packingSlip->sale->paid_amount);
+                    }
+                }
+
+                $nestedData['total_amount'] = $total_amount;
+                $nestedData['total_due'] = $total_due;
 
                 if($challan->created_by_id)
                     $nestedData['created_by'] = $challan->createdBy->name;
@@ -223,16 +245,14 @@ class ChallanController extends Controller
                 else
                     $nestedData['closed_by'] = 'N/A';
 
-                $nestedData['options'] = '<div class="btn-group">
-                                            <a href="'.route('challan.genInvoice', $challan->id).'" class="btn btn-primary" title="Print Challan" target="_blank"><i class="dripicons-print"></i></a>&nbsp';
+                $nestedData['options'] = '<div class="d-flex"><a href="'.route('challan.genInvoice', $challan->id).'" class="btn btn-primary btn-sm" title="Print Challan" target="_blank"><i class="dripicons-print"></i></a>&nbsp;';
 
                 if($challan->status == 'Active') {
-                    $nestedData['options'] .= '<a href="'.route('challan.finalize', $challan->id).'" class="btn btn-success" title="Finalize Challan"><i class="fa fa-money"></i></a>&nbsp';
+                    $nestedData['options'] .= '<a href="javascript:void(0)" class="btn btn-success btn-sm add-payment" data-id="'.$challan->id.'" data-due="'.$total_due.'" data-toggle="modal" data-target="#add-payment" title="Finalize Challan"><i class="fa fa-money"></i></a>&nbsp;';
                 }
                 elseif($challan->status == 'Close') {
-                    $nestedData['options'] .= '<a href="'.route('challan.moneyReciept', $challan->id).'" class="btn btn-success" title="Print Money Reciept" target="_blank"><i class="fa fa-copy"></i></a>';
+                    $nestedData['options'] .= '<a href="'.route('challan.moneyReciept', $challan->id).'" class="btn btn-success btn-sm" title="Print Money Reciept" target="_blank"><i class="fa fa-copy"></i></a>';
                 }
-
                 $nestedData['options'] .= '</div>';
                 $data[] = $nestedData;
             }
@@ -341,24 +361,33 @@ class ChallanController extends Controller
         DB::beginTransaction();
         try {
             $challan = Challan::find($id);
-            foreach ($data['cash_list'] as $key => $cash) {
-                if(!$cash && !$data['cheque_list'][$key] && !$data['online_payment_list'][$key])
+            foreach ($data['paid_amount_list'] as $key => $amount) {
+                if(!$amount)
                     $data['status_list'][$key] = 'Failed';
                 else
                     $data['status_list'][$key] = 'Delivered';
+            }
+
+            $packing_slip_list = explode(",", $challan->packing_slip_list);
+            $amount_list = explode(",", $challan->amount_list);
+            $unpaid_total = 0;
+            foreach ($packing_slip_list as $key => $ps_id) {
+                $ps = PackingSlip::with('sale')->find($ps_id);
+                if($ps->sale->payment_status != 4) {
+                    $unpaid_total += $amount_list[$key];
+                }
+            }
+
+            $input_amount = array_sum($data['paid_amount_list']);
+            if (number_format($input_amount, 2, '.', '') != number_format($unpaid_total, 2, '.', '')) {
+                DB::rollBack();
+                return redirect()->route('challan.finalize', $id)->with('message', "Input amount ($input_amount) is not equal to unpaid total ($unpaid_total)");
             }
 
             $statusList = $data['status_list'];
             $cashList = $data['cash_list'];
             $chequeList = $data['cheque_list'];
             $onlinePaymentList = $data['online_payment_list'];
-            //return $cashList;
-
-            $input_amount = array_sum($data['cash_list']) + array_sum($data['cheque_list']) + array_sum($data['online_payment_list']);
-            if ($input_amount != $total_price) {
-                DB::rollBack();
-                return redirect()->route('challan.finalize', $id)->with('message', "Amount is not equal to price");
-            }
 
             $data['cash_list'] = implode(",", $data['cash_list']);
             $data['cheque_list'] = implode(",", $data['cheque_list']);
@@ -398,15 +427,14 @@ class ChallanController extends Controller
                     }
                 }
 
-                if($cashList[$key]) {
-                    $this->createPayment($cashList[$key], $packing_slip->sale, 'Cash');
+                $paying_method = $data['paying_method_list'][$key] ?? 'Cash';
+                $paid_amount = $data['paid_amount_list'][$key] ?? 0;
+                $payment_note = $data['payment_note_list'][$key] ?? null;
+
+                if($paid_amount > 0) {
+                    $this->createPayment($paid_amount, $packing_slip->sale, $paying_method, $payment_note);
                 }
-                if($onlinePaymentList[$key]) {
-                    $this->createPayment($onlinePaymentList[$key], $packing_slip->sale, 'Credit Card');
-                }
-                if($chequeList[$key]) {
-                    $this->createPayment($chequeList[$key], $packing_slip->sale, 'Cheque');
-                }
+
                 $delivered_product_number = Product_Sale::where([
                                                     ['sale_id', $packing_slip->sale_id],
                                                     ['is_delivered', true]
@@ -467,7 +495,7 @@ class ChallanController extends Controller
         return redirect()->route('challan.index')->with('message', __('db.Challan finalized successfully'));
     }
 
-    public function createPayment($amount, $sale, $paying_method)
+    public function createPayment($amount, $sale, $paying_method, $payment_note = null)
     {
         $lims_cash_register_data =  CashRegister::select('id')
                                         ->where([
@@ -489,9 +517,154 @@ class ChallanController extends Controller
             'amount' => $amount,
             'change' => 0,
             'paying_method' => $paying_method,
+            'payment_note' => $payment_note,
         ]);
         $sale->paid_amount += $amount;
         $sale->save();
+    }
+
+    public function addPayment(Request $request)
+    {
+
+        $data = $request->all();
+        $challan = Challan::find($data['challan_id']);
+        $packingSlipList = explode(",", $challan->packing_slip_list);
+        $amount_list = explode(",", $challan->amount_list);
+
+        $document = $request->document;
+        if ($document) {
+            $v = \Validator::make(
+                [
+                    'extension' => strtolower($request->document->getClientOriginalExtension()),
+                ],
+                [
+                    'extension' => 'in:jpg,jpeg,png,gif,pdf,csv,docx,xlsx,txt',
+                ]
+            );
+            if ($v->fails())
+                return redirect()->back()->withErrors($v->errors());
+
+            $ext = pathinfo($document->getClientOriginalName(), PATHINFO_EXTENSION);
+            $documentName = date("Ymdhis") . '.' . $ext;
+            $document->move(public_path('documents/add-payment'), $documentName);
+            $data['document'] = $documentName;
+        }
+
+
+
+        DB::beginTransaction();
+        try {
+            $delivery_charge_list = $data['delivery_charge_list'] ?? [];
+            
+            foreach ($packingSlipList as $key => $packing_slip_id) {
+                $paying_method = $data['paying_method_list'][$key] ?? 'Cash';
+                $paying_amount = $data['paid_amount_list'][$key] ?? 0;
+                $payment_note = $data['payment_note_list'][$key] ?? null;
+
+                if ($paying_amount > 0) {
+                    $packing_slip = PackingSlip::with('sale')->find($packing_slip_id);
+                    $sale = $packing_slip->sale;
+
+                    if ($sale->payment_status == 4) continue; // Skip if already paid
+
+                    $due = $sale->grand_total - $sale->paid_amount;
+                    if ($paying_amount > $due) {
+                        $paying_amount = $due;
+                    }
+
+                    $lims_cash_register_data = CashRegister::where([
+                        ['user_id', Auth::id()],
+                        ['warehouse_id', $sale->warehouse_id],
+                        ['status', true]
+                    ])->first();
+
+                    $payment = new Payment();
+                    $payment->user_id = Auth::id();
+                    $payment->sale_id = $sale->id;
+                    $payment->account_id = $data['account_id'];
+                    if($lims_cash_register_data)
+                        $payment->cash_register_id = $lims_cash_register_data->id;
+                    $payment->payment_reference = 'spr-' . date("Ymd") . '-' . date("his");
+                    $payment->amount = $paying_amount;
+                    $payment->change = 0;
+                    $payment->paying_method = $paying_method;
+                    $payment->payment_note = $payment_note;
+                    $payment->payment_receiver = $data['payment_receiver'];
+                    if (isset($data['document'])) {
+                        $payment->document = $data['document'];
+                    }
+                    $payment->payment_at = date('Y-m-d H:i:s');
+                    $payment->save();
+
+                    $sale->paid_amount += $paying_amount;
+                    if ($sale->paid_amount >= $sale->grand_total) {
+                        $sale->payment_status = 4;
+                        $sale->sale_status = 1; // Completed
+                        
+                        // Mark products as delivered
+                        $packing_slip_products = PackingSlipProduct::where('packing_slip_id', $packing_slip_id)->get();
+                        foreach ($packing_slip_products as $ps_product) {
+                            Product_Sale::where([
+                                ['sale_id', $sale->id],
+                                ['product_id', $ps_product->product_id]
+                            ])->update(['is_delivered' => true]);
+                        }
+                        $packing_slip->status = 'Delivered';
+                        $packing_slip->save();
+                    }
+                    else
+                        $sale->payment_status = 3;
+                    $sale->save();
+                }
+            }
+
+            // Update Challan
+            $all_paid = true;
+            foreach ($packingSlipList as $ps_id) {
+                $ps = PackingSlip::with('sale')->find($ps_id);
+                if ($ps->sale->payment_status != 4) {
+                    $all_paid = false;
+                    break;
+                }
+            }
+            if ($all_paid) {
+                $challan->status = 'Close';
+                $challan->closing_date = date("Y-m-d");
+                $challan->closed_by_id = Auth::id();
+                $challan->delivery_charge_list = implode(",", $delivery_charge_list);
+                $challan->save();
+            }
+
+            DB::commit();
+            return redirect()->back()->with('message', 'Payment added successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('message', 'Something went wrong: ' . $e->getMessage());
+        }
+    }
+
+    public function getPackingSlips($id)
+    {
+        $challan = Challan::find($id);
+        $packing_slip_list = array_filter(explode(",", $challan->packing_slip_list));
+        $amount_list = array_filter(explode(",", $challan->amount_list));
+        
+        $data = [];
+        foreach ($packing_slip_list as $key => $ps_id) {
+            $ps = PackingSlip::with('sale')->find($ps_id);
+            if ($ps) {
+                $data[] = [
+                    'id' => $ps->id,
+                    'reference' => 'P' . $ps->reference_no,
+                    'order_reference' => $ps->sale->reference_no ?? 'N/A',
+                    'amount' => $amount_list[$key],
+                    'total_amount' => $ps->sale->grand_total,
+                    'due' => $ps->sale->grand_total - $ps->sale->paid_amount,
+                    'is_paid' => ($ps->sale->payment_status == 4)
+                ];
+            }
+        }
+        return response()->json($data);
     }
 
     public function moneyReciept($id)

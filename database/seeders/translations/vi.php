@@ -130,7 +130,7 @@ return array (
   21 => 
   array (
     'locale' => 'vi',
-    'key' => 'The field labels marked with * are required input fields',
+    'key' => 'The field labels marked with are required input fields',
     'value' => 'Các nhãn trường có dấu * là các trường nhập bắt buộc',
   ),
   22 => 

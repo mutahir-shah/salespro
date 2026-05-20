@@ -26,8 +26,6 @@ class InstallmentPlanController extends Controller
 
             $plan->installments()->create([
                 'status' => 'pending',
-                'reference_type' => $data['reference_type'],
-                'reference_id' => $data['reference_id'],
                 'payment_date' => $paymentDate,
                 'amount' => $amount,
             ]);
@@ -47,7 +45,35 @@ class InstallmentPlanController extends Controller
             $options = explode(',', $lims_pos_setting_data->payment_options);
         else
             $options = [];
-        
         return view('backend.installment_plans.show', compact('plan', 'lims_pos_setting_data', 'options', 'lims_reward_point_setting_data', 'lims_account_list', 'lims_gift_card_list'));
+    }
+
+    public function index()
+    {
+        $plans = InstallmentPlan::with('installments')->latest()->get();
+        return view('backend.installment_plans.index', compact('plans'));
+    }
+
+    public function report(Request $request)
+    {
+        $status = $request->status;
+        $starting_date = $request->starting_date ?? date('Y-m-d', strtotime('-1 month'));
+        $ending_date = $request->ending_date ?? date('Y-m-d');
+
+        $query = InstallmentPlan::with(['installments', 'reference']);
+
+        if ($status == 'pending') {
+            $query->whereHas('installments', function($q) {
+                $q->where('status', 'pending');
+            });
+        } elseif ($status == 'overdue') {
+            $query->whereHas('installments', function($q) {
+                $q->where('status', 'pending')->whereDate('payment_date', '<', now());
+            });
+        }
+
+        $plans = $query->latest()->get();
+        
+        return view('backend.report.installment_report', compact('plans', 'status', 'starting_date', 'ending_date'));
     }
 }

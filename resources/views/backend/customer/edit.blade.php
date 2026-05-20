@@ -20,7 +20,7 @@
                         <h4>{{__('db.Update Customer')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('customer.update', $lims_customer_data->id) }}" method="POST" enctype="multipart/form-data" id="customer_form">
                             @csrf
                             @method('PUT')

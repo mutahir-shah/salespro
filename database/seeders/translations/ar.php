@@ -130,7 +130,7 @@ return array (
   21 => 
   array (
     'locale' => 'ar',
-    'key' => 'The field labels marked with * are required input fields',
+    'key' => 'The field labels marked with are required input fields',
     'value' => 'تسميات الحقول التي تحمل علامة * هي حقول إدخال مطلوبة',
   ),
   22 => 

@@ -18,41 +18,8 @@
 						</form>
 					</div>
 
-					<div class="col-md-6 offset-md-3 mt-3 mb-3">
-						<div class="row">
-							<div class="col-md-6">
-								<span>Total {{__('db.Items')}}</span>
-								<h2><strong>{{number_format((float)$total_item, $general_setting->decimal, '.', '')}}</strong></h2>
-							</div>
-							<div class="col-md-6">
-								<span>Total {{__('db.Quantity')}}</span>
-								<h2><strong>{{number_format((float)$total_qty, $general_setting->decimal, '.', '')}}</strong></h2>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-md-5 offset-md-3 mt-2">
-						<div class="pie-chart">
-							@php
-			                    if($general_setting->theme == 'default.css'){
-			            			$color = '#733686';
-			                        $color_rgba = 'rgba(115, 54, 134, 0.8)';
-			            		}
-			            		elseif($general_setting->theme == 'green.css'){
-			                        $color = '#2ecc71';
-			                        $color_rgba = 'rgba(46, 204, 113, 0.8)';
-			                    }
-			                    elseif($general_setting->theme == 'blue.css'){
-			                        $color = '#3498db';
-			                        $color_rgba = 'rgba(52, 152, 219, 0.8)';
-			                    }
-			                    elseif($general_setting->theme == 'dark.css'){
-			                        $color = '#34495e';
-			                        $color_rgba = 'rgba(52, 73, 94, 0.8)';
-			                    }
-			                 @endphp
-					      	<canvas id="pieChart" data-color="{{$color}}" data-color_rgba="{{$color_rgba}}" data-price={{$total_price}} data-cost={{$total_cost}} width="10" height="10" data-label1="{{__('db.Stock Value by Price')}}" data-label2="{{__('db.Stock Value by Cost')}}" data-label3="{{__('db.Estimate Profit')}}"> </canvas>
-					    </div>
+					<div id="warehouse-content">
+						@include('backend.report.partials.warehouse_stock_table')
 					</div>
 				</div>
 			</div>
@@ -79,8 +46,70 @@
 		$('#warehouse_id').val(warehouse_id);
 		$('.selectpicker').selectpicker('refresh');
 
+		function initializePieChart() {
+			var PIECHART = $('#pieChart');
+			if (PIECHART.length > 0) {
+				var brandPrimary = PIECHART.data('color');
+				var brandPrimaryRgba = PIECHART.data('color_rgba');
+				var price = PIECHART.data('price');
+				var cost = PIECHART.data('cost');
+				var label1 = PIECHART.data('label1');
+				var label2 = PIECHART.data('label2');
+				var label3 = PIECHART.data('label3');
+				var myPieChart = new Chart(PIECHART, {
+					type: 'pie',
+					data: {
+						labels: [
+							label1,
+							label2,
+							label3
+						],
+						datasets: [
+							{
+								data: [price, cost, price - cost],
+								borderWidth: [1, 1, 1],
+								backgroundColor: [
+									brandPrimary,
+									"#ff8952",
+									"#858c85"
+								],
+								hoverBackgroundColor: [
+									brandPrimaryRgba,
+									"rgba(255, 137, 82, 0.8)",
+									"rgb(133, 140, 133, 0.8)"
+								],
+								hoverBorderWidth: [4, 4, 4],
+								hoverBorderColor: [
+									brandPrimaryRgba,
+									"rgba(255, 137, 82, 0.8)",
+									"rgb(133, 140, 133, 0.8)",
+								],
+							}]
+					},
+					options: {}
+				});
+			}
+		}
+
+		initializePieChart();
+
+		function reloadWarehouseStock() {
+			var warehouse_id = $('#warehouse_id').val();
+			$.ajax({
+				url: "{{ route('report.warehouseStock') }}",
+				type: "GET",
+				data: {
+					warehouse_id: warehouse_id
+				},
+				success: function(data) {
+					$('#warehouse-content').html(data);
+					initializePieChart();
+				}
+			});
+		}
+
 		$('#warehouse_id').on("change", function(){
-			$('#report-form').submit();
+			reloadWarehouseStock();
 		});
 	</script>
 @endpush

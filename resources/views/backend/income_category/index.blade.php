@@ -53,14 +53,14 @@
 <div id="createModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
     <div role="document" class="modal-dialog">
       <div class="modal-content">
-        <form action="{{ route('income_categories.store') }}" method="POST" files="true">
+        <form action="{{ route('income_categories.store') }}" method="POST" enctype="multipart/form-data">
           @csrf
         <div class="modal-header">
           <h5 id="exampleModalLabel" class="modal-title">{{__('db.Add Income Category')}}</h5>
           <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
         </div>
         <div class="modal-body">
-          <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+          <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
             <div class="form-group">
                 <label>{{__('db.Code')}} *</label>
                 <div class="input-group">
@@ -87,7 +87,7 @@
 <div id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
   <div role="document" class="modal-dialog">
     <div class="modal-content">
-        <form action="{{ route('income_categories.update', 1) }}" method="POST" files="true">
+        <form action="{{ route('income_categories.update', 1) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
       <div class="modal-header">
@@ -95,7 +95,7 @@
         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
       </div>
       <div class="modal-body">
-        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
             <div class="form-group">
                 <label>{{__('db.Code')}} *</label>
                 <input type="text" name="code" value="{{ old('code') }}" required class="form-control" placeholder="{{ __('db.Type income category code') }}">

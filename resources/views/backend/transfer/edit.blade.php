@@ -11,7 +11,7 @@
                         <h4>{{__('db.Update Transfer')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('transfers.update', $lims_transfer_data->id) }}" method="POST" enctype="multipart/form-data" id="transfer-form">
                             @csrf
                             @method('PUT')

@@ -96,8 +96,9 @@
                     <th>{{__('db.Returned Amount')}}</th>
                     <th>{{__('db.Paid')}}</th>
                     <th>{{__('db.Due')}}</th>
-                    <th>{{__('db.Payment Term')}}</th>
-                    <th>{{__('db.Due Date')}}</th>
+                    <th>{{__('db.Currency')}}/{{__('db.Exchange Rate')}}</th>
+                    <th>{{__('db.payment_term')}}</th>
+                    <th>{{__('db.due_date')}}</th>
                     <th>{{__('db.Payment Status')}}</th>
                     @foreach($custom_fields as $fieldName)
                     <th>{{$fieldName}}</th>
@@ -210,7 +211,7 @@
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('purchase.add-payment') }}" method="POST" class="payment-form">
+                <form action="{{ route('purchase.add-payment') }}" method="POST" class="payment-form" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
                         <input type="hidden" name="balance">
@@ -276,6 +277,17 @@
                             <input type="hidden" name="currency_id" id="currency_id">
                             <input type="hidden" name="exchange_rate" id="exchange_rate">
                         </div>
+                        {{-- Attach Document --}}
+                        <div class="col-md-4 mt-1">
+                            <div class="form-group">
+                                <label>{{__('db.Attach Document')}}</label>
+                                <x-info title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported" type="info" />
+                                <input type="file" name="document" class="form-control" />
+                                @if($errors->has('extension'))
+                                    <span><strong>{{ $errors->first('extension') }}</strong></span>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>{{__('db.Payment Note')}}</label>
@@ -299,7 +311,7 @@
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('purchase.update-payment') }}" method="POST" class="payment-form">
+                <form action="{{ route('purchase.update-payment') }}" method="POST" class="payment-form" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
                         <div class="col-md-6">
@@ -342,6 +354,14 @@
                                 <option value="{{$account->id}}">{{$account->name}} [{{$account->account_no}}]</option>
                             @endforeach
                             </select>
+                        </div>
+                        <div class="col-md-6 mt-1">
+                            <div class="form-group">
+                                <label>{{__('db.Attach Document')}}</label>
+                                <x-info title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported" type="info" />
+                                <input type="file" name="edit_document" class="form-control" />
+                                <small id="current_edit_document_link" class="text-muted"></small>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label>{{ __('db.Payment Date') }}</label>
@@ -417,6 +437,7 @@
             {"data": "returned_amount"},
             {"data": "paid_amount"},
             {"data": "due"},
+            {"data": "currency"},
             {"data": "pay_term"},
             {"data": "due_date"},
             {"data": "payment_status"}
@@ -606,6 +627,7 @@
             account_name = data[9];
             account_id = data[10];
             payment_at = data[11];
+            payment_document  = data[12];
 
             $.each(payment_date, function(index){
                 var newRow = $("<tr>");
@@ -618,6 +640,9 @@
                 cols += '<td>' + paying_method[index] + '</td>';
                 cols += '<td>' + payment_at[index] + '</td>';
                 cols += '<td><div class="btn-group"><button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Action<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu edit-options dropdown-menu-right dropdown-default" user="menu">';
+                if(payment_document[index])
+                    cols += '<li><a href="{{url("documents/add-payment")}}/'+payment_document[index]+'" target="_blank" class="btn btn-link"><i class="fa fa-file"></i> View Document</a></li><li class="divider"></li>';
+
                 if(all_permission.indexOf("purchase-payment-edit") != -1)
                     cols += '<li><button type="button" class="btn btn-link edit-btn" data-id="' + payment_id[index] +'" data-clicked=false data-toggle="modal" data-target="#edit-payment"><i class="dripicons-document-edit"></i> Edit</button></li><li class="divider"></li>';
                 if(all_permission.indexOf("purchase-payment-delete") != -1)
@@ -994,7 +1019,7 @@
 
     function purchaseDetails(purchase){
         currentPurchase = purchase;
-        console.log(purchase);
+        // console.log(purchase);
         var htmltext = '{{__("db.date")}}: '+purchase[0]+'<br>{{__("db.reference")}}: '+purchase[1]+'<br>{{__("db.Purchase Status")}}: '+purchase[2]+'<br>{{__("db.Currency")}}: '+purchase[26];
         if(purchase[27])
             htmltext += '<br>{{__("db.Exchange Rate")}}: '+purchase[27]+'<br>';
@@ -1009,7 +1034,7 @@
         htmltext += '<br><div class="row"><div class="col-md-6">{{__("db.From")}}:<br>'+purchase[7]+'<br>'+purchase[8]+'<br>'+purchase[9]+'<br>'+purchase[10]+'<br>'+purchase[11]+'<br>'+purchase[12]+'</div><div class="col-md-6"><div class="float-right">{{__("db.To")}}:<br>'+purchase[4]+'<br>'+purchase[5]+'<br>'+purchase[6]+'</div></div></div>';
         $(".product-purchase-list tbody").remove();
         $.get('purchases/product_purchase/' + purchase[3], function(data) {
-            console.log(data);
+            // console.log(data);
             if(data == 'Something is wrong!') {
                 var newBody = $("<tbody>");
                 var newRow = $("<tr>");

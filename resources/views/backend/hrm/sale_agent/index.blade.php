@@ -132,7 +132,7 @@
             </div>
             <div class="modal-body">
                 <p class="italic">
-                    <small>{{ __('db.The field labels marked with * are required input fields') }}.</small>
+                    <small>{{ __('db.The field labels marked with are required input fields') }}.</small>
                 </p>
 
                 <form action="{{ route('sale-agents.update', 1) }}" method="post" enctype="multipart/form-data">
@@ -150,8 +150,8 @@
                             <input type="file" name="image" class="form-control">
                         </div>
                         <div class="col-md-4 form-group">
-                            <label>{{ __('db.Email') }}</label>
-                            <input type="email" name="email" class="form-control">
+                            <label>{{ __('db.Email') }} *</label>
+                            <input type="email" name="email" required class="form-control">
                         </div>
                         <div class="col-md-4 form-group">
                             <label>{{ __('db.Phone Number') }} *</label>

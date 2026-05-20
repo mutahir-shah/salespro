@@ -7,42 +7,35 @@
             </div>
             <form action="{{ route('report.warehouse') }}" method="POST">
                 @csrf
-            <div class="row mb-3">
-                <div class="col-md-5 offset-md-1 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <div class="input-group">
-                                <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
-                                <input type="hidden" name="start_date" value="{{$start_date}}" />
-                                <input type="hidden" name="end_date" value="{{$end_date}}" />
+                <div class="row mb-3">
+                    <div class="col-md-5 offset-md-1 mt-3">
+                        <div class="form-group row">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <div class="input-group">
+                                    <input type="text" id="daterange" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
+                                    <input type="hidden" name="start_date" value="{{$start_date}}" />
+                                    <input type="hidden" name="end_date" value="{{$end_date}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <div class="form-group row">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Warehouse')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <input type="hidden" name="warehouse_id_hidden" value="{{$warehouse_id}}" />
+                                <select id="warehouse_id" name="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
+                                    @foreach($lims_warehouse_list as $warehouse)
+                                    <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Warehouse')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <input type="hidden" name="warehouse_id_hidden" value="{{$warehouse_id}}" />
-                            <select id="warehouse_id" name="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
-                                @foreach($lims_warehouse_list as $warehouse)
-                                <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2 mt-3">
-                    <div class="form-group">
-                        <button class="btn btn-primary" type="submit">{{__('db.submit')}}</button>
-                    </div>
-                </div>
-            </div>
             <input type="hidden" name="warehouse_id_hidden" value="{{$warehouse_id}}" />
             </form>
-
-
         </div>
     </div>
     <ul class="nav nav-tabs ml-4 mt-3" role="tablist">
@@ -251,10 +244,10 @@
         "serverSide": true,
         "ajax":{
             url:"warehouse-sale-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                warehouse_id: warehouse_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.warehouse_id = warehouse_id;
             },
             dataType: "json",
             type:"post"
@@ -380,10 +373,10 @@
         "serverSide": true,
         "ajax":{
             url:"warehouse-purchase-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                warehouse_id: warehouse_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.warehouse_id = warehouse_id;
             },
             dataType: "json",
             type:"post"
@@ -509,10 +502,10 @@
         "serverSide": true,
         "ajax":{
             url:"warehouse-quotation-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                warehouse_id: warehouse_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.warehouse_id = warehouse_id;
             },
             dataType: "json",
             type:"post"
@@ -633,10 +626,10 @@
         "serverSide": true,
         "ajax":{
             url:"warehouse-return-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                warehouse_id: warehouse_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.warehouse_id = warehouse_id;
             },
             dataType: "json",
             type:"post"
@@ -756,10 +749,10 @@
         "serverSide": true,
         "ajax":{
             url:"warehouse-expense-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                warehouse_id: warehouse_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.warehouse_id = warehouse_id;
             },
             dataType: "json",
             type:"post"
@@ -872,6 +865,34 @@
             $( dt_selector.column( 4 ).footer() ).html(dt_selector.column( 4, {page:'current'} ).data().sum().toFixed({{$general_setting->decimal}}));
         }
     }
+
+    function reloadWarehouseReportData() {
+        start_date = $('input[name="start_date"]').val();
+        end_date = $('input[name="end_date"]').val();
+        warehouse_id = $('select[name="warehouse_id"]').val();
+        
+        $('#sale-table').DataTable().ajax.reload();
+        $('#purchase-table').DataTable().ajax.reload();
+        $('#quotation-table').DataTable().ajax.reload();
+        $('#return-table').DataTable().ajax.reload();
+        $('#expense-table').DataTable().ajax.reload();
+    }
+
+    // Auto submit when warehouse changes
+    $('#warehouse_id').on('changed.bs.select', function () {
+        reloadWarehouseReportData();
+    });
+
+    // Auto submit when date range changes
+    $('#daterange').on('apply.daterangepicker', function (ev, picker) {
+        let form = $(this).closest('form');
+
+        // update hidden inputs
+        form.find('input[name="start_date"]').val(picker.startDate.format('YYYY-MM-DD'));
+        form.find('input[name="end_date"]').val(picker.endDate.format('YYYY-MM-DD'));
+
+        reloadWarehouseReportData();
+    });
 
 </script>
 @endpush

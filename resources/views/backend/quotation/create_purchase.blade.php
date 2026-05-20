@@ -11,7 +11,7 @@
                         <h4>{{__('db.Add Purchase')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('purchases.store') }}" method="POST" enctype="multipart/form-data" id="purchase-form">
                             @csrf
                         <div class="row">
@@ -184,7 +184,8 @@
                                                         <td><button type="button" class="ibtnDel btn btn-md btn-danger">{{__("db.delete")}}</button></td>
                                                         <input type="hidden" class="product-id" name="product_id[]" value="{{$product_data->id}}"/>
                                                         <input type="hidden" class="product-code" name="product_code[]" value="{{$product_data->code}}"/>
-                                                        <input type="hidden" class="product-cost" name="product_cost[]" value="{{ $product_cost}}"/>
+                                                        <input type="hidden" class="unit_cost" name="unit_cost[]" value="{{ $product_cost}}"/>
+                                                        <input type="hidden" class="net_unit_margin_type" name="net_unit_margin_type[]" value="{{$product_data->profit_margin_type}}" />
                                                         <input type="hidden" class="purchase-unit" name="purchase_unit[]" value="{{$unit_name}}"/>
                                                         <input type="hidden" class="purchase-unit-operator" value="{{$unit_operator}}"/>
                                                         <input type="hidden" class="purchase-unit-operation-value" value="{{$unit_operation_value}}"/>

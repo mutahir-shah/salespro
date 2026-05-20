@@ -215,8 +215,16 @@ trait TenantInfo
             );
         }
         //////creating tenant end/////////
+
+
         if ($paid_by) {
-            TenantPayment::create(['tenant_id' => $tenant->id, 'amount' => $request->price, 'paid_by' => $paid_by]);
+            TenantPayment::create([
+                'tenant_id'       => $tenant->id,
+                'amount'          => $request->price,
+                'paid_by'         => $paid_by,
+                'payment_proof'   => $request->payment_proof ?? null,
+                'transaction_ref' => $request->transaction_ref ?? null,
+            ]);
         }
 
         ///////////////Start if someone wants ecommerce demo as his own demo////////////////
@@ -310,7 +318,7 @@ trait TenantInfo
         }
 
         //updating tenant others information on landlord DB
-        $tenant->update(['package_id' => $request->package_id, 'subscription_type' => $request->subscription_type, 'company_name' => $request->company_name, 'phone_number' => $request->phone_number, 'email' => $request->email, 'expiry_date' => date("Y-m-d", strtotime("+" . $numberOfDaysToExpired . " days"))]);
+        $tenant->update(['package_id' => $request->package_id, 'subscription_type' => $request->subscription_type, 'company_name' => $request->company_name, 'phone_number' => $request->phone_number, 'email' => $request->email, 'expiry_date' => date("Y-m-d", strtotime("+" . $numberOfDaysToExpired . " days")), 'status' => !empty($request->pending_manual_payment) ? 0 : 1]);
 
         // Below section no use for frontend signup as it is redirect to tenants domain
         // check PaymentController@tenantCheckout function

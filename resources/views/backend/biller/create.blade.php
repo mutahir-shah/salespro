@@ -8,7 +8,7 @@
                         <h4>{{__('db.Add Biller')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('biller.store') }}" method="post" enctype="multipart/form-data">
                             @csrf
                             <div class="row">

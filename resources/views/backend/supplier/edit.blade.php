@@ -14,7 +14,7 @@
                     </div>
                     <div class="card-body">
                         <p class="italic">
-                            <small>{{__('db.The field labels marked with * are required input fields')}}.</small>
+                            <small>{{__('db.The field labels marked with are required input fields')}}.</small>
                         </p>
 
                         <form action="{{ route('supplier.update', $lims_supplier_data->id) }}" method="POST" enctype="multipart/form-data">

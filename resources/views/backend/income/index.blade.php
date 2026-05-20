@@ -1,56 +1,72 @@
 @extends('backend.layout.main') @section('content')
-
+<style type="text/css">
+    .btn-icon i{margin-right:5px}
+    .top-fields{margin-top:10px;position: relative;}
+    .top-fields label {font-size:11px;font-weight:600;margin-left:10px;padding:0 3px;position:absolute;top:-8px;z-index:9;}
+    .top-fields input{font-size:13px;height:45px}
+</style>
 <x-success-message key="message" />
 <x-error-message key="not_permitted" />
 
 <section>
     <div class="container-fluid">
+        
+        @if(in_array("incomes-add", $all_permission))
+            <button class="btn btn-info" data-toggle="modal" data-target="#income-modal"><i class="dripicons-plus"></i> {{__('db.Add Income')}}</button>
+        @endif
+        <button type="button" class="btn btn-warning btn-icon" id="toggle-filter">
+            <i class="dripicons-experiment"></i> {{ __('db.Filter') }}
+        </button>
         <div class="card">
-            <div class="card-header mt-2">
-                <h3 class="text-center">{{__('db.Income List')}}</h3>
-            </div>
-            <form action="{{ route('incomes.index') }}" method="get">
-            <div class="row mb-3">
-                <div class="col-md-4 offset-md-2 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <div class="input-group">
+            <div class="card-body" id="filter-card" style="display: none;">
+                <form action="{{ route('incomes.index') }}" method="get">
+                    <div class="row mb-3">
+                        <div class="col-md-3 offset-md-2 mt-3">
+                            <div class="form-group  top-fields">
+                                <label>{{__('db.Choose Your Date')}}</label>
                                 <input type="text" class="daterangepicker-field form-control" value="{{$starting_date}} To {{$ending_date}}" required />
                                 <input type="hidden" name="starting_date" value="{{$starting_date}}" />
                                 <input type="hidden" name="ending_date" value="{{$ending_date}}" />
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mt-3 @if(\Auth::user()->role_id > 2){{'d-none'}}@endif">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Warehouse')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <select id="warehouse_id" name="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" >
-                                <option value="0">{{__('db.All Warehouse')}}</option>
-                                @foreach($lims_warehouse_list as $warehouse)
-                                    @if($warehouse->id == $warehouse_id)
-                                        <option selected value="{{$warehouse->id}}">{{$warehouse->name}}</option>
-                                    @else
-                                        <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
-                                    @endif
-                                @endforeach
-                            </select>
+                        <div class="col-md-3 mt-3 @if(\Auth::user()->role_id > 2){{'d-none'}}@endif">
+                            <div class="form-group  top-fields">
+                                <label>{{__('db.Choose Warehouse')}}</label>
+                                <select id="warehouse_id" name="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" >
+                                    <option value="0">{{__('db.All Warehouse')}}</option>
+                                    @foreach($lims_warehouse_list as $warehouse)
+                                        @if($warehouse->id == $warehouse_id)
+                                            <option selected value="{{$warehouse->id}}">{{$warehouse->name}}</option>
+                                        @else
+                                            <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mt-3 @if(\Auth::user()->role_id > 2){{'d-none'}}@endif">
+                            <div class="form-group  top-fields">
+                                <label>{{__('db.Income Category')}}</label>
+                                <select id="income_category_id" name="income_category_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" >
+                                    <option value="0">{{__('db.All Categories')}}</option>
+                                    @foreach($income_category_list as $income_category)
+                                        @if($income_category->id == $income_category_id)
+                                            <option selected value="{{$income_category->id}}">{{$income_category->name}}</option>
+                                        @else
+                                            <option value="{{$income_category->id}}">{{$income_category->name}}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div id="filter-loading" class="col-12 text-center my-2" style="display:none;">
+                            <span class="spinner-border text-primary spinner-border-sm" role="status"></span>
+                            <span>Loading results...</span>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-2 mt-3">
-                    <div class="form-group">
-                        <button class="btn btn-primary" type="submit">{{__('db.submit')}}</button>
-                    </div>
-                </div>
+                </form>
             </div>
-            </form>
         </div>
-        @if(in_array("incomes-add", $all_permission))
-            <button class="btn btn-info" data-toggle="modal" data-target="#income-modal"><i class="dripicons-plus"></i> {{__('db.Add Income')}}</button>
-        @endif
     </div>
     <div class="table-responsive">
         <table id="income-table" class="table income-list" style="width: 100%">
@@ -88,7 +104,7 @@
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-              <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+              <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                 <form action="{{ route('incomes.update', 1) }}" method="post" enctype="multipart/form-data">
                     @csrf
                     @method('put')
@@ -164,6 +180,10 @@
 @push('scripts')
 <script type="text/javascript">
 
+    $('#toggle-filter').on('click', function() {
+        $('#filter-card').slideToggle('slow');
+    });
+
     $("ul#income").siblings('a').attr('aria-expanded','true');
     $("ul#income").addClass("show");
     $("ul#income #exp-list-menu").addClass("active");
@@ -207,24 +227,24 @@
     var starting_date = $("input[name=starting_date]").val();
     var ending_date = $("input[name=ending_date]").val();
     var warehouse_id = $("#warehouse_id").val();
-    $('#income-table').DataTable( {
-        "processing": true,
-        "serverSide": true,
-        "ajax":{
+    var incomeTable = $('#income-table').DataTable( {
+        processing: true,
+        serverSide: true,
+        ajax:{
             url:"incomes/income-data",
-            data:{
-                all_permission: all_permission,
-                starting_date: starting_date,
-                ending_date: ending_date,
-                warehouse_id: warehouse_id
+            type:"post",
+            data:function(d){
+                d.all_permission = all_permission;
+                d.starting_date  = $("input[name=starting_date]").val();
+                d.ending_date    = $("input[name=ending_date]").val();
+                d.warehouse_id   = $("#warehouse_id").val();
             },
-            dataType: "json",
-            type:"post"
+            dataType: "json"
         },
-        "createdRow": function( row, data, dataIndex ) {
+        createdRow: function(row, data, dataIndex) {
             $(row).attr('data-income_id', data['id']);
         },
-        "columns": [
+        columns: [
             {"data": "key"},
             {"data": "date"},
             {"data": "reference_no"},
@@ -382,6 +402,26 @@
             $( dt_selector.column( 5 ).footer() ).html(dt_selector.cells( rows, 5, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
         }
     }
+
+    $('.daterangepicker-field').on('apply.daterangepicker', function(ev, picker) {
+        $('input[name=starting_date]').val(picker.startDate.format('YYYY-MM-DD'));
+        $('input[name=ending_date]').val(picker.endDate.format('YYYY-MM-DD'));
+        saleTable.ajax.reload();
+    });
+
+    $('#warehouse_id, #income_category_id').on('change', function () {
+        incomeTable.ajax.reload();
+    });
+
+    // Show loader on request
+    incomeTable.on('preXhr.dt', function () {
+        $('#filter-loading').show();
+    });
+
+    // Hide loader after draw
+    incomeTable.on('xhr.dt', function () {
+        $('#filter-loading').hide();
+    });
 
     if(all_permission.indexOf("incomes-delete") == -1)
         $('.buttons-delete').addClass('d-none');

@@ -8,7 +8,7 @@ class Warehouse extends Model
 {
     protected $fillable =[
 
-        "name", "phone", "email", "address", "is_active"
+        "name", "phone", "email", "address", "qr_code_id", "is_active"
     ];
 
     public function product()
@@ -37,5 +37,10 @@ class Warehouse extends Model
         $this->save();
         // HARD delete related printers
         $this->printers()->delete();
+    }
+
+    public function qrCode()
+    {
+        return $this->morphOne(QrCode::class, 'qrable');
     }
 }

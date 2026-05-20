@@ -1,225 +1,334 @@
 <?php $general_setting = DB::table('general_settings')->find(1); ?>
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{$general_setting->site_title}}</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="all,follow">
-    <link rel="icon" type="image/png" href="{{url('logo', $general_setting->site_logo)}}" />
     @if(!config('database.connections.saleprosaas_landlord'))
     <link rel="icon" type="image/png" href="{{url('logo', $general_setting->site_logo)}}" />
     <!-- Bootstrap CSS-->
     <link rel="stylesheet" href="<?php echo asset('vendor/bootstrap/css/bootstrap.min.css') ?>" type="text/css">
-    <!-- login stylesheet-->
-    <link rel="stylesheet" href="<?php echo asset('css/auth.css') ?>" id="theme-stylesheet" type="text/css">
-    <!-- Google fonts - Roboto -->
-    <link rel="preload" href="https://fonts.googleapis.com/css?family=Nunito:400,500,700" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css?family=Nunito:400,500,700" rel="stylesheet"></noscript>
-    <script type="text/javascript" src="<?php echo asset('vendor/jquery/jquery.min.js') ?>"></script>
     @else
     <link rel="icon" type="image/png" href="{{url('../../logo', $general_setting->site_logo)}}" />
     <!-- Bootstrap CSS-->
     <link rel="stylesheet" href="<?php echo asset('../../vendor/bootstrap/css/bootstrap.min.css') ?>" type="text/css">
-    <!-- login stylesheet-->
-    <link rel="stylesheet" href="<?php echo asset('../../css/auth.css') ?>" id="theme-stylesheet" type="text/css">
-    <!-- Google fonts - Roboto -->
-    <link rel="preload" href="https://fonts.googleapis.com/css?family=Nunito:400,500,700" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css?family=Nunito:400,500,700" rel="stylesheet"></noscript>
-    <script type="text/javascript" src="<?php echo asset('../../vendor/jquery/jquery.min.js') ?>"></script>
     @endif
-  </head>
-  <body>
-    <div class="page login-page">
-      <div class="container">
-        <div class="form-outer text-center d-flex align-items-center">
-          <div class="form-inner">
-            <div class="logo"><span>{{$general_setting->site_title}}</span></div>
-            <form method="POST" action="{{ route('register') }}">
-                @csrf
-              <div class="form-group-material">
-                <input id="register-username" type="text" name="name" required class="input-material">
-                <label for="register-username" class="label-material">{{__('db.UserName')}} *</label>
-                @if ($errors->has('name'))
-                    <p>
-                        <strong>{{ $errors->first('name') }}</strong>
-                    </p>
-                @endif
-              </div>
-              <div class="form-group-material">
-                <input id="register-email" type="email" name="email" required class="input-material">
-                <label for="register-email" class="label-material">{{__('db.Email')}} *</label>
-                @if ($errors->has('email'))
-                    <p>
-                        <strong>{{ $errors->first('email') }}</strong>
-                    </p>
-                @endif
-              </div>
-              <div class="form-group-material">
-                <input id="register-phone" type="text" name="phone_number" required class="input-material">
-                <label for="register-phone" class="label-material">{{__('db.Phone Number')}} *</label>
-              </div>
-              <div class="form-group-material">
-                <input id="register-company" type="text" name="company_name" class="input-material">
-                <label for="register-company" class="label-material">{{__('db.Company Name')}}</label>
-              </div>
-              <div class="form-group-material">
-                <select required name="role_id" id="role-id" class="form-control">
-                  <option value="">Select Role*</option>
-                  @foreach($lims_role_list as $role)
-                    @if($role->id != 1 && $role->id != 2)
-                      <option value="{{$role->id}}">{{$role->name}}</option>
+
+    <!-- Google fonts -->
+    @if($general_setting->font_css)
+      {!! $general_setting->font_css !!}
+    @else
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+    @endif
+
+    <!-- Custom CSS from general settings -->
+    {!! $general_setting->auth_css !!}
+
+    <style>
+        body { font-size: 14px;font-family: 'Inter', sans-serif;}
+        .vh-100 { min-height: 100vh; }
+        a{color: #7c5cc4;}
+        
+        /* Left Side Styles */
+        .login-container { padding: 3% 0; }
+        .login-container form { max-width: 400px; margin: auto; }
+        .form-control { height: 38px; border-radius: .25rem; border: 1px solid #ddd; }
+        .btn-primary { background-color: #7c5cc4; border: none; height: 40px; border-radius: .25rem; font-weight: 600; }
+        .btn-primary:hover { background-color: #6a4bb3; }
+        .btn-outline-light { border: 1px solid #ddd; color: #333; height: 38px; border-radius: .25rem; font-weight: 500; }
+        .btn-outline-light img { width: 20px; margin-right: 8px; }
+        
+        /* Right Side Styles */
+        .promo-side {
+            background-image: url('{{asset('public/css/promo-bg.svg')}}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            padding: 10% 8%;
+            border-radius: 24px;
+            margin: 15px;
+            overflow: hidden;
+            z-index: 1; 
+            position: relative;
+        }
+        .promo-side div {
+            height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .dashboard-preview {
+            margin-top: 38px;
+            box-shadow: 0 20px 38px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            width: 120%; /* Creates the "peek" effect */
+        }
+        .footer-text { font-size: 0.85rem; color: #888; }
+
+        /* Dark Mode Variables */
+        :root {
+            --bg-dark: #0f172a;           /* Deep Navy background */
+            --card-dark: #1e293b;         /* Slightly lighter slate for inputs/cards */
+            --text-main: #f8fafc;         /* Off-white text */
+            --text-muted: #94a3b8;        /* Slate gray for secondary text */
+            --input-border: #334155;      /* Border for dark inputs */
+        }
+
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+        }
+
+        /* Left Side Adjustments */
+        .dark-mode .form-control {
+            background-color: var(--card-dark);
+            border-color: var(--input-border);
+            color: var(--text-main);
+        }
+
+        .dark-mode .form-control:focus {
+            background-color: var(--card-dark);
+            color: #fff;
+            border-color: #7c5cc4;
+        }
+
+        .dark-mode .input-group-text {
+            background-color: var(--card-dark) !important;
+            border-color: var(--input-border) !important;
+            color: var(--text-muted);
+        }
+
+        .dark-mode .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        .dark-mode .btn-outline-light {
+            border-color: var(--input-border);
+            color: var(--text-main);
+        }
+
+        .dark-mode .btn-outline-light:hover {
+            background-color: var(--input-border);
+        }
+
+        /* Horizontal Rule with "Or Login With" */
+        .dark-mode hr {
+            border-top: 1px solid var(--input-border);
+        }
+
+        .dark-mode .bg-white {
+            background-color: var(--bg-dark) !important; /* Matches body bg */
+        }
+
+        .dark-mode .promo-side {
+            opacity:0.9;
+        }
+
+        /* Footer Link Adjustments */
+        .dark-mode .footer-text a {
+            color: var(--text-muted) !important;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row min-vh-100">
+        <div class="col-lg-6 d-flex align-items-center position-relative py-5">
+            <div class="login-container w-100 px-lg-5 px-3">
+                <div class="mb-5" style="margin: auto; text-align: center;">
+                    @if($general_setting->site_logo)
+                    <img src="{{url('logo', $general_setting->site_logo)}}" width="120">
+                    @else
+                    <span>{{$general_setting->site_title}}</span>
                     @endif
-                  @endforeach
-                </select>
-              </div>
-              <div id="customer-section">
-                  <div class="form-group-material">
-                    <input id="customer-name" type="text" name="customer_name" class="input-material customer-field">
-                    <label for="customer-name" class="label-material">{{__('db.name')}} *</label>
-                  </div>
-                  <div class="form-group-material">
-                    <select name="customer_group_id" class="form-control customer-field">
-                      <option value="">Select customer group*</option>
-                      @foreach($lims_customer_group_list as $customer_group)
-                          <option value="{{$customer_group->id}}">{{$customer_group->name}}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                  <div class="form-group-material">
-                    <input id="customer-tax-number" type="text" name="tax_no" class="input-material">
-                    <label for="customer-tax-number" class="label-material">{{__('db.Tax Number')}}</label>
-                  </div>
-                  <div class="form-group-material">
-                    <input id="customer-address" type="text" name="address" class="input-material customer-field">
-                    <label for="customer-address" class="label-material">{{__('db.Address')}} *</label>
-                  </div>
-                  <div class="form-group-material">
-                    <input id="customer-city" type="text" name="city" class="input-material customer-field">
-                    <label for="customer-city" class="label-material">{{__('db.City')}} *</label>
-                  </div>
-                  <div class="form-group-material">
-                    <input id="customer-state" type="text" name="state" class="input-material">
-                    <label for="customer-state" class="label-material">{{__('db.State')}}</label>
-                  </div>
-                  <div class="form-group-material">
-                    <input id="customer-postal" type="text" name="postal_code" class="input-material">
-                    <label for="customer-postal" class="label-material">{{__('db.Postal Code')}}</label>
-                  </div>
-                  <div class="form-group-material">
-                    <input id="customer-country" type="text" name="country" class="input-material">
-                    <label for="customer-country" class="label-material">{{__('db.Country')}}</label>
-                  </div>
-              </div>
-              <div class="form-group-material" id="biller-id">
-                <select name="biller_id" class="form-control">
-                  <option value="">Select Biller*</option>
-                  @foreach($lims_biller_list as $biller)
-                      <option value="{{$biller->id}}">{{$biller->name}} ({{$biller->phone_number}})</option>
-                  @endforeach
-                </select>
-              </div>
-              <div class="form-group-material" id="warehouse-id">
-                <select name="warehouse_id" class="form-control">
-                  <option value="">Select Warehouse*</option>
-                  @foreach($lims_warehouse_list as $warehouse)
-                      <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
-                  @endforeach
-                </select>
-              </div>
-              <div class="form-group-material">
-                <input id="password" type="password" class="input-material" name="password" required>
-                <label for="passowrd" class="label-material">{{__('db.Password')}} *</label>
-                @if ($errors->has('password'))
-                    <p>
-                        <strong>{{ $errors->first('password') }}</strong>
+                </div>
+
+                <form method="POST" action="{{ route('register') }}" id="register-form">
+                    @csrf
+                    
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold small">{{__('db.UserName')}} *</label>
+                            <input type="text" name="name" required class="form-control" value="{{old('name')}}">
+                            @if ($errors->has('name')) <small class="text-danger">{{ $errors->first('name') }}</small> @endif
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold small">{{__('db.Email')}} *</label>
+                            <input type="email" name="email" required class="form-control" value="{{old('email')}}">
+                            @if ($errors->has('email')) <small class="text-danger">{{ $errors->first('email') }}</small> @endif
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold small">{{__('db.Phone Number')}} *</label>
+                            <input type="text" name="phone_number" required class="form-control">
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold small">{{__('db.Company Name')}}</label>
+                            <input type="text" name="company_name" class="form-control">
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label class="font-weight-bold small">Role *</label>
+                            <select required name="role_id" id="role-id" class="form-control custom-select">
+                                <option value="">Select Role</option>
+                                @foreach($lims_role_list as $role)
+                                    @if($role->id != 1 && $role->id != 2)
+                                        <option value="{{$role->id}}">{{$role->name}}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div id="customer-section" class="col-12 d-none">
+                            <div class="card card-body bg-light-custom border-0 mb-3">
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label class="small font-weight-bold">{{__('db.name')}} *</label>
+                                        <input type="text" name="customer_name" class="form-control customer-field">
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label class="small font-weight-bold">Customer Group *</label>
+                                        <select name="customer_group_id" class="form-control customer-field">
+                                            <option value="">Select group</option>
+                                            @foreach($lims_customer_group_list as $customer_group)
+                                                <option value="{{$customer_group->id}}">{{$customer_group->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-12 form-group">
+                                        <label class="small font-weight-bold">{{__('db.Address')}} *</label>
+                                        <input type="text" name="address" class="form-control customer-field">
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label class="small font-weight-bold">{{__('db.City')}} *</label>
+                                        <input type="text" name="city" class="form-control customer-field">
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label class="small font-weight-bold">{{__('db.Country')}}</label>
+                                        <input type="text" name="country" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="biller-id" class="col-md-6 form-group d-none">
+                            <label class="small font-weight-bold">Biller *</label>
+                            <select name="biller_id" class="form-control">
+                                <option value="">Select Biller</option>
+                                @foreach($lims_biller_list as $biller)
+                                    <option value="{{$biller->id}}">{{$biller->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div id="warehouse-id" class="col-md-6 form-group d-none">
+                            <label class="small font-weight-bold">Warehouse *</label>
+                            <select name="warehouse_id" class="form-control">
+                                <option value="">Select Warehouse</option>
+                                @foreach($lims_warehouse_list as $warehouse)
+                                    <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold small">{{__('db.Password')}} *</label>
+                            <input id="password" type="password" name="password" required class="form-control">
+                            @if ($errors->has('password')) <small class="text-danger">{{ $errors->first('password') }}</small> @endif
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold small">{{__('db.Confirm Password')}} *</label>
+                            <input id="password-confirm" type="password" name="password_confirmation" required class="form-control">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block shadow-sm mt-3">Register</button>
+                    
+                    <p class="text-center mt-4 text-muted">
+                        {{__('db.Already have an account')}}? <a href="{{url('login')}}" class="text-primary font-weight-bold">{{__('db.LogIn')}}</a>
                     </p>
-                @endif
-              </div>
-              <div class="form-group-material">
-                <input id="password-confirm" type="password" name="password_confirmation" required class="input-material">
-                <label for="password-confirm" class="label-material">{{__('db.Confirm Password')}} *</label>
-              </div>
-              <input id="register" type="submit" value="Register" class="btn btn-primary">
-            </form><p>{{__('db.Already have an account')}}? </p><a href="{{url('login')}}" class="signup">{{__('db.LogIn')}}</a>
-          </div>
+                </form>
+            </div>
         </div>
-      </div>
+
+        <div class="col-lg-6 d-none d-lg-flex">
+            <div class="promo-side w-100">
+              <div>
+                <h1 class="font-weight-bold">Create Account</h1>
+                <p class="lead">Fill in the details to register.</p>
+              </div>
+            </div>
+        </div>
     </div>
-    <script type="text/javascript">
-
-      @if(config('database.connections.saleprosaas_landlord'))
-        numberOfUserAccount = <?php echo json_encode($numberOfUserAccount)?>;
-        $.ajax({
-            type: 'GET',
-            async: false,
-            url: '{{route("package.fetchData", $general_setting->package_id)}}',
-            success: function(data) {
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // 1. Landlord Limit Check (Fetch API replacement for $.ajax)
+    @if(config('database.connections.saleprosaas_landlord'))
+        const numberOfUserAccount = @json($numberOfUserAccount);
+        fetch('{{route("package.fetchData", $general_setting->package_id)}}')
+            .then(response => response.json())
+            .then(data => {
                 if(data['number_of_user_account'] > 0 && data['number_of_user_account'] <= numberOfUserAccount) {
-                    localStorage.setItem("message", "You don't have permission to create another user account as you already exceed the limit! Subscribe to another package if you wants more!");
-                    location.href = "{{route('user.index')}}";
+                    localStorage.setItem("message", "You have exceeded your user limit. Please upgrade your package.");
+                    window.location.href = "{{route('user.index')}}";
                 }
-            }
-        });
+            })
+            .catch(err => console.error("Error checking limits", err));
     @endif
-      // ------------------------------------------------------- //
-    // Material Inputs
-    // ------------------------------------------------------ //
 
-        var materialInputs = $('input.input-material');
+    // 2. Dynamic Section Toggling
+    const roleSelect = document.getElementById('role-id');
+    const customerSection = document.getElementById('customer-section');
+    const billerSection = document.getElementById('biller-id');
+    const warehouseSection = document.getElementById('warehouse-id');
 
-        // activate labels for prefilled values
-        materialInputs.filter(function() { return $(this).val() !== ""; }).siblings('.label-material').addClass('active');
+    const customerFields = document.querySelectorAll('.customer-field');
+    const billerSelect = document.querySelector('select[name="biller_id"]');
+    const warehouseSelect = document.querySelector('select[name="warehouse_id"]');
 
-        // move label on focus
-        materialInputs.on('focus', function () {
-            $(this).siblings('.label-material').addClass('active');
-        });
+    roleSelect.addEventListener('change', function() {
+        const roleId = this.value;
 
-        // remove/keep label on blur
-        materialInputs.on('blur', function () {
-            $(this).siblings('.label-material').removeClass('active');
+        // Reset all dynamic sections first
+        customerSection.classList.add('d-none');
+        billerSection.classList.add('d-none');
+        warehouseSection.classList.add('d-none');
+        
+        // Remove required attributes
+        customerFields.forEach(f => f.required = false);
+        billerSelect.required = false;
+        warehouseSelect.required = false;
 
-            if ($(this).val() !== '') {
-                $(this).siblings('.label-material').addClass('active');
-            } else {
-                $(this).siblings('.label-material').removeClass('active');
-            }
-        });
+        if (roleId === '5') {
+            // Customer Role
+            customerSection.classList.remove('d-none');
+            customerFields.forEach(f => f.required = true);
+        } 
+        else if (roleId !== "" && parseInt(roleId) > 2) {
+            // Staff/Other Roles
+            billerSection.classList.remove('d-none');
+            warehouseSection.classList.remove('d-none');
+            billerSelect.required = true;
+            warehouseSelect.required = true;
+        }
+    });
 
-
-        $("#biller-id").hide();
-        $("#warehouse-id").hide();
-        $("#customer-section").hide();
-
-        $("#role-id").on("change", function () {
-            if($(this).val() == '5') {
-              $("#customer-section").show(300);
-              $(".customer-field").prop('required', true);
-              $("#biller-id").hide(300);
-              $("#warehouse-id").hide(300);
-              $("select[name='biller_id']").prop('required', false);
-              $("select[name='warehouse_id']").prop('required', false);
-            }
-            else if($(this).val() > 2) {
-              $("#customer-section").hide(300);
-              $("#biller-id").show(300);
-              $("#warehouse-id").show(300);
-              $("select[name='biller_id']").prop('required', true);
-              $("select[name='warehouse_id']").prop('required', true);
-              $(".customer-field").prop('required', false);
-            }
-            else {
-              $("#biller-id").hide(300);
-              $("#warehouse-id").hide(300);
-              $("#customer-section").hide(300);
-              $("select[name='biller_id']").prop('required', false);
-              $("select[name='warehouse_id']").prop('required', false);
-              $(".customer-field").prop('required', false);
-            }
-        });
-    </script>
-  </body>
+    // 3. Simple dark mode helper for background colors
+    const body = document.body;
+    if (body.classList.contains('dark-mode')) {
+        // Any specific registration-only dark mode tweaks can go here
+    }
+});
+</script>
+</body>
 </html>
+

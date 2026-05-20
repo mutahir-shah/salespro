@@ -36,7 +36,20 @@
                                 <li>
                                     <button type="button" data-id="{{$table->id}}" data-name="{{$table->name}}" data-number_of_person="{{$table->number_of_person}}" data-description="{{$table->description}}" data-floor_id="{{$table->floor_id}}" class="edit-btn btn btn-link" data-toggle="modal" data-target="#editModal" ><i class="dripicons-document-edit"></i>  {{__('db.edit')}}</button>
                                 </li>
-                                <li class="divider"></li>
+                                @if(in_array('restaurant',explode(',',$general_setting->modules)))
+                                @if($table->qr_code_id)
+                                    <li>
+                                        <button type="button" data-id="{{$table->qr_code_id}}" class="btn btn-link btn-view-qr"><i class="fa fa-qrcode"></i> View QR</button>
+                                    </li>
+                                    <li>
+                                        <a href="{{ url('qr/download/'.$table->qr_code_id) }}" class="btn btn-link"><i class="dripicons-download"></i> Download QR</a>
+                                    </li>
+                                @else
+                                    <li>
+                                        <button type="button" data-id="{{$table->id}}" data-type="table" class="btn btn-link btn-generate-qr"><i class="fa fa-qrcode"></i> Generate QR</button>
+                                    </li>
+                                @endif
+                                @endif
                                 <form action="{{ route('tables.destroy', $table->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
@@ -65,7 +78,7 @@
             <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
           </div>
           <div class="modal-body">
-          <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+          <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
           <form>
           	<div class="row">
           		<div class="col-md-6 form-group">
@@ -112,7 +125,7 @@
         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
       </div>
       <div class="modal-body">
-        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
         <form>
 	      	<div class="row">
 	      		<div class="col-md-6 form-group">

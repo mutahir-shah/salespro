@@ -39,9 +39,8 @@ class Language extends Model
         setcookie('language', $language->language, time() + (86400 * 365), '/');
         Cache::forever('default_language', $language);
         
-        session(['locale' => $language->code]);
-        app()->setLocale($language->code);
-        config(['app.locale' => $language->code]);
+        app()->setLocale($language->language);
+        config(['app.locale' => $language->language]);
 
         Artisan::call('cache:clear');
         Artisan::call('config:clear');

@@ -84,6 +84,100 @@
     </div>
 </section>
 
+<div id="add-payment" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
+    <div role="document" class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="exampleModalLabel" class="modal-title">Finalized</h5>
+                <button type="button" data-dismiss="modal" aria-label="Close" class="close">
+                    <span aria-hidden="true"><i class="dripicons-cross"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('challan.add-payment') }}" method="post" enctype="multipart/form-data" class="payment-form" id="add-payment-form">
+                    @csrf
+                    <div class="row">
+                        <input type="hidden" name="balance">
+                        <input type="hidden" name="challan_id">
+
+                        <div class="col-md-12 mt-3">
+                            <h5>Order List</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="modal-order-table">
+                                    <thead>
+                                        <tr>
+                                            <th>PS Ref</th>
+                                            <th>Order Ref</th>
+                                            <th>Payment Method</th>
+                                            <th>Amt Received</th>
+                                            <th>Del. Charge</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modal-order-list">
+                                        <!-- AJAX populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        {{-- Account --}}
+                        <div class="col-md-4">
+                            <label>{{__('db.Account')}}</label>
+                            <select class="form-control selectpicker" name="account_id">
+                                @foreach($lims_account_list as $account)
+                                    @if(auth()->user()->account_id === $account->id)
+                                        <option selected value="{{$account->id}}">{{$account->name}} [{{$account->account_no}}]</option>
+                                    @elseif($account->is_default)
+                                        <option selected value="{{$account->id}}">{{$account->name}} [{{$account->account_no}}]</option>
+                                    @else
+                                        <option value="{{$account->id}}">{{$account->name}} [{{$account->account_no}}]</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        {{-- Payment Receiver --}}
+                        <div class="col-md-4">
+                            <label>{{__('db.Payment Receiver')}}</label>
+                            <input type="text" name="payment_receiver" class="form-control">
+                        </div>
+
+                        {{-- Payment Date --}}
+                        <div class="col-md-4">
+                            <label>{{ __('db.Payment Date') }}</label>
+                            <input type="text" name="payment_at" id="payment_at" class="form-control"
+                                value="{{ date('Y-m-d') }}" required>
+                        </div>
+
+                        {{-- Attach Document --}}
+                        <div class="col-md-12 mt-2">
+                            <label>{{__('db.Attach Document')}}</label>
+                            <input type="file" name="document" class="form-control" />
+                        </div>
+
+                        {{-- Payment Note --}}
+                        <div class="col-md-12 mt-2">
+                            <label>{{__('db.Payment Note')}}</label>
+                            <textarea rows="3" class="form-control" name="payment_note"></textarea>
+                        </div>
+                    </div>
+
+                    {{-- <div class="d-none">
+                        <select name="paid_by_id">
+                            <option value="1">Cash</option>
+                        </select>
+                    </div> --}}
+
+                    <button type="submit" class="btn btn-primary" id="add-payment-submit-btn">
+                        {{__('db.submit')}}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -102,6 +196,141 @@
 
         $("#courier-id").val(<?php echo json_encode($courier_id) ?>);
         var challan_id = [];
+        var balance = {};
+        var expired_date = {};
+        var current_date = <?php echo json_encode(date("Y-m-d")) ?>;
+        var paymentOptions = <?php echo json_encode($options) ?>;
+
+        $(document).on("click", "table.challan-list tbody .add-payment", function() {
+            $("#cheque").hide();
+            $(".gift-card").hide();
+            $(".card-element").hide();
+            $('select[name="paid_by_id"]').val(1);
+            $('.selectpicker').selectpicker('refresh');
+
+            var id = $(this).data('id').toString();
+            $('input[name="challan_id"]').val(id);
+            
+            // Fetch Packing Slips via AJAX
+            $.get('{{url("challans/get-packing-slips")}}/' + id, function(data) {
+                var html = '';
+                $.each(data, function(key, ps) {
+                    var order_amount = parseFloat(ps.amount) || 0;
+                    var sale_due = parseFloat(ps.due) || 0;
+                    var max_payable = Math.min(order_amount, sale_due);
+                    if (max_payable < 0) max_payable = 0;
+
+                    var is_disabled = (ps.is_paid || sale_due <= 0) ? 'readonly' : '';
+                    var paid_amount = is_disabled ? 0 : max_payable;
+
+                    html += '<tr>';
+                    html += '<td><span class="badge badge-info">' + ps.reference + '</span></td>';
+                    html += '<td>' + ps.order_reference + '</td>';
+                    html += '<td>';
+                    html += '    <select name="paying_method_list[]" class="form-control modal_paying_method" ' + (is_disabled ? 'disabled' : '') + '>';
+                    if(paymentOptions.length > 0) {
+                        $.each(paymentOptions, function(i, option) {
+                            html += '        <option value="' + option + '">' + option + '</option>';
+                        });
+                    } else {
+                        html += '        <option value="Cash">Cash</option>';
+                    }
+                    html += '    </select>';
+                    html += '    <div class="mt-1 modal-payment-note-container d-none">';
+                    html += '        <input type="text" name="payment_note_list[]" class="form-control form-control-sm" placeholder="Note/Cheque No">';
+                    html += '    </div>';
+                    html += '</td>';
+                    html += '<td>';
+                    html += '    <input type="number" name="paid_amount_list[]" class="form-control modal_paid_amount" step="any" value="' + paid_amount.toFixed(2) + '" ' + is_disabled + ' required>';
+                    html += '    <input type="hidden" class="modal-max-payable" value="' + max_payable + '">';
+                    html += '    <input type="hidden" class="modal-sale-due" value="' + sale_due + '">';
+                    html += '    <small class="text-muted"><b>PS Amt:</b> ' + order_amount.toFixed(2) + ' | <b>Sale Due:</b> ' + sale_due.toFixed(2) + '</small>';
+                    html += '</td>';
+                    html += '<td><input type="number" name="delivery_charge_list[]" class="form-control modal_delivery_charge_list" step="any" value="0"></td>';
+                    html += '</tr>';
+                });
+                $('#modal-order-list').html(html);
+                $('.selectpicker').selectpicker('refresh');
+            });
+        });
+
+        // Toggle payment note in modal
+        $(document).on('change', '.modal_paying_method', function() {
+            var method = $(this).val();
+            var noteContainer = $(this).closest('td').find('.modal-payment-note-container');
+            if(method && method.toLowerCase() === 'cheque') {
+                noteContainer.removeClass('d-none');
+            } else {
+                noteContainer.addClass('d-none');
+                noteContainer.find('input').val('');
+            }
+        });
+
+        // Real-time validation for paid amount
+        $(document).on('input', '.modal_paid_amount', function() {
+            var maxPayable = parseFloat($(this).closest('tr').find('.modal-max-payable').val()) || 0;
+            var val = parseFloat($(this).val()) || 0;
+            if(val > (maxPayable + 0.01)) {
+                $(this).addClass('is-invalid').css('border-color', '#dc3545');
+                if(!$(this).next('.invalid-feedback').length) {
+                    $(this).after('<div class="invalid-feedback d-block text-danger" style="font-size: 11px;">Max allowed: ' + maxPayable.toFixed(2) + '</div>');
+                }
+            } else {
+                $(this).removeClass('is-invalid').css('border-color', '');
+                $(this).next('.invalid-feedback').remove();
+            }
+        });
+
+        // Validation for Modal Submission
+        $('#add-payment-form').on('submit', function(e) {
+            var isValid = true;
+            $('#modal-order-table tbody tr').each(function() {
+                var maxPayable = parseFloat($(this).find('.modal-max-payable').val()) || 0;
+                var paidAmount = parseFloat($(this).find('.modal_paid_amount').val()) || 0;
+                var isReadonly = $(this).find('.modal_paid_amount').attr('readonly');
+                var orderRef = $(this).find('td:nth-child(2)').text().trim();
+
+                if (!isReadonly && paidAmount > 0) {
+                    if (paidAmount > (maxPayable + 0.01)) {
+                        alert('Error: Paid amount (' + paidAmount + ') cannot exceed the maximum payable amount (' + maxPayable.toFixed(2) + ') for Order: ' + orderRef);
+                        isValid = false;
+                        return false;
+                    }
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+        $('input[name="paying_amount"]').on("input", function() {
+            $(".change").text(parseFloat($(this).val() - $('input[name="amount"]').val()).toFixed(2));
+        });
+
+        $('input[name="amount"]').on("input", function() {
+            if (parseFloat($(this).val()) > parseFloat($('input[name="paying_amount"]').val())) {
+                alert('Paying amount cannot be bigger than recieved amount');
+                $(this).val('');
+            }
+            else if (parseFloat($(this).val()) > parseFloat($('input[name="balance"]').val())) {
+                alert('Paying amount cannot be bigger than due amount');
+                $(this).val('');
+            }
+            $(".change").text(parseFloat($('input[name="paying_amount"]').val() - $(this).val()).toFixed(2));
+        });
+
+        $('select[name="paid_by_id"]').on("change", function() {
+            var id = $(this).val();
+            $(".payment-form").off("submit");
+            if(id == 4) {
+                $("#cheque").show();
+                $('input[name="cheque_no"]').attr('required', true);
+            } else {
+                $("#cheque").hide();
+                $('input[name="cheque_no"]').attr('required', false);
+            }
+        });
 
         $(document).on('submit', '#challan-deposit-form', function(e) {
             challan_id.length = 0;

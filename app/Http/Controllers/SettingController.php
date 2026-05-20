@@ -827,6 +827,11 @@ class SettingController extends Controller
         else
             $pos_setting->cash_register = true;
 
+        if (!isset($data['play_sound']))
+            $pos_setting->play_sound = false;
+        else
+            $pos_setting->play_sound = true;
+
         if (!isset($data['show_print_invoice']))
             $pos_setting->show_print_invoice = false;
         else

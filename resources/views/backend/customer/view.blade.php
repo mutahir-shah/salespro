@@ -1,4 +1,4 @@
-@extends('backend.layout.main')
+﻿@extends('backend.layout.main')
 
 @push('css')
 <style>
@@ -63,7 +63,7 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#installments-latest" role="tab" data-toggle="tab">
-                Installments
+                {{ __('db.Instalments') }}
             </a>
         </li>
     </ul>
@@ -169,7 +169,7 @@
             </div>
         </div>
 
-        <!-- INSTALLMENT TAB -->
+        <!-- INSTALMENT TAB -->
         <div role="tabpanel" class="tab-pane fade" id="installments-latest">
             <div class="table-responsive">
                 <table id="recent-installments" class="table w-100">
@@ -178,7 +178,7 @@
                             <th>Date</th>
                             <th>Sale Reference</th>
                             <th>Purchase Reference</th>
-                            <th>Installment No</th>
+                            <th>Instalment No</th>
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Payment Date</th>
@@ -392,7 +392,7 @@ $(function () {
         ]
     });
 
-    // INSTALLMENTS TABLE
+    // INSTALMENTS TABLE
     $('#recent-installments').DataTable({
         ajax: "{{ route('customers.installments', $lims_customer_data->id) }}",
         columns: [
@@ -412,7 +412,7 @@ $(function () {
                 extend: "pdfHtml5",
                 text: '<i class="fa fa-file-pdf-o"></i>',
                 className: 'btn btn-sm btn-danger me-1',
-                title: 'Customer Installments',
+                title: 'Customer Instalments',
                 footer: true,
                 exportOptions: {
                     columns: ':visible:not(.not-exported)'

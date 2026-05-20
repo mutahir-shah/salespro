@@ -56,3 +56,24 @@ if (!function_exists('normalize_to_sql_datetime')) {
         }
     }
 }
+
+if (!function_exists('format_currency')) {
+    function format_currency($amount, $currency = null, $position = null, $decimal = null, $mask = false)
+    {
+        if ($mask) {
+            return '****';
+        }
+
+        $currency = $currency ?? config('currency');
+        $position = $position ?? config('currency_position');
+        $decimal  = $decimal ?? config('decimal');
+
+        $formatted = number_format((float) $amount, $decimal, '.', '');
+
+        if ($position == 'prefix') {
+            return $currency . ' ' . $formatted;
+        }
+
+        return $formatted . ' ' . $currency;
+    }
+}

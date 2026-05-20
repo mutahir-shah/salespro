@@ -1,4 +1,4 @@
-@extends('backend.layout.main') @section('content')
+﻿@extends('backend.layout.main') @section('content')
 
 <x-success-message key="message" />
 <x-error-message key="not_permitted" />
@@ -12,7 +12,7 @@
                         <h4>{{__('db.POS Setting')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('setting.posStore') }}" method="POST">
                             @csrf
                             <div class="row">
@@ -102,6 +102,14 @@
                                     <input class="mt-2" type="checkbox" name="show_print_invoice" value="1">
                                     @endif
                                     <label class="mt-2">{{__('db.print_invoice')}} <x-info title="If unchecked invoice will not print after sales" type="info" /></label>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2">
+                                    @if($lims_pos_setting_data && $lims_pos_setting_data->play_sound)
+                                    <input class="mt-2" type="checkbox" name="play_sound" value="1" checked>
+                                    @else
+                                    <input class="mt-2" type="checkbox" name="play_sound" value="1">
+                                    @endif
+                                    <label class="mt-2">{{__('db.play_sound')}} <x-info title="If unchecked sound will not play on pos page" type="info" /></label>
                                 </div>
                             </div>
                             <hr>
@@ -196,7 +204,7 @@
                                     @else
                                     <input class="mt-2" type="checkbox" name="options[]" value="installment">
                                     @endif
-                                    <label class="mt-2">Installment</label>
+                                    <label class="mt-2">Instalment</label>
                                 </div>
 
                                 {{-- <div class="form-group d-inline">

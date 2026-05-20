@@ -38,126 +38,12 @@
                         </div>
 
                     </div>
-                    <!-- <div class="col-md-3 mt-3">
-                        <div class="form-group row">
-                            <label class="d-tc mt-2"><strong>Starting Date</strong> &nbsp;</label>
-                            <div class="d-tc">
-                                <div class="input-group">
-                                    <input type="text" class="date form-control" name="starting_date" value="{{$starting_date}}" required />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mt-3">
-                        <div class="form-group row">
-                            <label class="d-tc mt-2"><strong>Ending Date</strong> &nbsp;</label>
-                            <div class="d-tc">
-                                <div class="input-group">
-                                    <input type="text" class="date form-control" name="ending_date" value="{{$ending_date}}" required />
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-                    <div class="col-md-2 mt-5">
-                        <div class="form-group">
-                            <button class="btn btn-primary" type="submit">Submit</button>
-                        </div>
-                    </div>
                 </div>
             </form>
         </div>
     </div>
-    <div class="table-responsive">
-        <table id="challan-table" class="table table-striped">
-            <thead>
-                <tr>
-                    <th class="not-exported"></th>
-                    <th>Challan No</th>
-                    <th>Order No</th>
-                    <th>Order Date</th>
-                    <th>code</th>
-                    <th>Delivery Date</th>
-                    <th>Sales Amount</th>
-                    <th>Cash Payment</th>
-                    <th>Online Payment</th>
-                    <th>Cheque Payment</th>
-                    <th>Shipping Income</th>
-                    <th>Delivery Charge</th>
-                    <th>Net</th>
-                    <th>Net Cash</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($challan_data as $challan)
-                <?php
-                    $packingSlipList = explode(",", $challan->packing_slip_list);
-                    $status_list = explode(",", $challan->status_list);
-                    $cash_list = explode(",", $challan->cash_list);
-                    $cheque_list = explode(",", $challan->cheque_list);
-                    $online_payment_list = explode(",", $challan->online_payment_list);
-                    $delivery_charge_list = explode(",", $challan->delivery_charge_list);
-                ?>
-                    @foreach($packingSlipList as  $key => $packingSlipId)
-                    <?php $packingSlip = \App\Models\PackingSlip::with('sale.products')->find($packingSlipId); ?>
-                    <?php
-                        if(!$cash_list[$key])
-                            $cash_list[$key] = 0;
-                        if(!$online_payment_list[$key])
-                            $online_payment_list[$key] = 0;
-                        if(!$cheque_list[$key])
-                            $cheque_list[$key] = 0;
-                        if(!$delivery_charge_list[$key])
-                            $delivery_charge_list[$key] = 0;
-                    ?>
-                    <tr>
-                        <td><?php echo $index ?></td>
-                        <td>DC-{{$challan->reference_no}}</td>
-                        <td>{{$packingSlip->sale->reference_no ?? '-'}}</td>
-
-                        <td>{{date(config('date_format'), strtotime($packingSlip->sale->created_at))}}</td>
-                        <td>
-                            @foreach($packingSlip->sale->products as $i => $product)
-                            @if($i),@endif
-                            {{$product->code}}
-                            @endforeach
-                        </td>
-                        <td>
-                            @if($packingSlip->sale->sale_status == 1)
-                                {{date(config('date_format'), strtotime($packingSlip->sale->updated_at))}}
-                            @else
-                                N/A
-                            @endif
-                        </td>
-                        <td>{{$packingSlip->sale->grand_total}}</td>
-                        <td>{{$cash_list[$key]}}</td>
-                        <td>{{$online_payment_list[$key]}}</td>
-                        <td>{{$cheque_list[$key]}}</td>
-                        <td>{{$packingSlip->sale->shipping_cost}}</td>
-                        <td>{{$delivery_charge_list[$key]}}</td>
-                        <td>{{$cash_list[$key] + $online_payment_list[$key] + $cheque_list[$key] - $delivery_charge_list[$key]}}</td>
-                        <td>{{$cash_list[$key] - $delivery_charge_list[$key]}}</td>
-                    </tr>
-                    <?php $index++; ?>
-                    @endforeach
-                @endforeach
-            </tbody>
-            <tfoot>
-                <th></th>
-                <th>Total:</th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tfoot>
-        </table>
+    <div class="table-responsive" id="report-table">
+        @include('backend.report.partials.challan_table')
     </div>
 </section>
 
@@ -171,90 +57,130 @@
         $("ul#report").addClass("show");
         $("ul#report #challan-report-menu").addClass("active");
 
-        $('#challan-table').DataTable( {
-            "order": [],
-            'columnDefs': [
-                {
-                    "orderable": false,
-                    'targets': [0]
-                },
-                {
-                    'checkboxes': {
-                       'selectRow': true
+        function initializeChallanTable() {
+            var table = $('#challan-table').DataTable( {
+                "destroy": true,
+                "order": [],
+                'columnDefs': [
+                    {
+                        "orderable": false,
+                        'targets': [0]
                     },
-                    'targets': 0
+                    {
+                        'checkboxes': {
+                           'selectRow': true
+                        },
+                        'targets': 0
+                    }
+                ],
+                'select': { style: 'multi',  selector: 'td:first-child'},
+                'lengthMenu': [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                dom: '<"row"lfB>rtip',
+                buttons: [
+                    {
+                        extend: 'pdf',
+                        text: '<i title="export to pdf" class="fa fa-file-pdf-o"></i>',
+                        exportOptions: {
+                            columns: ':visible:Not(.not-exported)',
+                            rows: ':visible'
+                        },
+                        action: function(e, dt, button, config) {
+                            datatable_sum(dt, true);
+                            $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+                            datatable_sum(dt, false);
+                        },
+                        footer:true
+                    },
+                    {
+                        extend: 'excel',
+                        text: '<i title="export to excel" class="dripicons-document-new"></i>',
+                        exportOptions: {
+                            columns: ':visible:Not(.not-exported)',
+                            rows: ':visible'
+                        },
+                        action: function(e, dt, button, config) {
+                            datatable_sum(dt, true);
+                            $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                            datatable_sum(dt, false);
+                        },
+                        footer:true
+                    },
+                    {
+                        extend: 'csv',
+                        text: '<i title="export to csv" class="fa fa-file-text-o"></i>',
+                        exportOptions: {
+                            columns: ':visible:Not(.not-exported)',
+                            rows: ':visible'
+                        },
+                        action: function(e, dt, button, config) {
+                            datatable_sum(dt, true);
+                            $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
+                            datatable_sum(dt, false);
+                        },
+                        footer:true
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i title="print" class="fa fa-print"></i>',
+                        exportOptions: {
+                            columns: ':visible:not(.not-exported)',
+                            rows: ':visible',
+                        },
+                        action: function(e, dt, button, config) {
+                            datatable_sum(dt, true);
+                            $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+                            datatable_sum(dt, false);
+                        },
+                        footer:true
+                    },
+                    {
+                        extend: 'colvis',
+                        columns: ':gt(0)'
+                    },
+                ],
+                drawCallback: function () {
+                    var api = this.api();
+                    datatable_sum(api, false);
                 }
-            ],
-            'select': { style: 'multi',  selector: 'td:first-child'},
-            'lengthMenu': [[10, 25, 50, -1], [10, 25, 50, "All"]],
-            dom: '<"row"lfB>rtip',
-            buttons: [
-                {
-                    extend: 'pdf',
-                    text: '<i title="export to pdf" class="fa fa-file-pdf-o"></i>',
-                    exportOptions: {
-                        columns: ':visible:Not(.not-exported)',
-                        rows: ':visible'
-                    },
-                    action: function(e, dt, button, config) {
-                        datatable_sum(dt, true);
-                        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
-                        datatable_sum(dt, false);
-                    },
-                    footer:true
+            });
+        }
+
+        initializeChallanTable();
+
+        function reloadChallanTable() {
+            var starting_date = $('input[name="starting_date"]').val();
+            var ending_date = $('input[name="ending_date"]').val();
+            var based_on = $('select[name="based_on"]').val();
+
+            $.ajax({
+                url: "{{ route('report.challan') }}",
+                data: {
+                    starting_date: starting_date,
+                    ending_date: ending_date,
+                    based_on: based_on
                 },
-                {
-                    extend: 'excel',
-                    text: '<i title="export to excel" class="dripicons-document-new"></i>',
-                    exportOptions: {
-                        columns: ':visible:Not(.not-exported)',
-                        rows: ':visible'
-                    },
-                    action: function(e, dt, button, config) {
-                        datatable_sum(dt, true);
-                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
-                        datatable_sum(dt, false);
-                    },
-                    footer:true
+                method: 'GET',
+                beforeSend: function () {
+                    $('#report-table').html('<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>');
                 },
-                {
-                    extend: 'csv',
-                    text: '<i title="export to csv" class="fa fa-file-text-o"></i>',
-                    exportOptions: {
-                        columns: ':visible:Not(.not-exported)',
-                        rows: ':visible'
-                    },
-                    action: function(e, dt, button, config) {
-                        datatable_sum(dt, true);
-                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
-                        datatable_sum(dt, false);
-                    },
-                    footer:true
-                },
-                {
-                    extend: 'print',
-                    text: '<i title="print" class="fa fa-print"></i>',
-                    exportOptions: {
-                        columns: ':visible:not(.not-exported)',
-                        rows: ':visible',
-                    },
-                    action: function(e, dt, button, config) {
-                        datatable_sum(dt, true);
-                        $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
-                        datatable_sum(dt, false);
-                    },
-                    footer:true
-                },
-                {
-                    extend: 'colvis',
-                    columns: ':gt(0)'
-                },
-            ],
-            drawCallback: function () {
-                var api = this.api();
-                datatable_sum(api, false);
-            }
-        } );
+                success: function (response) {
+                    $('#report-table').html(response);
+                    initializeChallanTable();
+                }
+            });
+        }
+
+        // auto reload on dropdown change
+        $('select[name="based_on"]').on('change', function () {
+            reloadChallanTable();
+        });
+
+        // auto reload on date change
+        $('.daterangepicker-field').on('apply.daterangepicker', function(ev, picker) {
+            $('input[name="starting_date"]').val(picker.startDate.format('YYYY-MM-DD'));
+            $('input[name="ending_date"]').val(picker.endDate.format('YYYY-MM-DD'));
+            reloadChallanTable();
+        });
 
         function datatable_sum(dt_selector, is_calling_first) {
             if (dt_selector.rows( '.selected' ).any() && is_calling_first) {

@@ -96,10 +96,8 @@ class CategoryController extends Controller
                 $total_price = $category->product()->where('is_active', true)->sum(DB::raw('price * qty'));
                 $total_cost = $category->product()->where('is_active', true)->sum(DB::raw('cost * qty'));
 
-                if(config('currency_position') == 'prefix')
-                    $nestedData['stock_worth'] = config('currency').' '.$total_price.' / '.config('currency').' '.$total_cost;
-                else
-                    $nestedData['stock_worth'] = $total_price.' '.config('currency').' / '.$total_cost.' '.config('currency');
+                $nestedData['stock_worth'] = format_currency($total_price).' / '.format_currency($total_cost);
+
 
                 $nestedData['options'] = '<div class="btn-group">
                             <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.__("db.action").'

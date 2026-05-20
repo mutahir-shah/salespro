@@ -13,7 +13,7 @@
                         </div>
                         <div class="card-body">
                             <p class="italic">
-                                <small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                                <small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                             <form action="{{ route('discounts.store') }}" method="POST">
                                 @csrf
                                 <div class="row">

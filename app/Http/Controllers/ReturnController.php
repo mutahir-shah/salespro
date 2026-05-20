@@ -2,38 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Mail\ReturnDetails;
+use App\Models\Account;
+use App\Models\Biller;
+use App\Models\CashRegister;
+use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\CustomerGroup;
-use App\Models\Warehouse;
-use App\Models\Biller;
-use App\Models\Product;
-use App\Models\Unit;
-use App\Models\Tax;
-use App\Models\Product_Warehouse;
-use App\Models\ProductBatch;
-use Illuminate\Support\Facades\DB;
-use App\Models\Returns;
-use App\Models\Account;
-use App\Models\ProductReturn;
-use App\Models\ProductVariant;
-use App\Models\Variant;
-use App\Models\CashRegister;
-use App\Models\Sale;
-use App\Models\Product_Sale;
-use App\Models\Currency;
-use Auth;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use App\Mail\ReturnDetails;
-use Mail;
-use Illuminate\Support\Facades\Validator;
 use App\Models\MailSetting;
 use App\Models\Payment;
+use App\Models\Product_Sale;
+use App\Models\Product_Warehouse;
+use App\Models\Product;
+use App\Models\ProductBatch;
+use App\Models\ProductReturn;
+use App\Models\ProductVariant;
+use App\Models\Returns;
 use App\Models\RewardPointSetting;
+use App\Models\Sale;
+use App\Models\Tax;
+use App\Models\Unit;
+use App\Models\Variant;
+use App\Models\Warehouse;
 use App\Traits\MailInfo;
 use App\Traits\StaffAccess;
 use App\Traits\TenantInfo;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Mail;
+use Spatie\Permission\Models\Role;
 
 class ReturnController extends Controller
 {
@@ -125,107 +124,44 @@ class ReturnController extends Controller
         else
         {
             $search = $request->input('search.value');
+
             $q = Returns::join('customers', 'returns.customer_id', '=', 'customers.id')
                 ->join('billers', 'returns.biller_id', '=', 'billers.id')
-                ->whereDate('returns.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
+                ->leftJoin('product_returns', 'returns.id', '=', 'product_returns.return_id')
+                ->leftJoin('products', 'product_returns.product_id', '=', 'products.id')
+                ->whereDate('returns.created_at', '>=' ,$request->input('starting_date'))
+                ->whereDate('returns.created_at', '<=' ,$request->input('ending_date'));
+
+            // ✅ Access control FIRST
+            if(Auth::user()->role_id > 2 && config('staff_access') == 'own') {
+                $q->where('returns.user_id', Auth::id());
+            } elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse') {
+                $q->where('returns.warehouse_id', Auth::user()->warehouse_id);
+            } elseif($warehouse_id != 0) {
+                $q->where('returns.warehouse_id', $warehouse_id);
+            }
+
+            // ✅ Safe search
+            $q->where(function ($query) use ($search) {
+                $query->orWhere('returns.reference_no', 'LIKE', "%{$search}%")
+                    ->orWhere('customers.name', 'LIKE', "%{$search}%")
+                    ->orWhere('customers.phone_number', 'LIKE', "%{$search}%")
+                    ->orWhere('billers.name', 'LIKE', "%{$search}%")
+                    ->orWhere('products.name', 'LIKE', "%{$search}%")
+                    ->orWhere('products.code', 'LIKE', "%{$search}%");
+            });
+
+            // ✅ Count
+            $totalFiltered = $q->distinct('returns.id')->count('returns.id');
+
+            // ✅ Fetch
+            $returnss = $q->select('returns.*')
+                ->with('biller', 'customer', 'warehouse', 'user')
+                ->distinct('returns.id')
                 ->offset($start)
                 ->limit($limit)
-                ->orderBy($order,$dir);
-            if(Auth::user()->role_id > 2 && config('staff_access') == 'own') {
-                $returnss =  $q->select('returns.*')
-                            ->with('biller', 'customer', 'warehouse', 'user')
-                            ->where('returns.user_id', Auth::id())
-                            ->orwhere([
-                                ['returns.reference_no', 'LIKE', "%{$search}%"],
-                                ['returns.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['customers.name', 'LIKE', "%{$search}%"],
-                                ['returns.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['customers.phone_number', 'LIKE', "%{$search}%"],
-                                ['returns.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['billers.name', 'LIKE', "%{$search}%"],
-                                ['returns.user_id', Auth::id()]
-                            ])->get();
-
-                $totalFiltered = $q->where('returns.user_id', Auth::id())
-                                ->orwhere([
-                                    ['returns.reference_no', 'LIKE', "%{$search}%"],
-                                    ['returns.user_id', Auth::id()]
-                                ])
-                                ->orwhere([
-                                    ['customers.name', 'LIKE', "%{$search}%"],
-                                    ['returns.user_id', Auth::id()]
-                                ])
-                                ->orwhere([
-                                    ['customers.phone_number', 'LIKE', "%{$search}%"],
-                                    ['returns.user_id', Auth::id()]
-                                ])
-                                ->orwhere([
-                                    ['billers.name', 'LIKE', "%{$search}%"],
-                                    ['returns.user_id', Auth::id()]
-                                ])
-                                ->count();
-            }
-            elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse') {
-                $returnss =  $q->select('returns.*')
-                            ->with('biller', 'customer', 'warehouse', 'user')
-                            ->where('returns.user_id', Auth::id())
-                            ->orwhere([
-                                ['returns.reference_no', 'LIKE', "%{$search}%"],
-                                ['returns.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['customers.name', 'LIKE', "%{$search}%"],
-                                ['returns.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['customers.phone_number', 'LIKE', "%{$search}%"],
-                                ['returns.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['billers.name', 'LIKE', "%{$search}%"],
-                                ['returns.warehouse_id', Auth::user()->warehouse_id]
-                            ])->get();
-
-                $totalFiltered = $q->where('returns.user_id', Auth::id())
-                                ->orwhere([
-                                    ['returns.reference_no', 'LIKE', "%{$search}%"],
-                                    ['returns.warehouse_id', Auth::user()->warehouse_id]
-                                ])
-                                ->orwhere([
-                                    ['customers.name', 'LIKE', "%{$search}%"],
-                                    ['returns.warehouse_id', Auth::user()->warehouse_id]
-                                ])
-                                ->orwhere([
-                                    ['customers.phone_number', 'LIKE', "%{$search}%"],
-                                    ['returns.warehouse_id', Auth::user()->warehouse_id]
-                                ])
-                                ->orwhere([
-                                    ['billers.name', 'LIKE', "%{$search}%"],
-                                    ['returns.warehouse_id', Auth::user()->warehouse_id]
-                                ])
-                                ->count();
-            }
-            else {
-                $returnss =  $q->select('returns.*')
-                            ->with('biller', 'customer', 'warehouse', 'user')
-                            ->orwhere('returns.reference_no', 'LIKE', "%{$search}%")
-                            ->orwhere('customers.name', 'LIKE', "%{$search}%")
-                            ->orwhere('customers.phone_number', 'LIKE', "%{$search}%")
-                            ->orwhere('billers.name', 'LIKE', "%{$search}%")
-                            ->get();
-
-                $totalFiltered = $q->orwhere('returns.reference_no', 'LIKE', "%{$search}%")
-                                ->orwhere('customers.name', 'LIKE', "%{$search}%")
-                                ->orwhere('customers.phone_number', 'LIKE', "%{$search}%")
-                                ->orwhere('billers.name', 'LIKE', "%{$search}%")
-                                ->count();
-            }
+                ->orderBy($order, $dir)
+                ->get();
         }
         $data = array();
         if(!empty($returnss))
@@ -381,10 +317,10 @@ class ReturnController extends Controller
             $refund = $request->refund ?? 0;
 
             // refund logic only for completed sale and payment status is paid(4) or partial(3)
-            if($refund == 1 && $lims_sale_data->payment_status > '2') { 
+            if($refund && $lims_sale_data->paid_amount > 0) { 
 
                 // REFUND PAYMENT LOGIC
-                $refund_amount = $request->refund_amount ?? $lims_return_data->grand_total;
+                $refund_amount = $request->refund_amount ?? $lims_sale_data->paid_amount;
                 $paying_method = $request->paying_method ?? 'Cash';
 
                 // create payment reference
@@ -1282,7 +1218,12 @@ class ReturnController extends Controller
                     $product_return_data->delete();
                 }
             }
+
             $lims_return_data->delete();
+            if($refund){
+                $refund->delete();
+            }
+
             $this->fileDelete(public_path('documents/sale_return/'), $lims_return_data->document);
 
         }
@@ -1294,8 +1235,8 @@ class ReturnController extends Controller
         $lims_return_data = Returns::find($id);
         $refund = Payment::where('return_id', $lims_return_data->id)->latest()->first();
 
-        if($refund) {
-            return redirect('return-sale')->with('not_permitted', __('db.Sorry! This return cannot be deleted due to existing refund payment. Please delete the refund payment first.'));
+        if($refund){
+            $refund->delete();
         }
 
         $lims_product_return_data = ProductReturn::where('return_id', $id)->get();

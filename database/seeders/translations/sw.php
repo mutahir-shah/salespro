@@ -130,7 +130,7 @@ return array (
   21 => 
   array (
     'locale' => 'sw',
-    'key' => 'The field labels marked with * are required input fields',
+    'key' => 'The field labels marked with are required input fields',
     'value' => 'Lebo za sehemu zilizo na alama ya * zinahitajika sehemu za kuingiza',
   ),
   22 => 

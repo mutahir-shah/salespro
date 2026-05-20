@@ -91,7 +91,7 @@
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-              <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+              <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                 <form action="{{ route('accounts.update', 1) }}" method="POST">
                     @csrf
                     @method('PUT')

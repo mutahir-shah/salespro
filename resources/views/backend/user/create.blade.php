@@ -11,7 +11,7 @@
                         <h4>{{__('db.Add User')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('user.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="row">
@@ -98,14 +98,14 @@
                                           @endforeach
                                         </select>
                                     </div>
-                                    <div class="form-group" id="accountId">
+                                    <!-- <div class="form-group" id="accountId">
                                         <label>{{__('db.Account')}}</strong></label>
                                         <select name="account_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select Account...">
                                           @foreach($lims_account_list as $account)
                                               <option value="{{$account->id}}">{{$account->name}}</option>
                                           @endforeach
                                         </select>
-                                    </div>
+                                    </div> -->
                                     <div class="customer-section">
                                         <div class="form-group">
                                             <label>{{__('db.Customer Group')}} *</strong></label>

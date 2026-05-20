@@ -26,7 +26,7 @@
                         <h4>{{__('db.Update Sale')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('sales.update', $lims_sale_data->id) }}" method="POST" enctype="multipart/form-data" id="payment-form">
                             @csrf
                             @method('PUT')
@@ -642,8 +642,6 @@
             $results.html('<div class="loader " title="4" style="border:none;min-height:300px"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="30px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve"><rect x="0" y="0" width="4" height="10" fill="#333"><animateTransform attributeType="xml" attributeName="transform" type="translate" values="0 0; 0 20; 0 0" begin="0" dur="0.6s" repeatCount="indefinite"></animateTransform></rect><rect x="10" y="0" width="4" height="10" fill="#333"><animateTransform attributeType="xml" attributeName="transform" type="translate" values="0 0; 0 20; 0 0" begin="0.2s" dur="0.6s" repeatCount="indefinite"></animateTransform></rect><rect x="20" y="0" width="4" height="10" fill="#333"><animateTransform attributeType="xml" attributeName="transform" type="translate" values="0 0; 0 20; 0 0" begin="0.4s" dur="0.6s" repeatCount="indefinite"></animateTransform></rect></svg></div>');
             $noResults.hide();
 
-            search = encodeURIComponent(search);
-
             $.ajax({
                 url: '{{ url("/sales/search") }}',
                 type: 'GET',
@@ -1120,9 +1118,12 @@ $('button[name="update_btn"]').on("click", function() {
 });
 
 $("#myTable").on('click', '.plus', function() {
-    rowindex = $(this).closest('tr').index();
-    var qty = $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ') .qty').val();
-    var max_qty = $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ') .qty').attr('max');
+    var row = $(this).closest('tr');
+    var qtyInput = row.find('.qty'); 
+    
+    var qty = parseFloat(qtyInput.val()) || 0;
+    var max_qty = parseFloat(qtyInput.attr('max'));
+
     if(!qty)
         qty = 1;
     else if(!isNaN(max_qty) && parseFloat(qty) >= parseFloat(max_qty) && without_stock == 'no') {
@@ -1263,7 +1264,6 @@ function productSearch(data) {
 
                     product_price[rowindex] = parseFloat(data[2] * currency['exchange_rate']) + parseFloat(data[2] * currency['exchange_rate'] * customer_group_rate);
 
-                    checkDiscount(String(qty), true);
                     flag = 0;
                 }
                 $("input[name='product_code_name']").val('');

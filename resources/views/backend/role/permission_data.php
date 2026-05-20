@@ -14,6 +14,7 @@ return [
         "sidebar_people" => "People",
         "sidebar_reports" => "Reports",
         "sidebar_manufacturing" => "Manufacturing",
+        "sidebar_repair" => "Repair",
         "sidebar_whatsapp" => "whatsapp",
     ],
 ];

@@ -129,7 +129,7 @@
                 <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-              <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+              <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                 <form action="{{ route('gift_cards.store') }}" method="POST">
                     @csrf
                 <?php
@@ -189,7 +189,7 @@
               <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
           </div>
           <div class="modal-body">
-            <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+            <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
               <form action="{{ route('gift_cards.update', 1) }}" method="POST">
                 @csrf
                 @method('PUT')
@@ -251,7 +251,7 @@
               <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
           </div>
           <div class="modal-body">
-            <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+            <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
               <form action="{{ route('gift_cards.recharge', 1) }}" method="POST">
                 @csrf
                 <div class="form-group">

@@ -7,40 +7,35 @@
             </div>
             <form action="{{ route('report.customer') }}" method="POST">
                 @csrf
-            <div class="row mb-3">
-                <div class="col-md-4 offset-md-2 mt-3">
-                    <div class="form-group row daterangepicker-container">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <div class="input-group">
-                                <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
-                                <input type="hidden" name="start_date" value="{{$start_date}}" />
-                                <input type="hidden" name="end_date" value="{{$end_date}}" />
+                <div class="row mb-3">
+                    <div class="col-md-4 offset-md-2 mt-3">
+                        <div class="form-group row daterangepicker-container">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Your Date')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <div class="input-group">
+                                    <input type="text" class="daterangepicker-field form-control" value="{{$start_date}} To {{$end_date}}" required />
+                                    <input type="hidden" name="start_date" value="{{$start_date}}" />
+                                    <input type="hidden" name="end_date" value="{{$end_date}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <div class="form-group row">
+                            <label class="d-tc mt-2"><strong>{{__('db.Choose Customer')}}</strong> &nbsp;</label>
+                            <div class="d-tc">
+                                <input type="hidden" name="customer_id_hidden" value="{{$customer_id}}" />
+                                <select id="customer_id" name="customer_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
+                                    @foreach($lims_customer_list as $customer)
+                                        @if ($customer->type != 'walkin')
+                                            <option value="{{$customer->id}}">{{$customer->name}} ({{$customer->phone_number}})</option>
+                                        @endif
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mt-3">
-                    <div class="form-group row">
-                        <label class="d-tc mt-2"><strong>{{__('db.Choose Customer')}}</strong> &nbsp;</label>
-                        <div class="d-tc">
-                            <input type="hidden" name="customer_id_hidden" value="{{$customer_id}}" />
-                            <select id="customer_id" name="customer_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins">
-                                @foreach($lims_customer_list as $customer)
-                                    @if ($customer->type != 'walkin')
-                                        <option value="{{$customer->id}}">{{$customer->name}} ({{$customer->phone_number}})</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2 mt-3">
-                    <div class="form-group">
-                        <button class="btn btn-primary" type="submit">{{__('db.submit')}}</button>
-                    </div>
-                </div>
-            </div>
             <input type="hidden" name="customer_id_hidden" value="{{$customer_id}}" />
             </form>
         </div>
@@ -213,10 +208,10 @@
         "serverSide": true,
         "ajax":{
             url:"customer-sale-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                customer_id: customer_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.customer_id = customer_id;
             },
             dataType: "json",
             type:"post"
@@ -324,18 +319,19 @@
     });
 
     function datatable_sum_sale(dt_selector, is_calling_first) {
-        if (dt_selector.rows( '.selected' ).any() && is_calling_first) {
-            var rows = dt_selector.rows( '.selected' ).indexes();
-            $( dt_selector.column( 5 ).footer() ).html(dt_selector.cells( rows, 5, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
-            $( dt_selector.column( 6 ).footer() ).html(dt_selector.cells( rows, 6, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
-            $( dt_selector.column( 7 ).footer() ).html(dt_selector.cells( rows, 7, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
-            $( dt_selector.column( 8 ).footer() ).html(dt_selector.cells( rows, 8, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
-        }
+        if (dt_selector.rows('.selected').any() && is_calling_first) {
+            var rows = dt_selector.rows('.selected').indexes();
+
+            $(dt_selector.column(5).footer()).html(dt_selector.cells(rows, 5, { page: 'current' }).data().sum().toFixed({{$general_setting->decimal}}));
+            $(dt_selector.column(6).footer()).html(dt_selector.cells(rows, 6, { page: 'current' }).data().sum().toFixed({{$general_setting->decimal}}));
+            $(dt_selector.column(7).footer()).html(dt_selector.cells(rows, 7, { page: 'current' }).data().sum().toFixed({{$general_setting->decimal}}));
+            $(dt_selector.column(8).footer()).html(dt_selector.cells(rows, 8, { page: 'current' }).data().sum().toFixed({{$general_setting->decimal}}));
+        } 
         else {
-            $( dt_selector.column( 5 ).footer() ).html(dt_selector.cells( rows, 5, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
-            $( dt_selector.column( 6 ).footer() ).html(dt_selector.column( 6, {page:'current'} ).data().sum().toFixed({{$general_setting->decimal}}));
-            $( dt_selector.column( 7 ).footer() ).html(dt_selector.cells( rows, 7, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
-            $( dt_selector.column( 8 ).footer() ).html(dt_selector.column( 8, {page:'current'} ).data().sum().toFixed({{$general_setting->decimal}}));
+            $(dt_selector.column(5).footer()).html(dt_selector.column(5, { page: 'current' }).data().sum().toFixed({{$general_setting->decimal}}));
+            $(dt_selector.column(6).footer()).html(dt_selector.column(6, { page: 'current' }).data().sum().toFixed({{$general_setting->decimal}}));
+            $(dt_selector.column(7).footer()).html(dt_selector.column(7, { page: 'current' }).data().sum().toFixed({{$general_setting->decimal}}));
+            $(dt_selector.column(8).footer()).html(dt_selector.column(8, { page: 'current' }).data().sum().toFixed({{$general_setting->decimal}}));
         }
     }
 
@@ -344,10 +340,10 @@
         "serverSide": true,
         "ajax":{
             url:"customer-payment-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                customer_id: customer_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.customer_id = customer_id;
             },
             dataType: "json",
             type:"post"
@@ -466,10 +462,10 @@
         "serverSide": true,
         "ajax":{
             url:"customer-quotation-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                customer_id: customer_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.customer_id = customer_id;
             },
             dataType: "json",
             type:"post"
@@ -590,10 +586,10 @@
         "serverSide": true,
         "ajax":{
             url:"customer-return-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                customer_id: customer_id
+            data: function(d) {
+                d.start_date = start_date;
+                d.end_date = end_date;
+                d.customer_id = customer_id;
             },
             dataType: "json",
             type:"post"
@@ -707,5 +703,32 @@
             $( dt_selector.column( 6 ).footer() ).html(dt_selector.column( 6, {page:'current'} ).data().sum().toFixed({{$general_setting->decimal}}));
         }
     }
+
+    function reloadCustomerReportData() {
+        start_date = $('input[name="start_date"]').val();
+        end_date = $('input[name="end_date"]').val();
+        customer_id = $('select[name="customer_id"]').val();
+        
+        $('#sale-table').DataTable().ajax.reload();
+        $('#payment-table').DataTable().ajax.reload();
+        $('#return-table').DataTable().ajax.reload();
+        $('#quotation-table').DataTable().ajax.reload();
+    }
+
+    var filterTimer;
+    $('.product-report-filter select, .product-report-filter input').on('change', function () {
+        clearTimeout(filterTimer);
+        filterTimer = setTimeout(() => {
+            reloadCustomerReportData();
+        }, 400);
+    });
+    $('.daterangepicker-field').on('apply.daterangepicker', function(ev, picker) {
+        $('input[name="start_date"]').val(picker.startDate.format('YYYY-MM-DD'));
+        $('input[name="end_date"]').val(picker.endDate.format('YYYY-MM-DD'));
+        reloadCustomerReportData();
+    });
+    $('.selectpicker').on('changed.bs.select', function () {
+        reloadCustomerReportData();
+    });
 </script>
 @endpush

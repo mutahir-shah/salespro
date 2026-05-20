@@ -10,6 +10,7 @@ use App\Payment\SslCommerz;
 use App\Payment\BkashPayment;
 use App\Payment\PaypalPayment;
 use App\Payment\StripePayment;
+use App\Payment\JazzCashPayment;
 use App\Payment\PaydunyaPayment;
 use App\Payment\PaystackPayment;
 use App\Payment\RazorpayPayment;
@@ -26,6 +27,8 @@ class PaymentService
                 return new StripePayment();
             case 'paypal':
                 return new PaypalPayment();
+            case 'jazzcash':
+                return new JazzCashPayment();
             case 'razorpay':
                 return new RazorpayPayment();
             case 'paystack':
@@ -73,6 +76,9 @@ class PaymentService
         }
         if (isset($data['exchange_rate'])) {
             $lims_payment_data->exchange_rate = $data['exchange_rate'];
+        }
+        if (isset($data['document'])) {
+            $lims_payment_data->document = $data['document'];
         }
         $lims_payment_data->change = $data['paying_amount'] - $data['amount'];
         $lims_payment_data->paying_method = $paying_method;

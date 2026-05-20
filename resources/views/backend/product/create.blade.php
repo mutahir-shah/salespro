@@ -25,7 +25,13 @@
                         <h4>{{__('db.add_product')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
+                        <div id="alert-container" style="display:none;" class="alert alert-dismissible fade show" role="alert">
+                            <span id="alert-message"></span>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
                         <form id="product-form">
                             <div class="row">
                                 <div class="col-md-4">
@@ -613,6 +619,7 @@
                             @endif
                             <div class="form-group mt-3">
                                 <button type="submit" id="submit-btn" class="btn btn-primary">{{__('db.add_product')}}</button>
+                                <button type="submit" id="submit-and-insert-btn" class="btn btn-info">Save and Insert Another</button>
                             </div>
                         </form>
                     </div>
@@ -630,7 +637,7 @@
               <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
             </div>
             <div class="modal-body">
-              <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+              <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                 <div class="form-group">
                     <label>{{__('db.Title')}} *</label>
                     <input type="text" name="title" class="form-control" placeholder="{{ __('db.Type brand title') }}" required>
@@ -676,7 +683,7 @@
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span aria-hidden="true"><i class="dripicons-cross"></i></span></button>
                     </div>
                     <div class="modal-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form>
                             <div class="form-group">
                                 <label>{{__('db.Tax Name')}} *</label>
@@ -704,11 +711,29 @@
 @push('scripts')
 <script type="text/javascript">
 
+    var submit_type = 'add';
+
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+
+    function showAlert(message, type = 'success') {
+        const container = $('#alert-container');
+        container.removeClass('alert-success alert-danger alert-warning alert-info')
+                 .addClass('alert-' + type)
+                 .show();
+        $('#alert-message').text(message);
+        
+        // Auto-scroll to top
+        $('html, body').animate({ scrollTop: 0 }, 'slow');
+
+        // Auto-fade after 5 seconds
+        setTimeout(() => {
+            container.fadeOut('slow');
+        }, 8000);
+    }
 
     $("#is_addon").on('click', function(){
         if($("#is_addon").prop('checked') == false){
@@ -755,7 +780,6 @@
         var remove_id = $(this).parent().data('id');
         var selected_ids = $('.selected_ids').html().replace(remove_id+',','');
         $('.selected_ids').html(selected_ids);
-
     });
     @endif
 
@@ -1640,7 +1664,7 @@
             if(numberOfWarehouse > 0)
                 $("#initial-stock-section").show(300);
             else {
-                alert('Please create warehouse first before adding stock!');
+                showAlert('Please create warehouse first before adding stock!', 'danger');
                 $(this).prop("checked", false);
             }
         }
@@ -1783,16 +1807,16 @@
         var exp = /^\d+$/;
 
         if(!(product_code.match(exp)) && (barcode_symbology == 'UPCA' || barcode_symbology == 'UPCE' || barcode_symbology == 'EAN8' || barcode_symbology == 'EAN13') ) {
-            alert('Product code must be numeric.');
+            showAlert('Product code must be numeric.', 'danger');
             return false;
         }
         else if(product_code.match(exp)) {
             if(barcode_symbology == 'UPCA' && product_code.length > 11){
-                alert('Product code length must be less than 12');
+                showAlert('Product code length must be less than 12', 'danger');
                 return false;
             }
             else if(barcode_symbology == 'EAN8' && product_code.length > 7){
-                alert('Product code length must be less than 8');
+                showAlert('Product code length must be less than 8', 'danger');
                 return false;
             }
             /*else if(barcode_symbology == 'EAN13' && product_code.length > 12){
@@ -1804,14 +1828,14 @@
         if( $("#type").val() == 'combo' ) {
             var rownumber = $('table.order-list tbody tr:last').index();
             if (rownumber < 0) {
-                alert("Please insert product to table!")
+                showAlert("Please insert product to table!", 'danger')
                 return false;
             }
         }
         if($("#is-variant").is(":checked")) {
             rowindex = $("table#variant-table tbody tr:last").index();
             if (rowindex < 0) {
-                alert('This product has variant. Please insert variant to table');
+                showAlert('This product has variant. Please insert variant to table', 'danger');
                 return false;
             }
         }
@@ -1866,10 +1890,11 @@
         acceptedFiles: ".jpeg,.jpg,.png,.gif",
         init: function () {
             var myDropzone = this;
-            $('#submit-btn').on("click", function (e) {
+            $('#submit-btn, #submit-and-insert-btn').on("click", function (e) {
                 e.preventDefault();
+                submit_type = $(this).attr('id') == 'submit-btn' ? 'add' : 'insert';
                 if ( $("#product-form").valid() && validate() ) {
-                    $('#submit-btn').attr('disabled','true').html('<span class="spinner-border text-light" role="status"></span> {{__("db.Saving")}}...');
+                    $(this).attr('disabled','true').html('<span class="spinner-border text-light" role="status"></span> {{__("db.Saving")}}...');
                     tinyMCE.triggerSave();
                     if(myDropzone.getAcceptedFiles().length) {
                         myDropzone.processQueue();
@@ -1891,8 +1916,12 @@
                             contentType: false,
                             processData: false,
                             success:function(response) {
-                                //console.log(response);
-                                location.href = '../products';
+                                if(submit_type == 'add')
+                                    location.href = '../products';
+                                else {
+                                    showAlert(response.message, 'success');
+                                    resetForm();
+                                }
                             },
                             error:function(response) {
                                 // console.log(response);
@@ -1957,8 +1986,12 @@
             }
         },
         successmultiple: function (file, response) {
-            location.href = '../products';
-            //console.log(file, response);
+            if(submit_type == 'add')
+                location.href = '../products';
+            else {
+                showAlert(response.message, 'success');
+                resetForm();
+            }
         },
         completemultiple: function (file, response) {
             console.log(file, response, "completemultiple");
@@ -2021,6 +2054,43 @@
             }
         });
     });
+
+    function resetForm() {
+        $("#product-form")[0].reset();
+        $('#submit-btn, #submit-and-insert-btn').removeAttr('disabled');
+        $('#submit-btn').html('{{__("db.add_product")}}');
+        $('#submit-and-insert-btn').html('Save and Insert Another');
+        
+        // Core Reset logic
+        if(typeof myDropzone !== 'undefined') {
+            myDropzone.removeAllFiles(true);
+        }
+        $('.combo_product_list_table').empty();
+        $('.selectpicker').selectpicker('refresh');
+        
+        // Sync Profit Margin & Type
+        $('select[name="profit_margin_type"]').trigger('change');
+        $('input[name="profit_margin"]').val("{{ $general_setting->default_margin_value }}");
+        
+        // Clear dynamic sections
+        if(typeof $('.type-variant').importTags === 'function') {
+            $('.type-variant').importTags('');
+        }
+        $('table.variant-list tbody').empty();
+        
+        // Reset TinyMCE
+        if(tinyMCE.get(0)) {
+            tinyMCE.get(0).setContent('');
+        }
+        
+        // Hide conditional sections
+        $("#digital, #combo, #variant-section, #initial-stock-section, #diffPrice-section, #promotion_price, #start_date, #last_date").hide();
+        
+        // Reset numerical defaults
+        $("input[name='qty']").val("{{number_format(0, $general_setting->decimal, '.', '')}}");
+        $("input[name='code']").val(""); // Cleared for unique entry
+    }
+
 </script>
 
 <script>

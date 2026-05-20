@@ -11,7 +11,7 @@
                         </div>
                         <div class="card-body">
                             <p class="italic">
-                                <small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                                <small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                             <form class="sale-return-form" action="{{ route('return-sale.store') }}" method="post" enctype="multipart/form-data">
                                 @csrf
                             <div class="row">
@@ -243,22 +243,22 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @if($lims_sale_data->payment_status > 2) 
+                                    @if($lims_sale_data->paid_amount > 0) 
                                     {{-- only for paid or partial paid sale --}}
-                                    <!-- <div class="row">
+                                    <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <div class="form-check d-inline-block ml-3 mt-3">
+                                                <div class="form-check d-inline-block ml-1 mt-4">
                                                     <input class="form-check-input" type="checkbox" name="refund" id="refund" checked>
                                                     <label style="color:rgb(136, 136, 136);" class="form-check-label" for="refund">
-                                                        {{ __('db.refund') }}
+                                                        {{ __('db.issue_refund') }}
                                                     </label>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label>{{ __('db.Refund Amount') }}</label>
+                                                <label>{{ __('db.refund_amount') }}</label>
                                                 <input type="number" name="refund_amount" id="refund_amount" class="form-control" value="{{ $lims_sale_data->paid_amount ?? 0 }}" max="{{ $lims_sale_data->paid_amount ?? 0 }}" step="0.001"/>
                                                 @if ($errors->has('extension'))
                                                     <span>
@@ -267,7 +267,7 @@
                                                 @endif
                                             </div>
                                         </div>
-                                    </div> -->
+                                    </div>
                                     @endif
                                     <div class="row">
                                         <div class="col-md-6">
@@ -336,7 +336,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
                         <div class="row">
                             <div class="col-md-6 form-group warehouse-section">
                                 <label>{{ __('db.Warehouse') }} *</strong> </label>

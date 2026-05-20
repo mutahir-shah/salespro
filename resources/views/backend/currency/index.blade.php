@@ -69,7 +69,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p class="italic"><small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                    <p class="italic"><small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
 
                     <div class="form-group">
                         <label>{{ __('db.name') }} *</label>
@@ -116,7 +116,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p class="italic"><small>{{ __('db.The field labels marked with * are required input fields') }}.</small></p>
+                    <p class="italic"><small>{{ __('db.The field labels marked with are required input fields') }}.</small></p>
 
                     <div class="form-group">
                         <label>{{ __('db.name') }} *</label>

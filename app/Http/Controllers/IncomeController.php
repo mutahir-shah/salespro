@@ -42,9 +42,16 @@ class IncomeController extends Controller
             else
                 $warehouse_id = 0;
 
+            if($request->input('income_category_id'))
+                $income_category_id = $request->input('income_category_id');
+            else
+                $income_category_id = 0;
+
+            $income_category_list = DB::table('income_categories')->where('is_active', true)->get();
+
             $lims_warehouse_list = Warehouse::select('name', 'id')->where('is_active', true)->get();
             $lims_account_list = Account::where('is_active', true)->get();
-            return view('backend.income.index', compact('lims_account_list', 'lims_warehouse_list', 'all_permission', 'starting_date', 'ending_date', 'warehouse_id'));
+            return view('backend.income.index', compact('lims_account_list', 'lims_warehouse_list', 'income_category_list', 'all_permission', 'starting_date', 'ending_date', 'warehouse_id','income_category_id'));
         }
         else
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));

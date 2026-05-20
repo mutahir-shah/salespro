@@ -11,7 +11,7 @@
                         <h4>{{__('db.Update User')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('user.update', $lims_user_data->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
@@ -85,7 +85,7 @@
                                           @endforeach
                                         </select>
                                     </div>
-                                    <div class="form-group" id="accountId">
+                                    <!-- <div class="form-group" id="accountId">
                                         <label>{{ __('db.Account') }}</label>
 
                                         <select name="account_id"
@@ -100,7 +100,7 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                    </div>
+                                    </div> -->
                                     <div class="form-group" id="biller-id">
                                         <label>{{__('db.Biller')}} *</strong></label>
                                         <input type="hidden" name="biller_id_hidden" value="{{$lims_user_data->biller_id}}">

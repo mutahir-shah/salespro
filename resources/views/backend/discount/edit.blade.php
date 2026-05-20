@@ -12,7 +12,7 @@
                         <h4>{{__('db.Update Discount')}}</h4>
                     </div>
                     <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
+                        <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
                         <form action="{{ route('discounts.update', $lims_discount_data->id) }}" method="POST">
                             @csrf
                             @method('PUT')

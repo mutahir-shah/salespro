@@ -11,7 +11,7 @@
                         </div>
                         <div class="card-body">
                             <p class="italic">
-                                <small>{{ __('db.The field labels marked with * are required input fields') }}.</small>
+                                <small>{{ __('db.The field labels marked with are required input fields') }}.</small>
                             </p>
                             <form action="{{ route('return-sale.update', $lims_return_data->id) }}" method="post" enctype="multipart/form-data" id="payment-form">
                                 @csrf
@@ -447,7 +447,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('db.The field labels marked with * are required input fields') }}.</small>
+                            <small>{{ __('db.The field labels marked with are required input fields') }}.</small>
                         </p>
                         <div class="row">
                             <div class="col-md-6 form-group warehouse-section">

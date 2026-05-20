@@ -33,11 +33,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2 mt-3">
-                    <div class="form-group">
-                        <button class="btn btn-primary" type="submit">{{__('db.submit')}}</button>
-                    </div>
-                </div>
             </div>
             <input type="hidden" name="biller_id_hidden" value="{{$biller_id}}" />
             </form>
@@ -318,10 +313,11 @@
         "serverSide": true,
         "ajax":{
             url:"biller-sale-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                biller_id: biller_id
+            data:function (d) {
+                let date_range = $('.daterangepicker-field').val().split(' To ');
+                d.start_date = date_range[0];
+                d.end_date = date_range[1];
+                d.biller_id = $('#biller_id').val();
             },
             dataType: "json",
             type:"post"
@@ -463,10 +459,11 @@
         "serverSide": true,
         "ajax":{
             url:"biller-quotation-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                biller_id: biller_id
+            data:function (d) {
+                let date_range = $('.daterangepicker-field').val().split(' To ');
+                d.start_date = date_range[0];
+                d.end_date = date_range[1];
+                d.biller_id = $('#biller_id').val();
             },
             dataType: "json",
             type:"post"
@@ -599,10 +596,11 @@
         "serverSide": true,
         "ajax":{
             url:"biller-payment-data",
-            data:{
-                start_date: start_date,
-                end_date: end_date,
-                biller_id: biller_id
+            data:function (d) {
+                let date_range = $('.daterangepicker-field').val().split(' To ');
+                d.start_date = date_range[0];
+                d.end_date = date_range[1];
+                d.biller_id = $('#biller_id').val();
             },
             dataType: "json",
             type:"post"
@@ -738,6 +736,38 @@
             $( dt_selector.column( 4 ).footer() ).html(dt_selector.column( 4, {page:'current'} ).data().sum().toFixed({{$general_setting->decimal}}));
         }
     }
+
+    function applyFilter() {
+        let date_range = $('.daterangepicker-field').val().split(' To ');
+
+        let start_date = date_range[0];
+        let end_date = date_range[1];
+
+        $('input[name="start_date"]').val(start_date);
+        $('input[name="end_date"]').val(end_date);
+
+        $('#sale-table').DataTable().ajax.reload();
+        $('#quotation-table').DataTable().ajax.reload();
+        $('#payment-table').DataTable().ajax.reload();
+    }
+
+    $('#biller_id').on('change', function () {
+        applyFilter();
+    });
+
+    $('.daterangepicker-field').on('apply.daterangepicker', function (ev, picker) {
+
+        let start_date = picker.startDate.format('YYYY-MM-DD');
+        let end_date = picker.endDate.format('YYYY-MM-DD');
+
+        // 🔥 THIS LINE WAS MISSING
+        $(this).val(start_date + ' To ' + end_date);
+
+        $('input[name="start_date"]').val(start_date);
+        $('input[name="end_date"]').val(end_date);
+
+        applyFilter();
+    });
 
 </script>
 @endpush

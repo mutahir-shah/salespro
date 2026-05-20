@@ -8,461 +8,479 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header d-flex align-items-center">
-                        <h4>{{__('db.Add Purchase')}}</h4>
-                    </div>
-                    <div class="card-body">
-                        <p class="italic"><small>{{__('db.The field labels marked with * are required input fields')}}.</small></p>
-                        <form action="{{ route('purchases.store') }}" method="POST" enctype="multipart/form-data" id="purchase-form">
-                            @csrf
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{__('db.date')}}</label>
-                                            <input type="text" name="created_at" class="form-control date" placeholder="{{__('db.Choose date')}}" value="{{date($general_setting->date_format,strtotime('now'))}}"/>
-                                        </div>
+                <h4>{{__('db.Add Purchase')}}</h4>
+                <p class="italic"><small>{{__('db.The field labels marked with are required input fields')}}.</small></p>
+                
+                <form action="{{ route('purchases.store') }}" method="POST" enctype="multipart/form-data" id="purchase-form">
+                    @csrf
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{__('db.date')}}</label>
+                                        <input type="text" name="created_at" class="form-control date" placeholder="{{__('db.Choose date')}}" value="{{date($general_setting->date_format,strtotime('now'))}}"/>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>
-                                                {{__('db.Reference No')}}
-                                            </label>
-                                            <input type="text" name="reference_no" class="form-control" />
-                                        </div>
-                                        <x-validation-error fieldName="reference_no" />
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>
+                                            {{__('db.Reference No')}}
+                                        </label>
+                                        <input type="text" name="reference_no" class="form-control" />
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{__('db.Warehouse')}} *</label>
-                                            <select name="warehouse_id" class="selectpicker form-control" data-live-search="true" title="Select warehouse..." required>
-                                                @foreach($lims_warehouse_list as $warehouse)
-                                                <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
-                                                @endforeach
+                                    <x-validation-error fieldName="reference_no" />
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{__('db.Warehouse')}} *</label>
+                                        <select name="warehouse_id" class="selectpicker form-control" data-live-search="true" title="Select warehouse..." required>
+                                            @foreach($lims_warehouse_list as $warehouse)
+                                            <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
+                                            @endforeach
+                                        </select>
+                                        <x-validation-error fieldName="warehouse_id" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{__('db.Supplier')}}</label>
+                                        <select name="supplier_id" id="supplier-select" class="selectpicker form-control" data-live-search="true" title="Select supplier...">
+                                            @foreach($lims_supplier_list as $supplier)
+                                            <option value="{{$supplier->id}}"
+                                                    data-pay-term-no="{{$supplier->pay_term_no ?? ''}}"
+                                                    data-pay-term-period="{{$supplier->pay_term_period ?? 'days'}}">
+                                                {{$supplier->name .' ('. $supplier->company_name .')'}}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                {{-- Payment Terms --}}
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{ __('db.payment_term') }}</label>
+                                        <div class="d-flex">
+                                            <input type="number"
+                                                id="pay_term_no"
+                                                name="pay_term_no"
+                                                class="form-control"
+                                                placeholder="e.g. 30">
+                                            <select name="pay_term_period" id="pay_term_period" class="form-control ml-2">
+                                                <option value="days">{{ __('db.days') }}</option>
+                                                <option value="months">{{ __('db.months') }}</option>
                                             </select>
-                                            <x-validation-error fieldName="warehouse_id" />
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{__('db.Supplier')}}</label>
-                                            <select name="supplier_id" id="supplier-select" class="selectpicker form-control" data-live-search="true" title="Select supplier...">
-                                                @foreach($lims_supplier_list as $supplier)
-                                                <option value="{{$supplier->id}}"
-                                                        data-pay-term-no="{{$supplier->pay_term_no ?? ''}}"
-                                                        data-pay-term-period="{{$supplier->pay_term_period ?? 'days'}}">
-                                                    {{$supplier->name .' ('. $supplier->company_name .')'}}
-                                                </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    {{-- Payment Terms --}}
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{ __('db.payment_term') }}</label>
-                                            <div class="d-flex">
-                                                <input type="number"
-                                                    id="pay_term_no"
-                                                    name="pay_term_no"
-                                                    class="form-control"
-                                                    placeholder="e.g. 30">
-                                                <select name="pay_term_period" id="pay_term_period" class="form-control ml-2">
-                                                    <option value="days">{{ __('db.days') }}</option>
-                                                    <option value="months">{{ __('db.months') }}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
+                                </div>
 
-                                    {{-- Due Date --}}
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{ __('db.due_date') }}</label>
-                                            <input type="text"
-                                                name="due_date"
-                                                id="due_date"
-                                                class="form-control date"
-                                                placeholder="{{ __('db.Choose date') }}"
-                                                readonly>
-                                        </div>
+                                {{-- Due Date --}}
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{ __('db.due_date') }}</label>
+                                        <input type="text"
+                                            name="due_date"
+                                            id="due_date"
+                                            class="form-control date"
+                                            placeholder="{{ __('db.Choose date') }}"
+                                            readonly>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{__('db.Purchase Status')}}</label>
-                                            <select name="status" class="form-control">
-                                                <option value="1">{{__('db.Recieved')}}</option>
-                                                <option value="2">{{__('db.Partial')}}</option>
-                                                <option value="3">{{__('db.Pending')}}</option>
-                                                <option value="4">{{__('db.Ordered')}}</option>
-                                            </select>
-                                        </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{__('db.Purchase Status')}}</label>
+                                        <select name="status" class="form-control">
+                                            <option value="1">{{__('db.Recieved')}}</option>
+                                            <option value="2">{{__('db.Partial')}}</option>
+                                            <option value="3">{{__('db.Pending')}}</option>
+                                            <option value="4">{{__('db.Ordered')}}</option>
+                                        </select>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{__('db.Attach Document')}}</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
-                                            <input type="file" name="document" class="form-control" >
-                                            @if($errors->has('extension'))
-                                                <span>
-                                                   <strong>{{ $errors->first('extension') }}</strong>
-                                                </span>
-                                            @endif
-                                            <x-validation-error fieldName="document" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label>{{__('db.Currency')}} *</label>
-                                            <select name="currency_id" id="currency-id" class="form-control selectpicker" data-toggle="tooltip" title="">
-                                                @foreach($currency_list as $currency_data)
-                                                <option value="{{$currency_data->id}}" data-rate="{{$currency_data->exchange_rate}}" @if($currency_data->exchange_rate == 1){{'checked'}}@endif>{{$currency_data->code}}</option>
-                                                @endforeach
-                                            </select>
-                                            <x-validation-error fieldName="currency_id" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group mb-0">
-                                            <label>{{__('db.Exchange Rate')}} *</label>
-                                        </div>
-                                        <div class="form-group d-flex">
-                                            <input class="form-control" type="text" id="exchange_rate" name="exchange_rate" value="{{$currency->exchange_rate}}">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text" data-toggle="tooltip" title="" data-original-title="currency exchange rate">i</span>
-                                            </div>
-                                            <x-validation-error fieldName="exchange_rate" />
-                                        </div>
-                                    </div>
-                                    @foreach($custom_fields as $field)
-                                        @if(!$field->is_admin || \Auth::user()->role_id == 1)
-                                            <div class="{{'col-md-'.$field->grid_value}}">
-                                                <div class="form-group">
-                                                    <label>{{$field->name}}</label>
-                                                    @if($field->type == 'text')
-                                                        <input type="text" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$field->default_value}}" class="form-control" @if($field->is_required){{'required'}}@endif>
-                                                    @elseif($field->type == 'number')
-                                                        <input type="number" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$field->default_value}}" class="form-control" @if($field->is_required){{'required'}}@endif>
-                                                    @elseif($field->type == 'textarea')
-                                                        <textarea rows="5" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$field->default_value}}" class="form-control" @if($field->is_required){{'required'}}@endif></textarea>
-                                                    @elseif($field->type == 'checkbox')
-                                                        <br>
-                                                        <?php $option_values = explode(",", $field->option_value); ?>
-                                                        @foreach($option_values as $value)
-                                                            <label>
-                                                                <input type="checkbox" name="{{str_replace(' ', '_', strtolower($field->name))}}[]" value="{{$value}}" @if($value == $field->default_value){{'checked'}}@endif @if($field->is_required){{'required'}}@endif> {{$value}}
-                                                            </label>
-                                                            &nbsp;
-                                                        @endforeach
-                                                    @elseif($field->type == 'radio_button')
-                                                        <br>
-                                                        <?php $option_values = explode(",", $field->option_value); ?>
-                                                        @foreach($option_values as $value)
-                                                            <label class="radio-inline">
-                                                                <input type="radio" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$value}}" @if($value == $field->default_value){{'checked'}}@endif @if($field->is_required){{'required'}}@endif> {{$value}}
-                                                            </label>
-                                                            &nbsp;
-                                                        @endforeach
-                                                    @elseif($field->type == 'select')
-                                                        <?php $option_values = explode(",", $field->option_value); ?>
-                                                        <select class="form-control" name="{{str_replace(' ', '_', strtolower($field->name))}}" @if($field->is_required){{'required'}}@endif>
-                                                            @foreach($option_values as $value)
-                                                                <option value="{{$value}}" @if($value == $field->default_value){{'selected'}}@endif>{{$value}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    @elseif($field->type == 'multi_select')
-                                                        <?php $option_values = explode(",", $field->option_value); ?>
-                                                        <select class="form-control" name="{{str_replace(' ', '_', strtolower($field->name))}}[]" @if($field->is_required){{'required'}}@endif multiple>
-                                                            @foreach($option_values as $value)
-                                                                <option value="{{$value}}" @if($value == $field->default_value){{'selected'}}@endif>{{$value}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    @elseif($field->type == 'date_picker')
-                                                        <input type="text" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$field->default_value}}" class="form-control date" @if($field->is_required){{'required'}}@endif>
-                                                    @endif
-                                                </div>
-                                            </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{__('db.Attach Document')}}</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
+                                        <input type="file" name="document" class="form-control" >
+                                        @if($errors->has('extension'))
+                                            <span>
+                                                <strong>{{ $errors->first('extension') }}</strong>
+                                            </span>
                                         @endif
-                                    @endforeach
-                                    <div class="col-md-12 mt-3">
-                                        <label>{{__('db.Select Product')}}</label>
-                                        <div class="search-box input-group">
-                                            <button class="btn btn-secondary"><i class="fa fa-barcode"></i></button>
-                                            <input type="text" name="product_code_name" id="lims_productcodeSearch" placeholder="{{__('db.Please type product code and select')}}" class="form-control" />
-
-                                        </div>
+                                        <x-validation-error fieldName="document" />
                                     </div>
                                 </div>
-                                <div class="row mt-4">
-                                    <div class="col-md-12">
-                                        <h5>{{__('db.Order Table')}} *</h5>
-                                        <div class="table-responsive mt-3">
-                                            <table id="myTable" class="table table-hover order-list">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="min-width: 30%">{{__('db.product')}}</th>
-                                                        <th>{{__('db.Quantity')}}</th>
-                                                        <th class="recieved-product-qty d-none">{{__('db.Recieved')}}</th>
-                                                        <th>{{__('db.Net Unit Cost')}}</th>
-                                                        <th>{{__('db.Profit Margin')}}</th>
-                                                        <th>{{__('db.profit_margin_type')}}</th>
-                                                        <th>{{__('db.Product Price')}}</th>
-                                                        <th>{{__('db.Discount')}}</th>
-                                                        <th>{{__('db.Tax')}}</th>
-                                                        <th>{{__('db.Subtotal')}}</th>
-                                                        <th><i class="dripicons-trash"></i></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                </tbody>
-                                                <tfoot class="tfoot active">
-                                                    <th>{{__('db.Total')}}</th>
-                                                    <th id="total-qty">0</th>
-                                                    <th class="recieved-product-qty d-none"></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th id="total-discount">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
-                                                    <th id="total-tax">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
-                                                    <th id="total">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
-                                                    <th><i class="dripicons-trash"></i></th>
-                                                </tfoot>
-                                            </table>
-                                        </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>{{__('db.Currency')}} *</label>
+                                        <select name="currency_id" id="currency-id" class="form-control selectpicker" data-toggle="tooltip" title="">
+                                            @foreach($currency_list as $currency_data)
+                                            <option value="{{$currency_data->id}}" data-rate="{{$currency_data->exchange_rate}}" @if($currency_data->exchange_rate == 1){{'checked'}}@endif>{{$currency_data->code}}</option>
+                                            @endforeach
+                                        </select>
+                                        <x-validation-error fieldName="currency_id" />
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <input type="hidden" name="total_qty" />
-                                        </div>
+                                <div class="col-md-2">
+                                    <div class="form-group mb-0">
+                                        <label>{{__('db.Exchange Rate')}} *</label>
                                     </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <input type="hidden" name="total_discount" />
+                                    <div class="form-group d-flex">
+                                        <input class="form-control" type="text" id="exchange_rate" name="exchange_rate" value="{{$currency->exchange_rate}}">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" data-toggle="tooltip" title="" data-original-title="currency exchange rate">i</span>
                                         </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <input type="hidden" name="total_tax" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <input type="hidden" name="total_cost" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <input type="hidden" name="profit_margin" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <input type="hidden" name="profit_margin_type" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <input type="hidden" name="product_price" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <input type="hidden" name="item" />
-                                            <input type="hidden" name="order_tax" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <input type="hidden" name="grand_total" />
-                                        </div>
+                                        <x-validation-error fieldName="exchange_rate" />
                                     </div>
                                 </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{__('db.Order Tax')}}</label>
-                                            <select class="form-control" name="order_tax_rate">
-                                                <option value="0">{{__('db.No Tax')}}</option>
-                                                @foreach($lims_tax_list as $tax)
-                                                <option value="{{$tax->rate}}">{{$tax->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>
-                                                <strong>{{__('db.Discount')}}</strong>
-                                            </label>
-                                            <input type="number" name="order_discount" class="form-control" step="any" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>
-                                                <strong>{{__('db.Shipping Cost')}}</strong>
-                                            </label>
-                                            <input type="number" name="shipping_cost" class="form-control" step="any" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{__('db.Payment Status')}} *</label>
-                                            <select name="payment_status" id="payment_status" class="form-control">
-                                                <option value="1">{{__('db.Due')}}</option>
-                                                <option value="3">{{__('db.Partial')}}</option>
-                                                <option value="4">{{__('db.Paid')}}</option>
-                                            </select>
-                                            <x-validation-error fieldName="payment_status" />
-                                        </div>
-                                    </div>
-                                    <?php
-                                        $accountSelection = $role_has_permissions_list->where('name', 'account-selection')->first();
-                                        $defaultAccount = $lims_account_list->where('is_default', true)->first();
-                                    ?>
-                                    <!-- New Account Selection Field -->
-                                    <div id="account-list" class="col-md-3 col-6" hidden>
-                                        <div class="form-group top-fields">
-                                            <label>{{__('db.Account')}}</label>
-                                            <select required name="account_id" id="account_id" class="selectpicker form-control" data-live-search="true">
-                                                @if ($accountSelection)
-                                                    @foreach($lims_account_list as $account)
-                                                        @if($account->is_default)
-                                                        <option selected value="{{$account->id}}" data-total_balance="{{$account->total_balance}}">{{$account->name}} [{{$account->account_no}}]</option>
-                                                        @else
-                                                        <option value="{{$account->id}}" data-total_balance="{{$account->total_balance}}">{{$account->name}} [{{$account->account_no}}]</option>
-                                                        @endif
+                                @foreach($custom_fields as $field)
+                                    @if(!$field->is_admin || \Auth::user()->role_id == 1)
+                                        <div class="{{'col-md-'.$field->grid_value}}">
+                                            <div class="form-group">
+                                                <label>{{$field->name}}</label>
+                                                @if($field->type == 'text')
+                                                    <input type="text" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$field->default_value}}" class="form-control" @if($field->is_required){{'required'}}@endif>
+                                                @elseif($field->type == 'number')
+                                                    <input type="number" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$field->default_value}}" class="form-control" @if($field->is_required){{'required'}}@endif>
+                                                @elseif($field->type == 'textarea')
+                                                    <textarea rows="5" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$field->default_value}}" class="form-control" @if($field->is_required){{'required'}}@endif></textarea>
+                                                @elseif($field->type == 'checkbox')
+                                                    <br>
+                                                    <?php $option_values = explode(",", $field->option_value); ?>
+                                                    @foreach($option_values as $value)
+                                                        <label>
+                                                            <input type="checkbox" name="{{str_replace(' ', '_', strtolower($field->name))}}[]" value="{{$value}}" @if($value == $field->default_value){{'checked'}}@endif @if($field->is_required){{'required'}}@endif> {{$value}}
+                                                        </label>
+                                                        &nbsp;
                                                     @endforeach
-                                                @else
-                                                    <option selected value="{{$defaultAccount->id}}" data-total_balance="{{$defaultAccount->total_balance}}">{{$defaultAccount->name}} [{{$defaultAccount->account_no}}]</option>
+                                                @elseif($field->type == 'radio_button')
+                                                    <br>
+                                                    <?php $option_values = explode(",", $field->option_value); ?>
+                                                    @foreach($option_values as $value)
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$value}}" @if($value == $field->default_value){{'checked'}}@endif @if($field->is_required){{'required'}}@endif> {{$value}}
+                                                        </label>
+                                                        &nbsp;
+                                                    @endforeach
+                                                @elseif($field->type == 'select')
+                                                    <?php $option_values = explode(",", $field->option_value); ?>
+                                                    <select class="form-control" name="{{str_replace(' ', '_', strtolower($field->name))}}" @if($field->is_required){{'required'}}@endif>
+                                                        @foreach($option_values as $value)
+                                                            <option value="{{$value}}" @if($value == $field->default_value){{'selected'}}@endif>{{$value}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                @elseif($field->type == 'multi_select')
+                                                    <?php $option_values = explode(",", $field->option_value); ?>
+                                                    <select class="form-control" name="{{str_replace(' ', '_', strtolower($field->name))}}[]" @if($field->is_required){{'required'}}@endif multiple>
+                                                        @foreach($option_values as $value)
+                                                            <option value="{{$value}}" @if($value == $field->default_value){{'selected'}}@endif>{{$value}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                @elseif($field->type == 'date_picker')
+                                                    <input type="text" name="{{str_replace(' ', '_', strtolower($field->name))}}" value="{{$field->default_value}}" class="form-control date" @if($field->is_required){{'required'}}@endif>
                                                 @endif
-                                            </select>
+                                            </div>
                                         </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12 mt-3">
+                                    <label>{{__('db.Select Product')}}</label>
+                                    <div class="search-box input-group">
+                                        <button class="btn btn-secondary"><i class="fa fa-barcode"></i></button>
+                                        <input type="text" name="product_code_name" id="lims_productcodeSearch" placeholder="{{__('db.Please type product code and select')}}" class="form-control" />
+
                                     </div>
                                 </div>
-                                <div id="payment">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>{{__('db.Paid By')}}</label>
-                                                <select name="paid_by_id[]" class="form-control">
-                                                    <option value="1">{{ __('db.Cash') }}</option>
-                                                    <option value="3">{{ __('db.Credit Card') }}</option>
-                                                    <option value="4">{{ __('db.Cheque') }}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>{{__('db.Recieved Amount')}} *</label>
-                                                <input type="number" name="paying_amount[]" class="form-control" id="paying-amount" step="any" />
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>{{__('db.Paying Amount')}} *</label>
-                                                <input type="number" name="amount[]" class="form-control" id="paid-amount" step="0.01"/>
-                                                <input type="hidden" name="paid_amount" value="0" />
-                                            </div>
-                                            <div class="alert alert-danger d-none p-2 position-absolute" id="paying-amount-error">
-                                                Paying amount must be greater than 0
-                                            </div>
-                                            <div class="alert alert-danger d-none p-2 position-absolute" id="paying-amount-error-2">
-
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>{{__('db.Payment Receiver')}}</label>
-                                                <input type="text" name="payment_receiver" class="form-control" id="payment-receiver"/>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>{{__('db.Change')}}</label>
-                                                <p id="change" class="ml-2">{{ number_format(0, $general_setting->decimal, '.', '') }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {{-- Credit card fields --}}
-                                    <div class="row mt-2" id="card-element-row" style="display:none;">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <div class="card-element form-control"></div>
-                                                <div class="card-errors text-danger mt-2" role="alert"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {{-- Cheque fields --}}
-                                    <div class="row" id="cheque-row" style="display:none;">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>{{__('db.Cheque Number')}} *</label>
-                                                <input type="text" name="cheque_no" class="form-control">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <label>{{__('db.Payment Note')}}</label>
-                                            <textarea rows="3" class="form-control" name="payment_note"></textarea>
-                                        </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h5>{{__('db.Order Table')}} *</h5>
+                                    <div class="table-responsive mt-3">
+                                        <table id="myTable" class="table table-hover order-list">
+                                            <thead>
+                                                <tr>
+                                                    <th style="min-width: 30%">{{__('db.product')}}</th>
+                                                    <th>{{__('db.Quantity')}}</th>
+                                                    <th class="recieved-product-qty d-none">{{__('db.Recieved')}}</th>
+                                                    <th>{{__('db.Net Unit Cost')}}</th>
+                                                    <th>{{__('db.Profit Margin')}}</th>
+                                                    <th>{{__('db.profit_margin_type')}}</th>
+                                                    <th>{{__('db.Product Price')}}</th>
+                                                    <th>{{__('db.Discount')}}</th>
+                                                    <th>{{__('db.Tax')}}</th>
+                                                    <th>{{__('db.Subtotal')}}</th>
+                                                    <th><i class="dripicons-trash"></i></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                            <tfoot class="tfoot active">
+                                                <th>{{__('db.Total')}}</th>
+                                                <th id="total-qty">0</th>
+                                                <th class="recieved-product-qty d-none"></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th id="total-discount">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
+                                                <th id="total-tax">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
+                                                <th id="total">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
+                                                <th><i class="dripicons-trash"></i></th>
+                                            </tfoot>
+                                        </table>
                                     </div>
                                 </div>
-
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label>{{__('db.Note')}}</label>
-                                            <textarea rows="5" class="form-control" name="note"></textarea>
-                                        </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="hidden" name="total_qty" />
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-primary" id="submit-btn">{{__('db.submit')}}</button>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="hidden" name="total_discount" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="hidden" name="total_tax" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="hidden" name="total_cost" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="hidden" name="profit_margin" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="hidden" name="profit_margin_type" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="hidden" name="product_price" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="hidden" name="item" />
+                                        <input type="hidden" name="order_tax" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="hidden" name="grand_total" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        </form>
                     </div>
-                </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{__('db.Order Tax')}}</label>
+                                        <select class="form-control" name="order_tax_rate">
+                                            <option value="0">{{__('db.No Tax')}}</option>
+                                            @foreach($lims_tax_list as $tax)
+                                            <option value="{{$tax->rate}}">{{$tax->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>
+                                            <strong>{{__('db.Discount')}}</strong>
+                                        </label>
+                                        <input type="number" name="order_discount" class="form-control" step="any" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>
+                                            <strong>{{__('db.Shipping Cost')}}</strong>
+                                        </label>
+                                        <input type="number" name="shipping_cost" class="form-control" step="any" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>{{__('db.Payment Status')}} *</label>
+                                        <select name="payment_status" id="payment_status" class="form-control">
+                                            <option value="1">{{__('db.Due')}}</option>
+                                            <option value="3">{{__('db.Partial')}}</option>
+                                            <option value="4">{{__('db.Paid')}}</option>
+                                        </select>
+                                        <x-validation-error fieldName="payment_status" />
+                                    </div>
+                                </div>
+                                <?php
+                                    $accountSelection = $role_has_permissions_list->where('name', 'account-selection')->first();
+                                    $defaultAccount = $lims_account_list->where('is_default', true)->first();
+                                ?>
+                                <!-- New Account Selection Field -->
+                                <div id="account-list" class="col-md-3 col-6" hidden>
+                                    <div class="form-group top-fields">
+                                        <label>{{__('db.Account')}}</label>
+                                        <select required name="account_id" id="account_id" class="selectpicker form-control" data-live-search="true">
+                                            @if ($accountSelection)
+                                                @foreach($lims_account_list as $account)
+                                                    @if($account->is_default)
+                                                    <option selected value="{{$account->id}}" data-total_balance="{{$account->total_balance}}">{{$account->name}} [{{$account->account_no}}]</option>
+                                                    @else
+                                                    <option value="{{$account->id}}" data-total_balance="{{$account->total_balance}}">{{$account->name}} [{{$account->account_no}}]</option>
+                                                    @endif
+                                                @endforeach
+                                            @else
+                                                <option selected value="{{$defaultAccount->id}}" data-total_balance="{{$defaultAccount->total_balance}}">{{$defaultAccount->name}} [{{$defaultAccount->account_no}}]</option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="payment">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Paid By')}}</label>
+                                            <select name="paid_by_id[]" class="form-control">
+                                                <option value="1">{{ __('db.Cash') }}</option>
+                                                <option value="3">{{ __('db.Credit Card') }}</option>
+                                                <option value="4">{{ __('db.Cheque') }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Recieved Amount')}} *</label>
+                                            <input type="number" name="paying_amount[]" class="form-control" id="paying-amount" step="any" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Paying Amount')}} *</label>
+                                            <input type="number" name="amount[]" class="form-control" id="paid-amount" step="0.01"/>
+                                            <input type="hidden" name="paid_amount" value="0" />
+                                        </div>
+                                        <div class="alert alert-danger d-none p-2 position-absolute" id="paying-amount-error">
+                                            Paying amount must be greater than 0
+                                        </div>
+                                        <div class="alert alert-danger d-none p-2 position-absolute" id="paying-amount-error-2">
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Payment Receiver')}}</label>
+                                            <input type="text" name="payment_receiver" class="form-control" id="payment-receiver"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{__('db.Change')}}</label>
+                                            <p id="change" class="ml-2">{{ number_format(0, $general_setting->decimal, '.', '') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Credit card fields --}}
+                                <div class="row mt-2" id="card-element-row" style="display:none;">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <div class="card-element form-control"></div>
+                                            <div class="card-errors text-danger mt-2" role="alert"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Cheque fields --}}
+                                <div class="row" id="cheque-row" style="display:none;">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>{{__('db.Cheque Number')}} *</label>
+                                            <input type="text" name="cheque_no" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>{{__('db.Payment Note')}}</label>
+                                        <textarea rows="3" class="form-control" name="payment_note"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>{{__('db.Note')}}</label>
+                                        <textarea rows="5" class="form-control" name="note"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary" id="submit-btn">{{__('db.submit')}}</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
     <div class="container-fluid">
-        <table class="table table-bordered table-condensed totals">
-            <td><strong>{{__('db.Items')}}</strong>
-                <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{__('db.Total')}}</strong>
-                <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{__('db.Order Tax')}}</strong>
-                <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{__('db.Order Discount')}}</strong>
-                <span class="pull-right" id="order_discount">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{__('db.Shipping Cost')}}</strong>
-                <span class="pull-right" id="shipping_cost">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{__('db.grand total')}}</strong>
-                <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-        </table>
+        <div class="card" style="margin-top:0;">
+            <div class="card-body">
+                <div class="card-title">
+                    {{ __('db.Order Summary') }}
+                </div>
+                <table class="table table-bordered table-condensed totals">
+                    <td><strong>{{__('db.Items')}}</strong>
+                        <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                    </td>
+                    <td><strong>{{__('db.Total')}}</strong>
+                        <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                    </td>
+                    <td><strong>{{__('db.Order Tax')}}</strong>
+                        <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                    </td>
+                    <td><strong>{{__('db.Order Discount')}}</strong>
+                        <span class="pull-right" id="order_discount">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                    </td>
+                    <td><strong>{{__('db.Shipping Cost')}}</strong>
+                        <span class="pull-right" id="shipping_cost">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                    </td>
+                    <td><strong>{{__('db.grand total')}}</strong>
+                        <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                    </td>
+                </table>
+            </div>
+        </div>
     </div>
     <div id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
         <div role="document" class="modal-dialog">
@@ -678,6 +696,14 @@
         });
 
         $('#purchase-form').on('submit', function (e) {
+            /* ===============================
+            0. Warehouse must be selected
+            =============================== */
+            if ($('select[name="warehouse_id"]').val() == '') {
+                alert("Please select warehouse!");
+                e.preventDefault();
+                return false;
+            }
 
             /* ===============================
             1. Order table must have rows

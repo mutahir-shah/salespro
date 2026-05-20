@@ -62,6 +62,7 @@
 </style>
 @endpush
 
+<x-toast :toast_notify="session('toast_notify')" />
 <x-success-message key="message1" />
 <x-success-message key="message2" />
 <x-error-message key="message3" />
