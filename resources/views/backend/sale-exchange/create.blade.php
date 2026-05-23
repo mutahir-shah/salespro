@@ -821,17 +821,21 @@
             @endif
         @endif
 
-        var currency = <?php echo json_encode($currency); ?>;
+        var currency = <?php echo json_encode($currency); ?> || {};
+        currency['exchange_rate'] = parseFloat(currency['exchange_rate']) || 1;
+        currency['id'] = currency['id'] || '';
         var currencyChange = false;
         var without_stock = <?php echo json_encode($general_setting->without_stock); ?>;
         var authUser = <?php echo json_encode($authUser); ?>;
         var decimal = <?php echo json_encode($general_setting->decimal); ?>;
         var exchangeValue = 0,
             newProductsTotal = 0;
-        $('#currency').val(currency['id']);
+        if (currency['id']) {
+            $('#currency').val(currency['id']);
+        }
 
         $('#currency').change(function() {
-            var rate = $(this).find(':selected').data('rate');
+            var rate = parseFloat($(this).find(':selected').data('rate')) || 1;
             $('#exchange_rate').val(rate);
             currency['exchange_rate'] = rate;
             $("table.order-list tbody .qty").each(function(index) {
@@ -1033,27 +1037,26 @@
             if (item == -1) {
                 $('#order-discount-val').val(0);
             }
-            var total_qty = parseFloat($('input[name="total_qty"]').val());
-            var subtotal = parseFloat($('input[name="total_price"]').val());
-            var order_tax = parseFloat($('select[name="order_tax_rate"]').val());
+            var total_qty = parseFloat($('input[name="total_qty"]').val()) || 0;
+            var subtotal = parseFloat($('input[name="total_price"]').val()) || 0;
+            var order_tax = parseFloat($('select[name="order_tax_rate"]').val()) || 0;
             var order_discount_type = $('select[name="order_discount_type"]').val();
-            var order_discount_value = parseFloat($('input[name="order_discount_value"]').val());
-            if (!order_discount_value) order_discount_value = {{ number_format(0, $general_setting->decimal, '.', '') }};
+            var order_discount_value = parseFloat($('input[name="order_discount_value"]').val()) || 0;
             var order_discount = (order_discount_type == 'Flat') ? (currencyChange ? parseFloat(order_discount_value *
-                currency['exchange_rate']) : parseFloat(order_discount_value)) : parseFloat(subtotal * (
+                (currency['exchange_rate'] || 1)) : parseFloat(order_discount_value)) : parseFloat(subtotal * (
                 order_discount_value / 100));
             $("#discount").text(order_discount_value.toFixed(decimal));
             $('input[name="order_discount"]').val(order_discount);
             $('#order-discount-val').val(order_discount_value);
             $('input[name="order_discount_type"]').val(order_discount_type);
-            var shipping_cost = currencyChange ? parseFloat($('input[name="shipping_cost"]').val() * currency[
-                'exchange_rate']) : parseFloat($('input[name="shipping_cost"]').val());
+            var shipping_cost = currencyChange ? parseFloat($('input[name="shipping_cost"]').val() * (currency[
+                'exchange_rate'] || 1)) : parseFloat($('input[name="shipping_cost"]').val()) || 0;
             if (!shipping_cost) shipping_cost = {{ number_format(0, $general_setting->decimal, '.', '') }};
             item = ++item + '(' + total_qty + ')';
             order_tax = (subtotal - order_discount) * (order_tax / 100);
             var grand_total = (subtotal + order_tax + shipping_cost) - order_discount;
-            var coupon_discount = currencyChange ? parseFloat($('input[name="coupon_discount"]').val() * currency[
-                'exchange_rate']) : parseFloat($('input[name="coupon_discount"]').val());
+            var coupon_discount = currencyChange ? parseFloat($('input[name="coupon_discount"]').val() * (currency[
+                'exchange_rate'] || 1)) : parseFloat($('input[name="coupon_discount"]').val()) || 0;
             if (!coupon_discount) coupon_discount = {{ number_format(0, $general_setting->decimal, '.', '') }};
             grand_total -= coupon_discount;
             $('#item').text(item);
@@ -1353,8 +1356,9 @@
                         if (pre_qty > 0) {
                             var qty = data[15];
                             $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ') .qty').val(qty);
-                            product_price[rowindex] = parseFloat(data[2] * currency['exchange_rate']) +
-                                parseFloat(data[2] * currency['exchange_rate'] * customer_group_rate);
+                            var exchangeRate = parseFloat(currency['exchange_rate']) || 1;
+                            product_price[rowindex] = parseFloat(data[2] * exchangeRate) +
+                                parseFloat(data[2] * exchangeRate * customer_group_rate);
                             checkDiscount(String(qty), true, tableSelector);
                             flag = 0;
                         }
@@ -1657,13 +1661,18 @@
                 url: '{{ url('/') }}/sales/check-discount?qty=' + qty + '&customer_id=' + customer_id +
                     '&product_id=' + product_id + '&warehouse_id=' + warehouse_id,
                 success: function(data) {
-                    if (product_price[rowindex].length == 0) {
-                        product_price[rowindex] = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) +
-                            ') .product_price').val();
+                    var $row = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')');
+                    var currentProductPrice = parseFloat(product_price[rowindex]);
+                    if (!isFinite(currentProductPrice)) {
+                        currentProductPrice = parseFormattedNumber($row.find('.product_price').val()) ||
+                            parseFormattedNumber($row.find('.net_unit_price').val()) ||
+                            parseFormattedNumber($row.find('.product-price').text()) || 0;
                     }
-                    product_price[rowindex] = parseFloat(product_price[rowindex] * currency['exchange_rate']) +
-                        parseFloat(product_price[rowindex] * currency['exchange_rate'] * customer_group_rate);
-                    var productDiscount = parseFloat($('#discount').text());
+                    var exchangeRate = parseFloat(currency['exchange_rate']) || 1;
+                    var groupRate = parseFloat(customer_group_rate) || 0;
+                    product_price[rowindex] = parseFloat(currentProductPrice * exchangeRate) +
+                        parseFloat(currentProductPrice * exchangeRate * groupRate);
+                    var productDiscount = parseFloat($('#discount').text()) || 0;
                     if (flag == true) $('#discount').text(productDiscount + data[2]);
                     else if (flag == false) $('#discount').text(productDiscount - data[2] * qty);
                     else if (flag == 'input') $('#discount').text(productDiscount - data[2] * previousqty +
@@ -1710,20 +1719,27 @@
             recalculateAll();
         }
 
-        function unitConversion() {
-            var row_unit_operator = unit_operator[rowindex].slice(0, unit_operator[rowindex].indexOf(",")),
-                row_unit_operation_value = unit_operation_value[rowindex].slice(0, unit_operation_value[rowindex].indexOf(
-                    ","));
+        function unitConversion(tableSelector, basePrice) {
+            var $row = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')');
+            var row_unit_operator = ($row.find('.sale-unit-operator').val() || unit_operator[rowindex] || '').split(',')[0] || '*';
+            var row_unit_operation_value = parseFloat(($row.find('.sale-unit-operation-value').val() || unit_operation_value[rowindex] || '').split(',')[0]) || 1;
             if (row_unit_operator == '*') {
-                row_product_price = product_price[rowindex] * row_unit_operation_value;
+                row_product_price = basePrice * row_unit_operation_value;
             } else {
-                row_product_price = product_price[rowindex] / row_unit_operation_value;
+                row_product_price = basePrice / row_unit_operation_value;
             }
         }
 
         function calculateRowProductData(quantity, tableSelector = 'table.order-list') {
-            if (product_discount[rowindex] < 1) {
-                cur_product_id = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ') .product-id').val();
+            var $row = $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')');
+            var rowTaxRate = parseFloat($row.find('.tax-rate').val()) || parseFloat(tax_rate[rowindex]) || 0;
+            var rowTaxMethod = parseInt($row.find('.tax-method').val()) || parseInt(tax_method[rowindex]) || 1;
+            var rowProductDiscount = parseFloat($row.find('.discount-value').val()) || parseFloat(product_discount[rowindex]) || 0;
+            var rowProductType = $row.find('.product_type').val() || 'standard';
+            var rowProductPrice = parseFormattedNumber($row.find('.product_price').val()) || parseFormattedNumber($row.find('.net_unit_price').val()) || parseFormattedNumber($row.find('.product-price').text()) || 0;
+
+            if (rowProductDiscount < 1) {
+                cur_product_id = $row.find('.product-id').val();
                 @if (isset($draft_product_discount))
                     if (product_discount[rowindex] < 1) {
                         draft_discounts = @json($draft_product_discount['discount']);
@@ -1731,25 +1747,24 @@
                     }
                 @endif
             }
-            if (product_type[pos] == 'standard') unitConversion();
-            else row_product_price = product_price[rowindex];
+            if (rowProductType == 'standard') unitConversion(tableSelector, rowProductPrice);
+            else row_product_price = rowProductPrice;
             var net_unit_price, tax, sub_total, sub_total_unit;
-            if (tax_method[rowindex] == 1) {
-                net_unit_price = row_product_price - product_discount[rowindex];
-                tax = net_unit_price * quantity * (tax_rate[rowindex] / 100);
+            if (rowTaxMethod == 1) {
+                net_unit_price = row_product_price - rowProductDiscount;
+                tax = net_unit_price * quantity * (rowTaxRate / 100);
                 sub_total = (net_unit_price * quantity) + tax;
                 sub_total_unit = parseFloat(quantity) ? sub_total / quantity : sub_total;
             } else {
-                sub_total_unit = row_product_price - product_discount[rowindex];
-                net_unit_price = (100 / (100 + tax_rate[rowindex])) * sub_total_unit;
+                sub_total_unit = row_product_price - rowProductDiscount;
+                net_unit_price = (100 / (100 + rowTaxRate)) * sub_total_unit;
                 tax = (sub_total_unit - net_unit_price) * quantity;
                 sub_total = sub_total_unit * quantity;
             }
-            var topping_price = ($(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.topping-price')
-                .val() * quantity) || 0;
-            $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.discount-value').val((product_discount[
-                rowindex] * quantity).toFixed({{ $general_setting->decimal }}));
-            $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.tax-rate').val(tax_rate[rowindex]
+            var topping_price = parseFormattedNumber($(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.topping-price').val()) * quantity || 0;
+            $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.discount-value').val((rowProductDiscount *
+                quantity).toFixed({{ $general_setting->decimal }}));
+            $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.tax-rate').val(rowTaxRate
                 .toFixed({{ $general_setting->decimal }}));
             $(tableSelector + ' tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').val(net_unit_price
                 .toFixed({{ $general_setting->decimal }}));

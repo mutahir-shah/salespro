@@ -1,0 +1,14 @@
+Report Controller modifications
+Added new reports
+ALTER TABLE sales
+ADD INDEX idx_sales_created_at (created_at),
+ADD INDEX idx_sales_customer (customer_id),
+ADD INDEX idx_sales_biller (biller_id),
+ADD INDEX idx_sales_warehouse (warehouse_id);
+
+ALTER TABLE product_sales
+ADD INDEX idx_product_sales_sale (sale_id),
+ADD INDEX idx_product_sales_product (product_id);
+
+ALTER TABLE biller_commissions
+ADD INDEX idx_biller_sale (sale_id);

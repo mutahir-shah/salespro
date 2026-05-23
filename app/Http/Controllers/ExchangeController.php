@@ -269,13 +269,11 @@ class ExchangeController extends Controller
     {
         // Get logged-in user's role
         $role = Role::find(Auth::user()->role_id);
-
         // Check permission
         if (!$role->hasPermissionTo('exchange-add')) {
             return redirect()->back()
                 ->with('not_permitted', __('Sorry! You are not allowed to access this module'));
         }
-
         // Load required data for the exchange page
         $lims_customer_list   = Customer::where('is_active', true)->get();
         $lims_account_list    = Account::latest()->get();
@@ -283,53 +281,34 @@ class ExchangeController extends Controller
         $lims_biller_list     = Biller::where('is_active', true)->get();
         $lims_tax_list        = Tax::where('is_active', true)->get();
         $numberOfInvoice      = Sale::whereNull('deleted_at')->count();
-
         // Default values
         $lims_sale_data = null;
         $lims_product_sale_data = collect([]);
-
         /**
          * Handle optional inputs:
          * 1. reference_no (from modal input)
          * 2. sale_id (direct navigation)
          */
         if ($request->filled('reference_no')) {
-
             // Find sale by reference number
-            $lims_sale_data = Sale::where('reference_no', $request->reference_no)
-                ->whereNull('deleted_at')
-                ->first();
+            $lims_sale_data = Sale::where('reference_no', $request->reference_no)->whereNull('deleted_at')->first();
         } elseif ($request->filled('sale_id')) {
-
             // Find sale by ID
-            $lims_sale_data = Sale::whereNull('deleted_at')
-                ->find($request->sale_id);
+            $lims_sale_data = Sale::whereNull('deleted_at')->find($request->sale_id);
         }
-
         // If sale found, load its products
         if ($lims_sale_data) {
             $lims_product_sale_data = Product_Sale::where('sale_id', $lims_sale_data->id)->get();
         }
 
+       // dd($lims_sale_data, $lims_product_sale_data);
         // Currency exchange rate (default = 1 if no sale selected)
         $currency_exchange_rate = $lims_sale_data->exchange_rate ?? 1;
-
         // Custom fields for sale
         $custom_fields = CustomField::where('belongs_to', 'sale')->get();
-
         // Return exchange create view
-        return view('backend.sale-exchange.create', compact(
-            'lims_account_list',
-            'lims_customer_list',
-            'lims_warehouse_list',
-            'lims_biller_list',
-            'lims_tax_list',
-            'lims_sale_data',
-            'lims_product_sale_data',
-            'currency_exchange_rate',
-            'custom_fields',
-            'numberOfInvoice'
-        ));
+        return view('backend.sale-exchange.create', compact('lims_account_list','lims_customer_list','lims_warehouse_list','lims_biller_list',
+            'lims_tax_list','lims_sale_data','lims_product_sale_data','currency_exchange_rate','custom_fields','numberOfInvoice'));
     }
 
     public function store(Request $request)

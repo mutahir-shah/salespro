@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Biller, Category, Challan, Customer, CustomerGroup, CustomField, Expense, GeneralSetting, Income, Payment, Payroll, Product_Sale};
+use App\Models\{Biller, BillerCommission, Category, Challan, Customer, CustomerGroup, CustomField, Expense, GeneralSetting, Income, Payment, Payroll, Product_Sale, ProductReturn};
 use App\Models\{Product_Warehouse, Product, ProductPurchase, ProductVariant, Purchase, ReturnPurchase, Returns, Sale, Supplier, Unit, User, Variant, Warehouse};
 use Carbon\Carbon;
 use Illuminate\Support\Facades\{Auth, Cache, DB};
@@ -5740,5 +5740,335 @@ class ReportController extends Controller
             })->groupBy('packing_type')->orderByDesc('total_remaining_products')->get();
 
         return view('backend.report.remaining_products_by_type', compact('categories', 'lims_warehouse_list', 'warehouse_id'));
+    }
+
+
+
+
+
+    // -------------------------------------------------------------------------
+    // FIX: add Category model to your imports at the top of the controller
+    // -------------------------------------------------------------------------
+    // use App\Models\Category;   <-- make sure this is imported
+
+    public function saleReport1(Request $request)
+    {
+        $data         = $request->all();
+        $start_date   = $request->input('start_date', date('Y-m') . '-' . '01');
+        $end_date     = $request->input('end_date', date('Y-m-d'));
+        $warehouse_id = $request->input('warehouse_id', 0);
+        $category_id  = $request->input('category_id', 0);
+        $lims_warehouse_list = Warehouse::where('is_active', true)->get();
+        $categories_list     = Category::where('is_active', true)->orderBy('name')->get();
+
+        $custom_fields = CustomField::where([['belongs_to', 'sale'], ['is_table', true]])->pluck('name');
+        $field_names   = [];
+        foreach ($custom_fields as $fieldName) {
+            $field_names[] = str_replace(' ', '_', strtolower($fieldName));
+        }
+
+        return view('backend.report.sale_report_new', compact(
+            'start_date',
+            'end_date',
+            'warehouse_id',
+            'category_id',
+            'lims_warehouse_list',
+            'categories_list',
+            'custom_fields',
+            'field_names'
+        ));
+    }
+
+
+    // =============================================================================
+    // 2. DATATABLE DATA ENDPOINT
+    // =============================================================================
+    // 2. DATATABLE DATA ENDPOINT
+    // =============================================================================
+    public function saleReportData1(Request $request)
+    {
+        // Commission is one row per sale; product_sales is many rows per sale.
+        // Aggregate first to avoid multiplying the commission per product line.
+        $commissionSub = DB::table('biller_commissions')
+            ->select('sale_id', DB::raw('SUM(commission_amount) as commission_amount'))
+            ->groupBy('sale_id');
+
+        $query = DB::table('product_sales as ps')
+            ->join('sales as s',          's.id',       '=', 'ps.sale_id')
+            ->join('products as p',       'p.id',       '=', 'ps.product_id')
+            ->leftJoin('categories as cat', 'cat.id',   '=', 'p.category_id')
+            ->leftJoin('customers as c',  'c.id',       '=', 's.customer_id')
+            ->leftJoin('billers as b',    'b.id',       '=', 's.biller_id')
+            ->leftJoin('warehouses as w', 'w.id',       '=', 's.warehouse_id')
+            ->leftJoinSub($commissionSub, 'bc', fn($j) => $j->on('bc.sale_id', '=', 's.id'))
+            ->select([
+                'ps.id',
+                's.id as sale_id',
+                's.reference_no',
+                's.created_at',
+
+                'p.name as product_name',
+                'p.code as product_code',
+
+                'cat.name as category_name',
+
+                'c.name as customer_name',
+
+                'b.name as biller_name',
+                'w.name as warehouse_name',
+
+                'ps.qty',
+                'ps.return_qty',
+                DB::raw('(ps.qty - ps.return_qty) as remaining_qty'),
+
+                'ps.net_unit_price',
+                'ps.discount',
+                'ps.tax',
+                'ps.total',
+
+                // product_sales has no product_cost; use p.cost from products table
+                DB::raw('((ps.net_unit_price - COALESCE(p.cost, 0)) * (ps.qty - ps.return_qty)) as profit'),
+
+                DB::raw('COALESCE(bc.commission_amount, 0) as commission'),
+
+                's.payment_status',
+                's.sale_status',
+            ])
+            ->whereNull('s.deleted_at')      // exclude soft-deleted sales
+            ->where('s.sale_status', 1);     // completed sales only
+
+        // Filters
+        if ($request->start_date) {
+            $query->whereDate('s.created_at', '>=', $request->start_date);
+        }
+        if ($request->end_date) {
+            $query->whereDate('s.created_at', '<=', $request->end_date);
+        }
+        if ($request->warehouse_id > 0) {
+            $query->where('s.warehouse_id', $request->warehouse_id);
+        }
+        if ($request->category_id > 0) {
+            $query->where('p.category_id', $request->category_id);
+        }
+        if ($request->biller_id > 0) {
+            $query->where('s.biller_id', $request->biller_id);
+        }
+        if ($request->customer_id > 0) {
+            $query->where('s.customer_id', $request->customer_id);
+        }
+
+        return DataTables::of($query)
+            ->addIndexColumn() // supplies DT_RowIndex
+
+            ->editColumn(
+                'created_at',
+                fn($row) =>
+                date('d-m-Y h:i A', strtotime($row->created_at))
+            )
+
+            ->editColumn('payment_status', fn($row) => match ((int) $row->payment_status) {
+                1       => '<span class="badge badge-success">Paid</span>',
+                2       => '<span class="badge badge-warning">Partial</span>',
+                default => '<span class="badge badge-danger">Due</span>',
+            })
+
+            ->addColumn('action', function ($row) {
+                // Two buttons: View Detail (opens modal) + quick Return shortcut
+                return '
+                <div class="btn-group btn-group-sm">
+                    <button type="button"
+                            class="btn btn-info fetchProductDetails"
+                            title="View Detail &amp; Return"
+                            data-sale_id="'    . $row->sale_id . '"
+                            data-product_id="' . $row->id      . '">
+                        <i class="fa fa-eye"></i> Detail
+                    </button>
+                </div>';
+            })
+
+            ->rawColumns(['payment_status', 'action'])
+            ->make(true);
+    }
+
+
+    // =============================================================================
+    // 3. GET PRODUCT DETAILS  (for the detail/return modal)
+    // =============================================================================
+    public function getProductDetails(Request $request)
+    {
+        $request->validate([
+            'sale_id'    => 'required|exists:sales,id',
+            'product_id' => 'required|exists:product_sales,id', // ps.id, not product.id
+        ]);
+
+        // Load the sale with its relationships
+        $sale = Sale::with(['customer', 'biller', 'warehouse'])->findOrFail($request->sale_id);
+
+        // Load the specific product_sales row (ps.id is passed as product_id from the action button)
+        $ps = Product_Sale::with('product.category', 'product.unit')
+            ->where('sale_id', $request->sale_id)
+            ->findOrFail($request->product_id);
+
+        $product    = $ps->product;
+        $customer   = $sale->customer;
+        $commission = BillerCommission::where('sale_id', $sale->id)
+            ->sum('commission_amount');
+
+        // Payment status badge (same logic as DataTable)
+        $paymentBadge = match ((int) $sale->payment_status) {
+            1       => '<span class="badge badge-success">Paid</span>',
+            2       => '<span class="badge badge-warning">Partial</span>',
+            default => '<span class="badge badge-danger">Due</span>',
+        };
+
+        return response()->json([
+            'sale' => [
+                'reference_no'        => $sale->reference_no,
+                'created_at'          => date('d-m-Y h:i A', strtotime($sale->created_at)),
+                'warehouse'           => $sale->warehouse->name  ?? '—',
+                'biller'              => $sale->biller->name     ?? '—',
+                'payment_status_badge' => $paymentBadge,
+            ],
+
+            'customer' => [
+                'name'    => $customer->name          ?? '—',
+                'phone'   => $customer->phone_number  ?? '—',  // phone_number per schema
+                'email'   => $customer->email         ?? '—',
+                'company' => $customer->company_name  ?? '—',
+                'address' => $customer->address       ?? '—',
+            ],
+
+            'product' => [
+                'name'          => $product->name                    ?? '—',
+                'code'          => $product->code                    ?? '—',
+                'category'      => $product->category->name         ?? '—',
+                'unit'          => $product->unit->name         ?? '—',
+
+                // product_sales columns
+                'qty'           => $ps->qty,
+                'return_qty'    => $ps->return_qty,
+                'remaining_qty' => $ps->qty - $ps->return_qty,
+                'net_unit_price' => $ps->net_unit_price,
+                'discount'      => $ps->discount,
+                'tax'           => $ps->tax,
+                'total'         => $ps->total,
+
+                // Profit using p.cost (product_sales has no product_cost column)
+                'profit'        => round(
+                    ($ps->net_unit_price - ($product->cost ?? 0)) * ($ps->qty - $ps->return_qty),
+                    2
+                ),
+                'commission'    => round($commission, 2),
+            ],
+        ]);
+    }
+
+
+    // =============================================================================
+    // 4. PROCESS RETURN
+    // =============================================================================
+    public function processReturn(Request $request)
+    {
+        $request->validate([
+            'sale_id'           => 'required|exists:sales,id',
+            'product_id'        => 'required|exists:product_sales,id',
+            'quantity_returned' => 'required|numeric|min:1',
+            'created_at'        => 'required|date_format:d-m-Y',
+        ]);
+
+        $sale = Sale::findOrFail($request->sale_id);
+        $ps   = Product_Sale::with('product')  // eager load to avoid lazy query later
+            ->where('sale_id', $sale->id)
+            ->findOrFail($request->product_id);
+
+        $qty            = (float) $request->quantity_returned;
+        $net_unit_price = $ps->net_unit_price;
+        $remaining      = $ps->qty - $ps->return_qty;
+
+        if ($qty > $remaining) {
+            return response()->json([
+                'error' => "Return quantity ({$qty}) exceeds returnable quantity ({$remaining})."
+            ], 422);
+        }
+
+        $refundAmount = $net_unit_price * $qty;
+        $created      = Carbon::createFromFormat('d-m-Y', $request->created_at)
+            ->format('Y-m-d H:i:s');
+
+        // Wrap everything in a transaction — if any step fails, all steps roll back
+        DB::transaction(function () use ($sale, $ps, $qty, $net_unit_price, $refundAmount, $created) {
+
+            // 1. Create the return header
+            $returnRecord = Returns::create([
+                'user_id'          => Auth::id(),
+                'reference_no'     => $sale->reference_no,
+                'sale_id'          => $sale->id,
+                'customer_id'      => $sale->customer_id,
+                'warehouse_id'     => $sale->warehouse_id,
+                'biller_id'        => $sale->biller_id,
+                'currency_id'      => $sale->currency_id,
+                'exchange_rate'    => $sale->exchange_rate,
+                'cash_register_id' => 1,
+                'account_id'       => 1,
+                'item'             => 1,         // this return covers 1 product line
+                'total_qty'        => $qty,
+                'total_discount'   => 0,
+                'total_tax'        => 0.00,
+                'order_tax_rate'   => 0.00,
+                'order_tax'        => 0.00,
+                'total_price'      => $refundAmount,
+                'grand_total'      => $refundAmount,
+            ]);
+
+            // Backdate timestamps (not in $fillable)
+            DB::table('returns')
+                ->where('id', $returnRecord->id)
+                ->update(['created_at' => $created, 'updated_at' => $created]);
+
+            // 2. Create the product return line
+            $productReturn = ProductReturn::create([
+                'return_id'      => $returnRecord->id,
+                'product_id'     => $ps->product_id,
+                'qty'            => $qty,
+                'sale_unit_id'   => $ps->sale_unit_id,
+                'net_unit_price' => $net_unit_price,
+                'discount'       => 0,
+                'tax_rate'       => 0,
+                'tax'            => 0,
+                'total'          => $refundAmount,
+            ]);
+
+            // Backdate timestamps (not in $fillable)
+            DB::table('product_returns')
+                ->where('id', $productReturn->id)
+                ->update(['created_at' => $created, 'updated_at' => $created]);
+
+            // 3. Update product_sales so remaining_qty is accurate in the report
+            $ps->increment('return_qty', $qty);
+
+            // 4. Restore stock on the product
+            $ps->product->increment('qty', $qty);
+
+            // 5. Restore stock in the warehouse
+            $productWarehouse = Product_Warehouse::FindProductWithoutVariant(
+                $ps->product_id,
+                $sale->warehouse_id
+            )->first();
+
+            if ($productWarehouse) {
+                $productWarehouse->increment('qty', $qty);
+            }
+        });
+
+        // Compute updated values from what we already know — no extra DB queries
+        $newReturnQty    = $ps->return_qty + $qty;
+        $newRemainingQty = $ps->qty - $newReturnQty;
+
+        return response()->json([
+            'message'           => 'Return processed successfully.',
+            'refund_amount'     => $refundAmount,
+            'new_return_qty'    => $newReturnQty,
+            'new_remaining_qty' => $newRemainingQty,
+        ]);
     }
 }

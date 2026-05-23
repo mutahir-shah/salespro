@@ -583,6 +583,16 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::post('purchase_report_data', 'purchaseReportData');
             Route::post('sale_report', 'saleReport')->name('report.sale');
             Route::post('sale_report_data', 'saleReportData');
+
+            Route::get('/reports_new/sale', 'saleReport1')->name('report.sale.view');
+            Route::post('/report_new/sale', 'saleReport1')->name('report.sale.list');
+            // DataTables AJAX endpoint
+            Route::get('/report_new/sale/data', 'saleReportData1')->name('report.sale.data1');
+
+            Route::get('/report_new/sale/product-details',  'getProductDetails')->name('report.get-product-details');
+            Route::post('/report_new/sale/process-return',  'processReturn')->name('report.process-return');
+
+
             Route::get('stock', 'stockReport')->name('report.stock');
             Route::post('stock-data', 'stockReportData')->name('report.stock-data');
             Route::get('challan-report', 'challanReport')->name('report.challan');
