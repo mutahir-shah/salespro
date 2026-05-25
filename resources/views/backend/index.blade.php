@@ -949,12 +949,11 @@
                 }
             });
 
-
+        });
 
             //BIller commsion ReportingObserver
-$(function () {
 
-    const REPORT_URL = '{{ route("dashboard.biller-reports") }}';
+   const REPORT_URL = '{{ route("dashboard.biller-reports") }}';
 
     function loadBillerReports(params) {
         const spinner = '<tr><td colspan="3" class="text-center"><i class="fa fa-spinner fa-spin"></i></td></tr>';
@@ -1013,10 +1012,7 @@ var params = {
             _token       : '{{ csrf_token() }}',
         };
     loadBillerReports(params);
-});
-
-
-        });
+    
 
 
         
