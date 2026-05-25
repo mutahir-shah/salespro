@@ -12,3 +12,11 @@ ADD INDEX idx_product_sales_product (product_id);
 
 ALTER TABLE biller_commissions
 ADD INDEX idx_biller_sale (sale_id);
+
+Routes 
+   Route::get('/reports_new/sale', 'saleReport1')->name('report.sale.view');
+            Route::post('/report_new/sale', 'saleReport1')->name('report.sale.list');
+            // DataTables AJAX endpoint
+            Route::get('/report_new/sale/data', 'saleReportData1')->name('report.sale.data1');
+            Route::get('/report_new/sale/product-details',  'getProductDetails')->name('report.get-product-details');
+            Route::post('/report_new/sale/process-return',  'processReturn')->name('report.process-return');

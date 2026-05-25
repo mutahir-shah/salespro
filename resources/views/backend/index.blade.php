@@ -686,6 +686,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -709,6 +710,67 @@
                         </div>
                     </div>
                 </div>
+
+
+
+                 {{-- Commission Table --}}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>{{ __('db.Best Biller') . ' ' . date('Y') . '(' . __('db.Price') . ')' }}</h4>
+                <div class="right-column">
+                    <div class="badge badge-primary">{{ __('db.top') }} 5</div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="yearly-best-selling-price" class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{{ __('db.Name') }}</th>
+                            <th>{{ __('db.grand total') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="commission-tbody">
+                        <tr><td colspan="3" class="text-center">
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- Quantity Table --}}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>{{ __('db.Best Biller') . ' ' . date('Y') . '(' . __('db.Quantity') . ')' }}</h4>
+                <div class="right-column">
+                    <div class="badge badge-success">{{ __('db.top') }} 5</div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="yearly-best-selling-qty" class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{{ __('db.Name') }}</th>
+                            <th>{{ __('db.Quantity') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quantity-tbody">
+                        <tr><td colspan="3" class="text-center">
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+                
+
+
             </div>
         </div>
     </section>
@@ -886,6 +948,74 @@
                     })
                 }
             });
+
+
+
+            //BIller commsion ReportingObserver
+$(function () {
+
+    const REPORT_URL = '{{ route("dashboard.biller-reports") }}';
+
+    function loadBillerReports(parms) {
+        const spinner = '<tr><td colspan="3" class="text-center"><i class="fa fa-spinner fa-spin"></i></td></tr>';
+        $('#commission-tbody, #quantity-tbody').html(spinner);
+
+        $.ajax({
+            url     : REPORT_URL,
+            method  : 'GET',
+            data    : params,
+            success : function (res) {
+                renderCommission(res.commission);
+                renderQuantity(res.quantity);
+            },
+            error   : function () {
+                const err = '<tr><td colspan="3" class="text-center text-danger">Failed to load data.</td></tr>';
+                $('#commission-tbody, #quantity-tbody').html(err);
+            }
+        });
+    }
+
+    function renderCommission(rows) {
+        if (!rows.length) {
+            $('#commission-tbody').html('<tr><td colspan="3" class="text-center text-muted">No data</td></tr>');
+            return;
+        }
+        const html = rows.map((r, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${r.name}</td>
+                <td><strong>RS ${r.total_commission}</strong></td>
+            </tr>
+        `).join('');
+        $('#commission-tbody').html(html);
+    }
+
+    function renderQuantity(rows) {
+        if (!rows.length) {
+            $('#quantity-tbody').html('<tr><td colspan="3" class="text-center text-muted">No data</td></tr>');
+            return;
+        }
+        const html = rows.map((r, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${r.name}</td>
+                <td><strong>${r.total_items}</strong></td>
+            </tr>
+        `).join('');
+        $('#quantity-tbody').html(html);
+    }
+
+    //$('#filter-apply').on('click', loadBillerReports);
+var params = {
+            warehouse_id : $('#filter-warehouse').val() || null,
+            from         : $('#filter-from').val()      || null,
+            to           : $('#filter-to').val()        || null,
+            _token       : '{{ csrf_token() }}',
+        };
+    loadBillerReports(params);
+});
+
+
         });
 
 
@@ -980,6 +1110,15 @@
             });
 
             singleCategoryWiseExpenses(start_date,end_date,warehouse_id);
+
+            var params = {
+            warehouse_id : warehouse_id || null,
+            from         : start_date      || null,
+            to           : end_date        || null,
+            _token       : '{{ csrf_token() }}',
+        };
+    loadBillerReports(params);
+
         });
 
         function dashboardFilter(data) {
