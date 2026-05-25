@@ -956,7 +956,7 @@ $(function () {
 
     const REPORT_URL = '{{ route("dashboard.biller-reports") }}';
 
-    function loadBillerReports(parms) {
+    function loadBillerReports(params) {
         const spinner = '<tr><td colspan="3" class="text-center"><i class="fa fa-spinner fa-spin"></i></td></tr>';
         $('#commission-tbody, #quantity-tbody').html(spinner);
 
@@ -1094,10 +1094,19 @@ var params = {
             var start_date = $(this).data('start_date');
             var end_date = $(this).data('end_date');
             var warehouse_id = $("#warehouse_btn").val();
-            console.log(warehouse_id);
+        
             $.get('dashboard-filter/' + start_date + '/' + end_date + '/' + warehouse_id, function(data) {
                 dashboardFilter(data);
             });
+
+             var params = {
+                    warehouse_id : warehouse_id || null,
+                    from         : start_date      || null,
+                    to           : end_date        || null,
+                    _token       : '{{ csrf_token() }}',
+            };
+            loadBillerReports(params);
+
         });
 
         $("#warehouse_btn").on("change", function() {
@@ -1112,12 +1121,12 @@ var params = {
             singleCategoryWiseExpenses(start_date,end_date,warehouse_id);
 
             var params = {
-            warehouse_id : warehouse_id || null,
-            from         : start_date      || null,
-            to           : end_date        || null,
-            _token       : '{{ csrf_token() }}',
-        };
-    loadBillerReports(params);
+                    warehouse_id : warehouse_id || null,
+                    from         : start_date      || null,
+                    to           : end_date        || null,
+                    _token       : '{{ csrf_token() }}',
+            };
+            loadBillerReports(params);
 
         });
 
