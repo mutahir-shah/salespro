@@ -899,7 +899,6 @@
                 <div class="modal-content">
 
                     <form action="{{ route('exchange.create') }}" method="get">
-                        @csrf
                         <!-- Header -->
                         <div class="modal-header">
                             <h5 class="modal-title">{{ __('db.Add Sale Exchange') }}</h5>
