@@ -1324,41 +1324,32 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
         $('.customer_total_dues-data').show(500);
     }
 
-    $(function() {
-        var start = moment().subtract(29, 'days');
-        var end = moment();
-        // Override initial start/end ONLY once (page load)
-        // @if(isset($start_date))
-        //     start = moment("{{ $start_date }}", 'YYYY-MM-DD');
-        // @endif
-        // @if(isset($end_date))
-        //     end = moment("{{ $end_date }}", 'YYYY-MM-DD');
-        // @endif
-        function applyDashboardFilter(start, end) {
-            var start_date = start.format('YYYY-MM-DD');
-           var end_date = end.format('YYYY-MM-DD');
+$(function() {
+    var start = moment().subtract(29, 'days');
+    var end = moment();
 
-            // visible field
-            $('.daterangepicker-field').val(start_date + ' To ' + end_date);
+    function applyDashboardFilter(start, end) {
+        var start_date = start.format('YYYY-MM-DD');
+        var end_date = end.format('YYYY-MM-DD');
 
-            // hidden fields (NOW SAFE)
-            $('input[name="start_date"]').val(start_date);
-            $('input[name="end_date"]').val(end_date);
+        $('.daterangepicker-field').val(start_date + ' To ' + end_date);
 
-            // console.log(start_date+' '+end_date);
+        $('input[name="start_date"]').val(start_date);
+        $('input[name="end_date"]').val(end_date);
 
-            $(".date-btn").removeClass("active");
+        $(".date-btn").removeClass("active");
 
-            var warehouse_id = $("#warehouse_btn").val();
-            if (warehouse_id === undefined || staff_role_id > 2) {
-                console.log(start_date, end_date);
-                warehouse_id = staff_warehouse_id;
-            }
-
-            $.get('dashboard-filter/' + start_date + '/' + end_date + '/' + warehouse_id, function(data) {
-                dashboardFilter(data);
-            });
+        var warehouse_id = $("#warehouse_btn").val();
+        if (warehouse_id === undefined || staff_role_id > 2) {
+            console.log(start_date, end_date);
+            warehouse_id = staff_warehouse_id;
         }
+
+        $.get('dashboard-filter/' + start_date + '/' + end_date + '/' + warehouse_id, function(data) {
+            dashboardFilter(data);
+        });
+    }
+ 
 
         // 🔴 THIS is the important part
         $('.daterangepicker-field').on('apply.daterangepicker', function(ev, picker) {
