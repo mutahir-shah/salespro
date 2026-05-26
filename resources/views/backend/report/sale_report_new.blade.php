@@ -542,11 +542,10 @@
         });
     });
 
-     $(document).on('click', '#btn-process-exchange', function () {
-        $('#modal-sale-detail').modal('hide');
-        $('#add-exchange').modal('show');
-        $('#reference_no').val($('#d-reference-no').text());
-     });
+   $(document).on('click', '#btn-process-exchange', function () {
+    var reference_no = $('#d-reference-no').text().trim();
+    window.location.href = '{{ route("exchange.create") }}?reference_no=' + reference_no;
+});
 
     // ── Live refund preview ─────────────────────────────────────────────────
     function updateRefundPreview(qty, unitPrice) {
