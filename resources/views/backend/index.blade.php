@@ -1119,7 +1119,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                     <td>${i + 1}</td>
                     <td>${r.category}</td>
                     <td><span class="badge badge-secondary">${r.shop}</span></td>
-                    <td><strong>$${r.total_amount}</strong></td>
+                    <td><strong>RS${r.total_amount}</strong></td>
                 </tr>
             `).join('');
 
