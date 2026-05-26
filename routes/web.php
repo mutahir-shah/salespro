@@ -591,7 +591,9 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::get('/report_new/sale/product-details',  'getProductDetails')->name('report.get-product-details');
             Route::post('/report_new/sale/process-return',  'processReturn')->name('report.process-return');
 
-            Route::get('/dashboard/biller-reports', [ReportController::class, 'billerReports'])->name('dashboard.biller-reports');
+            Route::get('/dashboard/biller-reports','billerReports')->name('dashboard.biller-reports');
+
+            Route::get('/dashboard/expense-report', 'expenseReport')->name('dashboard.expense-report');
 
 
             Route::get('stock', 'stockReport')->name('report.stock');

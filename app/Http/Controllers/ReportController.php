@@ -6082,4 +6082,26 @@ class ReportController extends Controller
             'quantity'   => $byQuantity,
         ]);
     }
+
+
+    public function expenseReport(Request $request)
+    {
+        $warehouseId = $request->warehouse_id;
+        $from        = $request->from ?? date('Y-01-01');
+        $to          = $request->to   ?? date('Y-m-d');
+
+        $results = Expense::with('expenseCategory')
+            ->when($warehouseId,fn($q) => $q->where('warehouse_id', $warehouseId))
+            ->whereDate('created_at', '>=', $from)
+            ->whereDate('created_at', '<=', $to)
+            ->select('expense_category_id',DB::raw('SUM(amount) as total_amount'), DB::raw('COUNT(*) as total_count'))
+            ->groupBy('expense_category_id')->orderByDesc('total_amount')->limit(50)->get()
+            ->map(fn($r) => [
+                'category'     => $r->expenseCategory->name ?? '—',
+                'total_amount' => number_format($r->total_amount, 2),
+                'total_count'  => $r->total_count,
+            ]);
+
+        return response()->json(['expenses' => $results]);
+    }
 }
