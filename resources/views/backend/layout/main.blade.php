@@ -899,7 +899,7 @@
                 <div class="modal-content">
 
                     <form action="{{ route('exchange.create') }}" method="get">
- @csrf
+                        @csrf
                         <!-- Header -->
                         <div class="modal-header">
                             <h5 class="modal-title">{{ __('db.Add Sale Exchange') }}</h5>
@@ -922,8 +922,7 @@
                             <!-- Optional Reference Input -->
                             <div class="form-group">
                                 <label>{{ __('db.Sale Reference') }} ({{ __('db.Optional') }})</label>
-                                <input type="text" name="reference_no" class="form-control"
-                                    placeholder="Example: SALE-1234">
+                                <input type="text" name="reference_no" class="form-control" placeholder="Example: SALE-1234">
                             </div>
 
                         </div>

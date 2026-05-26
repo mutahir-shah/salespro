@@ -383,6 +383,11 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fa fa-times"></i> Close
                 </button>
+
+                <button type="button" class="btn btn-info" id="btn-process-exchange">
+                    <i class="fa fa-undo"></i> Exchange for Same Product
+                </button>
+
                 <button type="button" class="btn btn-danger" id="btn-process-return" disabled>
                     <i class="fa fa-undo"></i> Process Return
                 </button>
@@ -536,6 +541,12 @@
             }
         });
     });
+
+     $(document).on('click', '#btn-process-exchange', function () {
+        $('#modal-sale-detail').modal('hide');
+        $('#expense-modal').modal('show');
+        $('input[name="reference_no"]').val($('#d-reference-no').text());
+     });
 
     // ── Live refund preview ─────────────────────────────────────────────────
     function updateRefundPreview(qty, unitPrice) {
