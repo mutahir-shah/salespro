@@ -174,9 +174,7 @@
     {!! $general_setting->custom_css !!}
 </head>
 
-<body
-    class="@if ($theme == 'dark') dark-mode dripicons-brightness-low @endif  @if (Route::current()->getName() == 'sale.pos') pos-page @endif"
-    onload="myFunction()">
+<body class="@if ($theme == 'dark') dark-mode dripicons-brightness-low @endif  @if (Route::current()->getName() == 'sale.pos') pos-page @endif" onload="myFunction()">
     <div id="loader"></div>
     <!-- Side Navbar -->
     <nav class="side-navbar shrink d-print-none">
@@ -198,19 +196,13 @@
             <header class="container-fluid">
                 <nav class="navbar">
                     <a id="toggle-btn" class="menu-btn"><i class="fa fa-bars"> </i></a>
-@if (Auth::user()->role_id != 1 && Auth::user()->warehouse_id)
-                                @if (Auth::user()->warehouse)
-                                 <a class="btn-pos btn-sm" type="button" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="">{{ Auth::user()->warehouse->name }}</span></a>
-                                @endif
-                            @endif
+
                     <ul class="nav-menu list-unstyled d-flex flex-md-row align-items-md-center">
                         <div class="dropdown d-none d-lg-block">
- 
+
                             <a class="btn-pos btn-sm" type="button" data-toggle="dropdown" aria-expanded="false">
                                 <i class="dripicons-plus"></i>
                             </a>
-                           
                             <ul class="dropdown-menu">
                                 <?php
                                 $category_permission_active = $role_has_permissions_list->where('name', 'category')->first();
@@ -320,10 +312,13 @@
 
                         $general_setting_permission_active = $role_has_permissions_list->where('name', 'general_setting')->first();
 
-                        $language_setting_active = $role_has_permissions_list->where('name', 'language_setting')->first();?>
-                        @can('pos_menu_button')
-                            <li class="nav-item"><a class="btn-pos btn-sm" href="{{ route('sale.pos') }}"><i class="dripicons-shopping-bag"></i><span> POS</span></a></li>
-                        @endcan
+                        $language_setting_active = $role_has_permissions_list->where('name', 'language_setting')->first();
+
+                        ?>
+                        @if ($sale_add_permission_active)
+                            <li class="nav-item"><a class="btn-pos btn-sm" href="{{ route('sale.pos') }}"><i
+                                        class="dripicons-shopping-bag"></i><span> POS</span></a></li>
+                        @endif
                         <li class="nav-item d-none d-lg-block"><a id="switch-theme" data-toggle="tooltip"
                                 title="{{ __('Switch Theme') }}"><i class="dripicons-brightness-max"></i></a></li>
                         @if (config('database.connections.saleprosaas_landlord'))
@@ -335,7 +330,7 @@
                         <li class="nav-item d-none d-lg-block"><a id="btnFullscreen" data-toggle="tooltip"
                                 title="{{ __('Full Screen') }}"><i class="dripicons-expand"></i></a></li>
                         @if (\Auth::user()->role_id <= 2)
-                            <li class="nav-item"><a href="{{ route('cashRegister.index') }}" data-toggle="tooltip"
+                            <li class="nav-item d-none d-lg-block"><a href="{{ route('cashRegister.index') }}" data-toggle="tooltip"
                                     title="{{ __('Cash Register List') }}"><i class="dripicons-archive"></i></a></li>
                         @endif
                         @php
@@ -466,18 +461,12 @@
                                     </li>
                                 @endif
                                 @if ($empty_database_permission_active)
-                                    <!-- <li>
+                                    <li>
                                         <a onclick="return confirm('Are you sure want to delete? If you do this all of your data will be lost.')"
                                             href="{{ route('setting.emptyDatabase') }}"><i
                                                 class="dripicons-stack"></i> {{ __('db.Empty Database') }}</a>
-                                    </li> -->
+                                    </li>
                                 @endif
-                                <li>
-                                    <a href="{{ route('cache.clear', ['redirect' => request()->fullUrl()]) }}"><i
-                                            class="dripicons-refresh"></i>
-                                        {{ __('db.Clear Cache') }}
-                                    </a>
-                                </li>
                                 <li>
                                     <a href="{{ route('logout') }}"
                                         onclick="event.preventDefault();
@@ -526,7 +515,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form route = 'notifications.store' method = 'post' files = 'true'>
                         <div class="row">
                             <?php
@@ -583,7 +572,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <div class="row">
                             <div class="col-md-6 form-group">
                                 <label>{{ __('name') }} *</label>
@@ -672,7 +661,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('expenses.store') }}" method="post" enctype="multipart/form-data">
                             @csrf
                         <?php
@@ -797,9 +786,9 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('incomes.store') }}" method="post">
-                             @csrf
+                            @csrf
                         <?php
                         $lims_income_category_list = DB::table('income_categories')->where('is_active', true)->get();
                         if (Auth::user()->role_id > 2) {
@@ -886,7 +875,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -903,36 +892,63 @@
         </div>
         <!-- end sale return modal -->
 
-        <!-- sale return modal -->
-        <div id="add-exchange" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"
-            class="modal fade text-left">
+        <!-- Sale Exchange Modal -->
+        <div id="add-exchange" tabindex="-1" role="dialog" aria-hidden="true" class="modal fade text-left">
+
             <div role="document" class="modal-dialog">
                 <div class="modal-content">
+
                     <form action="{{ route('exchange.create') }}" method="get">
-                         @csrf
-                    <div class="modal-header">
-                        <h5 id="exampleModalLabel" class="modal-title">Add Exchange</h5>
-                        <button type="button" data-dismiss="modal" aria-label="Close" class="close"><span
-                                aria-hidden="true"><i class="dripicons-cross"></i></span></button>
-                    </div>
-                    <div class="modal-body">
-                        <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>{{ __('Sale Reference') }} *</label>
-                                    <input type="text" name="reference_no" class="form-control">
-                                </div>
-                            </div>
+ @csrf
+                        <!-- Header -->
+                        <div class="modal-header">
+                            <h5 class="modal-title">{{ __('db.Add Sale Exchange') }}</h5>
+                            <button type="button" data-dismiss="modal" class="close">
+                                <span><i class="dripicons-cross"></i></span>
+                            </button>
                         </div>
-                        <button type="submit" class="btn btn-primary">{{ __('db.submit') }}</button>
-                    </div>
+
+                        <!-- Body -->
+                        <div class="modal-body">
+
+                            <!-- Instruction for user -->
+                            <p class="text-muted">
+                                <small>
+                                    You can enter a Sale Reference to exchange a specific sale. <br>
+                                    Or continue without it to open a blank Exchange page.
+                                </small>
+                            </p>
+
+                            <!-- Optional Reference Input -->
+                            <div class="form-group">
+                                <label>{{ __('db.Sale Reference') }} ({{ __('db.Optional') }})</label>
+                                <input type="text" name="reference_no" class="form-control"
+                                    placeholder="Example: SALE-1234">
+                            </div>
+
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="modal-footer">
+
+                            <!-- Submit with reference (if provided) -->
+                            <button type="submit" class="btn btn-primary">
+                                {{ __('db.Continue to Exchange') }}
+                            </button>
+
+                            <!-- Direct access without reference -->
+                            <a href="{{ route('exchange.create') }}" class="btn btn-outline-secondary">
+                                {{ __('db.Continue Without Reference') }}
+                            </a>
+
+                        </div>
+
                     </form>
+
                 </div>
             </div>
         </div>
-        <!-- end sale return modal -->
+        <!-- end sale exchange modal -->
 
         <!-- purchase return modal -->
         <div id="add-purchase-return" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -948,7 +964,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -977,9 +993,9 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('accounts.store') }}" method="post">
-                             @csrf
+                            @csrf
                         <div class="form-group">
                             <label>{{ __('Account No') }} *</label>
                             <input type="text" name="account_no" required class="form-control">
@@ -1018,7 +1034,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('accounts.statement') }}" method="post">
                         @csrf
                         <div class="row">
@@ -1071,7 +1087,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('report.warehouse') }}" method="post">
                             @csrf
 
@@ -1111,7 +1127,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('report.user') }}" method="post">
                             @csrf
                         <?php
@@ -1153,7 +1169,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('report.biller') }}" method="post">
                             @csrf
                         <?php
@@ -1196,7 +1212,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('report.customer') }}" method="post">
                             @csrf
                         <?php
@@ -1239,7 +1255,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('report.customer_group') }}" method="post">
                             @csrf
                         <?php
@@ -1281,7 +1297,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="italic">
-                            <small>{{ __('The field labels marked with * are required input fields') }}.</small></p>
+                            <small>{{ __('The field labels marked with are required input fields') }}.</small></p>
                         <form action="{{ route('report.supplier') }}" method="post">
                             @csrf
                         <?php
@@ -1785,6 +1801,21 @@
                     .selectpicker('refresh');
             }
         });
+
+        window.appConfig = {
+            currency: "{{ config('currency') }}",
+            currency_position: "{{ config('currency_position') }}",
+            decimal: {{ config('decimal') }}
+        };
+        function formatCurrency(amount) {
+            let formatted = parseFloat(amount).toFixed(window.appConfig.decimal);
+
+            if (window.appConfig.currency_position === 'prefix') {
+                return window.appConfig.currency + ' ' + formatted;
+            }
+
+            return formatted + ' ' + window.appConfig.currency;
+        }
     </script>
 
     @stack('scripts')
