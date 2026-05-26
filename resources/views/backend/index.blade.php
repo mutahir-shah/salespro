@@ -909,7 +909,9 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                         var images = ['zummXD2dvAtI.png'];
                     $('#yearly-best-selling-price').find('tbody').append('<tr><td><div class="d-flex align-items-center"><img src="' +  url + '/' + images[0] +
                         '" width="30" height="25" class="ml-3 mr-3"> '+item.product_name+'['+item.product_code+']</div></td><td>'+(item.total_price / item.exchange_rate).toFixed({{$general_setting->decimal}})+'</td></tr>');
-                    })}});
+                });
+            }
+        });
         $.ajax({
             url: '{{ url('/yearly-best-selling-qty')}}',
             type: 'GET',
@@ -1068,13 +1070,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
             $('#commission-tbody').html('<tr><td colspan="3" class="text-center text-muted">No data</td></tr>');
             return;
         }
-        const html = rows.map((r, i) => `
-            <tr>
-                <td>${i + 1}</td>
-                <td>${r.name}</td>
-                <td><strong>RS ${r.total_commission}</strong></td>
-            </tr>
-        `).join('');
+        const html = rows.map((r, i) => `<tr><td>${i + 1}</td><td>${r.name}</td><td><strong>RS ${r.total_commission}</strong></td></tr>`).join('');
         $('#commission-tbody').html(html);
     }
 
@@ -1083,13 +1079,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
             $('#quantity-tbody').html('<tr><td colspan="3" class="text-center text-muted">No data</td></tr>');
             return;
         }
-        const html = rows.map((r, i) => `
-            <tr>
-                <td>${i + 1}</td>
-                <td>${r.name}</td>
-                <td><strong>${r.total_items}</strong></td>
-            </tr>
-        `).join('');
+        const html = rows.map((r, i) => `<tr><td>${i + 1}</td><td>${r.name}</td><td><strong>${r.total_items}</strong></td></tr>`).join('');
         $('#quantity-tbody').html(html);
     }
 
@@ -1098,9 +1088,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
     const EXPENSE_URL = '{{ route("dashboard.expense-report") }}';
 
     function loadExpenseReport(params) {
-        $('#expense-tbody').html(
-            '<tr><td colspan="4" class="text-center"><i class="fa fa-spinner fa-spin"></i></td></tr>'
-        );
+        $('#expense-tbody').html('<tr><td colspan="4" class="text-center"><i class="fa fa-spinner fa-spin"></i></td></tr>');
 
         $.ajax({
             url: EXPENSE_URL,
