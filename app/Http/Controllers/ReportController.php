@@ -6090,14 +6090,27 @@ class ReportController extends Controller
         $from        = $request->from ?? date('Y-01-01');
         $to          = $request->to   ?? date('Y-m-d');
 
-        $results = Expense::with('expenseCategory')
-            ->when($warehouseId,fn($q) => $q->where('warehouse_id', $warehouseId))
+        $results = Expense::with(['expenseCategory', 'warehouse'])
+            ->when(
+                $warehouseId && $warehouseId !== 'all',
+                fn($q) =>
+                $q->where('warehouse_id', $warehouseId)
+            )
             ->whereDate('created_at', '>=', $from)
             ->whereDate('created_at', '<=', $to)
-            ->select('expense_category_id',DB::raw('SUM(amount) as total_amount'), DB::raw('COUNT(*) as total_count'))
-            ->groupBy('expense_category_id')->orderByDesc('total_amount')->limit(50)->get()
+            ->select(
+                'expense_category_id',
+                'warehouse_id',                          // ← add this
+                DB::raw('SUM(amount) as total_amount'),
+                DB::raw('COUNT(*) as total_count')
+            )
+            ->groupBy('expense_category_id', 'warehouse_id')  // ← group by both
+            ->orderByDesc('total_amount')
+            ->limit(5)
+            ->get()
             ->map(fn($r) => [
                 'category'     => $r->expenseCategory->name ?? '—',
+                'shop'         => $r->warehouse->name ?? '—',       // ← add this
                 'total_amount' => number_format($r->total_amount, 2),
                 'total_count'  => $r->total_count,
             ]);

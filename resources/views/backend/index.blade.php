@@ -852,10 +852,11 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
+                                
                                 <tr>
                                     <th>#</th>
                                     <th>{{ __('db.Category') }}</th>
-                                    <th>{{ __('db.Count') }}</th>
+                                    <th>{{ __('db.Shop') }}</th>
                                     <th>{{ __('db.Total Amount') }}</th>
                                 </tr>
                             </thead>
@@ -1106,21 +1107,23 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
     }
 
     function renderExpenses(rows) {
-        if (!rows.length) {
-            $('#expense-tbody').html(
-                '<tr><td colspan="4" class="text-center text-muted">No expenses found.</td></tr>'
-            );
-            return;
-        }
+            if (!rows.length) {
+                $('#expense-tbody').html(
+                    '<tr><td colspan="4" class="text-center text-muted">No expenses found.</td></tr>'
+                );
+                return;
+            }
 
-        const html = rows.map((r, i) => `<tr>
-                <td>${i + 1}</td>
-                <td>${r.category}</td>
-                <td><span class="badge badge-secondary">${r.total_count}</span></td>
-                <td><strong>$${r.total_amount}</strong></td>
-            </tr>`).join('');
+            const html = rows.map((r, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${r.category}</td>
+                    <td><span class="badge badge-secondary">${r.shop}</span></td>
+                    <td><strong>$${r.total_amount}</strong></td>
+                </tr>
+            `).join('');
 
-        $('#expense-tbody').html(html);
+            $('#expense-tbody').html(html);
     }
 
     //   $('#expense-filter-apply').on('click', loadExpenseReport);
