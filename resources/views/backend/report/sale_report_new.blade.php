@@ -544,8 +544,8 @@
 
      $(document).on('click', '#btn-process-exchange', function () {
         $('#modal-sale-detail').modal('hide');
-        $('#expense-modal').modal('show');
-        $('input[name="reference_no"]').val($('#d-reference-no').text());
+        $('#add-exchange').modal('show');
+        $('#reference_no').val($('#d-reference-no').text());
      });
 
     // ── Live refund preview ─────────────────────────────────────────────────

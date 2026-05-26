@@ -922,7 +922,7 @@
                             <!-- Optional Reference Input -->
                             <div class="form-group">
                                 <label>{{ __('db.Sale Reference') }} ({{ __('db.Optional') }})</label>
-                                <input type="text" name="reference_no" class="form-control" placeholder="Example: SALE-1234">
+                                <input type="text" name="reference_no" id="reference_no" class="form-control" placeholder="Example: SALE-1234">
                             </div>
 
                         </div>
