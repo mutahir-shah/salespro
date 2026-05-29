@@ -301,15 +301,31 @@ class ExchangeController extends Controller
             $lims_product_sale_data = Product_Sale::where('sale_id', $lims_sale_data->id)->get();
         }
 
-       // dd($lims_sale_data, $lims_product_sale_data);
+        // dd($lims_sale_data, $lims_product_sale_data);
         // Currency exchange rate (default = 1 if no sale selected)
         $currency_exchange_rate = $lims_sale_data->exchange_rate ?? 1;
         // Custom fields for sale
         $custom_fields = CustomField::where('belongs_to', 'sale')->get();
         // Return exchange create view
-        return view('backend.sale-exchange.create', compact('lims_account_list','lims_customer_list','lims_warehouse_list','lims_biller_list',
-            'lims_tax_list','lims_sale_data','lims_product_sale_data','currency_exchange_rate','custom_fields','numberOfInvoice'));
+        return view('backend.sale-exchange.create', compact(
+            'lims_account_list',
+            'lims_customer_list',
+            'lims_warehouse_list',
+            'lims_biller_list',
+            'lims_tax_list',
+            'lims_sale_data',
+            'lims_product_sale_data',
+            'currency_exchange_rate',
+            'custom_fields',
+            'numberOfInvoice'
+        ));
     }
+
+
+    // ============================================================
+    // PASTE THIS INTO ExchangeController.php — replaces store(),
+    // processNewProduct(), and processReturnProduct()
+    // ============================================================
 
     public function store(Request $request)
     {
@@ -319,7 +335,6 @@ class ExchangeController extends Controller
             $data['reference_no'] = 'exc-' . date("Ymd") . '-' . date("his");
             $data['total_discount'] = $request->total_sale_discount ?? 0;
             $data['user_id'] = Auth::id();
-
             $lims_sale_data = null;
 
             if (!empty($data['sale_id']) && is_numeric($data['sale_id'])) {
@@ -331,10 +346,10 @@ class ExchangeController extends Controller
             $data['sale_id'] = $lims_sale_data ? $lims_sale_data->id : 0;
 
             $validator = Validator::make($data, [
-                'customer_id' => 'required|exists:customers,id',
+                'customer_id'  => 'required|exists:customers,id',
                 'warehouse_id' => 'required|exists:warehouses,id',
-                'biller_id' => 'required|exists:billers,id',
-                'product_id' => 'required|array|min:1',
+                'biller_id'    => 'required|exists:billers,id',
+                'product_id'   => 'required|array|min:1',
             ]);
 
             if ($validator->fails()) {
@@ -352,7 +367,7 @@ class ExchangeController extends Controller
                     DB::rollBack();
                     return redirect()->back()->withErrors($v->errors());
                 }
-                $ext = pathinfo($document->getClientOriginalName(), PATHINFO_EXTENSION);
+                $ext          = pathinfo($document->getClientOriginalName(), PATHINFO_EXTENSION);
                 $documentName = date("Ymdhis");
 
                 if (!config('database.connections.saleprosaas_landlord')) {
@@ -367,34 +382,48 @@ class ExchangeController extends Controller
 
             $lims_exchange_data = SaleExchange::create($data);
 
-            $type_array = $request->type ?? [];
-            $product_id = $data['product_id'] ?? [];
+            $type_array      = $request->type ?? [];
+            $product_id      = $data['product_id'] ?? [];
             $product_batch_id = $data['product_batch_id'] ?? [];
-            $imei_number = $data['imei_number'] ?? [];
-            $product_code = $data['product_code'] ?? [];
-            $qty = $data['qty'] ?? [];
-            $sale_unit = $data['sale_unit'] ?? [];
-            $net_unit_price = $data['net_unit_price'] ?? [];
-            $discount = $data['discount'] ?? [];
-            $tax_rate = $data['tax_rate'] ?? [];
-            $tax = $data['tax'] ?? [];
-            $total = $data['subtotal'] ?? [];
+            $imei_number     = $data['imei_number'] ?? [];
+            $product_code    = $data['product_code'] ?? [];
+            $qty             = $data['qty'] ?? [];
+            $sale_unit       = $data['sale_unit'] ?? [];
+            $net_unit_price  = $data['net_unit_price'] ?? [];
+            $discount        = $data['discount'] ?? [];
+            $tax_rate        = $data['tax_rate'] ?? [];
+            $tax             = $data['tax'] ?? [];
+            $total           = $data['subtotal'] ?? [];
             $product_sale_id = $data['product_sale_id'] ?? [];
-            $is_exchange = $request->is_exchange ?? [];
 
-            $new_products_count = 0;
+            // FIX: is_exchange now carries product_sale IDs (integers), not product codes.
+            // Cast everything to string for safe in_array comparison.
+            $is_exchange = array_map('strval', $request->is_exchange ?? []);
+
+            $new_products_count      = 0;
             $returned_products_count = 0;
 
             foreach ($product_id as $index => $id) {
                 $product_type = $type_array[$index] ?? 'new';
 
                 if ($product_type === 'return') {
-                    $product_code_value = $product_code[$index] ?? null;
-                    $should_return = $product_code_value && in_array($product_code_value, $is_exchange);
+                    // FIX: identify this row by its unique product_sale_id, not the product code.
+                    // This correctly handles the same product appearing multiple times in one
+                    // invoice with different prices — each row has a distinct product_sale_id.
+                    $sale_row_id   = (string) ($product_sale_id[$index] ?? '');
+                    $should_return = $sale_row_id !== '' && in_array($sale_row_id, $is_exchange);
 
                     if ($should_return) {
-                        $original_sale_id = $product_sale_id[$index] ?? null;
-                        $original_product_sale = $original_sale_id ? Product_Sale::find($original_sale_id) : null;
+                        $original_product_sale = $sale_row_id
+                            ? Product_Sale::find($sale_row_id)
+                            : null;
+
+                        // Safety guard: ensure the fetched sale row belongs to the expected product
+                        if ($original_product_sale && (int) $original_product_sale->product_id !== (int) $id) {
+                            throw new \Exception(
+                                "product_sale_id {$sale_row_id} does not belong to product_id {$id} at index {$index}"
+                            );
+                        }
 
                         $this->processReturnProduct(
                             $id,
@@ -443,28 +472,13 @@ class ExchangeController extends Controller
             DB::rollBack();
             Log::error('Exchange Store Error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
-                'data' => $request->all()
+                'data'  => $request->all(),
             ]);
             return redirect()->back()->with('not_permitted', 'Something went wrong: ' . $e->getMessage());
         }
     }
 
-    private function sanitizeDecimal($value, $decimals = null): float
-    {
-        $decimals = $decimals ?? config('decimal', 2);
-
-        if ($value === null || $value === '' || $value === 'NaN' || $value === 'null' || $value === 'undefined') {
-            return 0.00;
-        }
-
-        $numeric = floatval($value);
-
-        if (is_nan($numeric) || !is_finite($numeric)) {
-            return 0.00;
-        }
-
-        return round($numeric, $decimals);
-    }
+    // ============================================================
 
     private function processNewProduct(
         $product_id,
@@ -489,7 +503,7 @@ class ExchangeController extends Controller
         }
 
         $sale_unit_id = 0;
-        $quantity = floatval($qty[$index] ?? 0);
+        $quantity     = floatval($qty[$index] ?? 0);
 
         if (!empty($sale_unit[$index]) && $sale_unit[$index] != 'n/a') {
             $lims_sale_unit_data = Unit::where('unit_name', $sale_unit[$index])->first();
@@ -503,6 +517,7 @@ class ExchangeController extends Controller
             }
         }
 
+        // New product going OUT of stock — decrement
         $lims_product_data->qty -= $quantity;
         $lims_product_data->save();
 
@@ -530,7 +545,7 @@ class ExchangeController extends Controller
             }
             $lims_product_warehouse_data = Product_Warehouse::where([
                 ['product_batch_id', $product_batch_id[$index]],
-                ['warehouse_id', $warehouse_id]
+                ['warehouse_id', $warehouse_id],
             ])->first();
         } else {
             $lims_product_warehouse_data = Product_Warehouse::FindProductWithoutVariant(
@@ -543,7 +558,7 @@ class ExchangeController extends Controller
             $lims_product_warehouse_data->qty -= $quantity;
 
             if (!empty($imei_number[$index]) && !str_contains($imei_number[$index], "null")) {
-                $imei_numbers = explode(",", $imei_number[$index]);
+                $imei_numbers     = explode(",", $imei_number[$index]);
                 $all_imei_numbers = explode(",", $lims_product_warehouse_data->imei_number ?? '');
                 foreach ($imei_numbers as $number) {
                     if (($j = array_search($number, $all_imei_numbers)) !== false) {
@@ -555,25 +570,40 @@ class ExchangeController extends Controller
             $lims_product_warehouse_data->save();
         }
 
-        $netUnitPrice = $this->sanitizeDecimal($net_unit_price[$index] ?? 0);
-        $discountVal = $this->sanitizeDecimal($discount[$index] ?? 0);
-        $taxRateVal = $this->sanitizeDecimal($tax_rate[$index] ?? 0);
-        $taxVal = $this->sanitizeDecimal($tax[$index] ?? 0);
-        $totalVal = $this->sanitizeDecimal($total[$index] ?? 0);
-
         ProductExchange::create([
-            'exchange_id' => $exchange_id,
-            'product_id' => $product_id,
-            'qty' => $quantity,
-            'sale_unit_id' => $sale_unit_id,
-            'net_unit_price' => $netUnitPrice,
-            'discount' => $discountVal,
-            'tax_rate' => $taxRateVal,
-            'tax' => $taxVal,
-            'total' => $totalVal,
-            'type' => 'new',
+            'exchange_id'    => $exchange_id,
+            'product_id'     => $product_id,
+            'qty'            => $quantity,
+            'sale_unit_id'   => $sale_unit_id,
+            'net_unit_price' => $this->sanitizeDecimal($net_unit_price[$index] ?? 0),
+            'discount'       => $this->sanitizeDecimal($discount[$index] ?? 0),
+            'tax_rate'       => $this->sanitizeDecimal($tax_rate[$index] ?? 0),
+            'tax'            => $this->sanitizeDecimal($tax[$index] ?? 0),
+            'total'          => $this->sanitizeDecimal($total[$index] ?? 0),
+            'type'           => 'new',
         ]);
     }
+
+    // ============================================================
+
+
+    private function sanitizeDecimal($value, $decimals = null): float
+    {
+        $decimals = $decimals ?? config('decimal', 2);
+
+        if ($value === null || $value === '' || $value === 'NaN' || $value === 'null' || $value === 'undefined') {
+            return 0.00;
+        }
+
+        $numeric = floatval($value);
+
+        if (is_nan($numeric) || !is_finite($numeric)) {
+            return 0.00;
+        }
+
+        return round($numeric, $decimals);
+    }
+
 
     private function processReturnProduct(
         $product_id,

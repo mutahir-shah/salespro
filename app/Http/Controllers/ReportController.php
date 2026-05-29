@@ -5806,37 +5806,19 @@ class ReportController extends Controller
                 's.id as sale_id',
                 's.reference_no',
                 's.created_at',
-
                 'p.name as product_name',
                 'p.code as product_code',
-
                 'cat.name as category_name',
-
                 'c.name as customer_name',
-
                 'b.name as biller_name',
                 'w.name as warehouse_name',
-
-                'ps.qty',
-                'ps.return_qty',
-                DB::raw('(ps.qty - ps.return_qty) as remaining_qty'),
-
-                'ps.net_unit_price',
-                'ps.discount',
-                'ps.tax',
-                'ps.total',
-
+                'ps.qty','ps.return_qty',DB::raw('(ps.qty - ps.return_qty) as remaining_qty'),
+                'ps.net_unit_price','ps.discount','ps.tax','ps.total',
                 // product_sales has no product_cost; use p.cost from products table
                 DB::raw('((ps.net_unit_price - COALESCE(p.cost, 0)) * (ps.qty - ps.return_qty)) as profit'),
-
                 DB::raw('COALESCE(bc.commission_amount, 0) as commission'),
-
-                's.payment_status',
-                's.sale_status',
-            ])
-            ->whereNull('s.deleted_at')      // exclude soft-deleted sales
+                's.payment_status', 's.sale_status',])->whereNull('s.deleted_at')      // exclude soft-deleted sales
             ->where('s.sale_status', 1);     // completed sales only
-
         // Filters
         if ($request->start_date) {
             $query->whereDate('s.created_at', '>=', $request->start_date);
@@ -5871,6 +5853,63 @@ class ReportController extends Controller
                 2       => '<span class="badge badge-warning">Partial</span>',
                 default => '<span class="badge badge-danger">Due</span>',
             })
+
+            ->filter(function ($query) use ($request) {
+                $search = $request->input('search.value');
+                if (!empty($search)) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('s.reference_no', 'LIKE', "%{$search}%")
+                            ->orWhere('p.name', 'LIKE', "%{$search}%")
+                            ->orWhere('p.code', 'LIKE', "%{$search}%")
+                            ->orWhere('cat.name', 'LIKE', "%{$search}%")
+                            ->orWhere('c.name', 'LIKE', "%{$search}%")
+                            ->orWhere('b.name', 'LIKE', "%{$search}%")
+                            ->orWhere('w.name', 'LIKE', "%{$search}%");
+                    });
+                }
+            }, true)
+
+            ->filterColumn('reference_no', function ($query, $keyword) {
+                $query->where('s.reference_no', 'LIKE', "%{$keyword}%");
+            })
+            ->filterColumn('product_name', function ($query, $keyword) {
+                $query->where('p.name', 'LIKE', "%{$keyword}%");
+            })
+            ->filterColumn('product_code', function ($query, $keyword) {
+                $query->where('p.code', 'LIKE', "%{$keyword}%");
+            })
+            ->filterColumn('category_name', function ($query, $keyword) {
+                $query->where('cat.name', 'LIKE', "%{$keyword}%");
+            })
+            ->filterColumn('customer_name', function ($query, $keyword) {
+                $query->where('c.name', 'LIKE', "%{$keyword}%");
+            })
+            ->filterColumn('biller_name', function ($query, $keyword) {
+                $query->where('b.name', 'LIKE', "%{$keyword}%");
+            })
+            ->filterColumn('warehouse_name', function ($query, $keyword) {
+                $query->where('w.name', 'LIKE', "%{$keyword}%");
+            })
+            ->filterColumn('qty', function ($query, $keyword) {
+                $query->where('ps.qty', 'LIKE', "%{$keyword}%");
+            })
+            ->filterColumn('net_unit_price', function ($query, $keyword) {
+                $query->where('ps.net_unit_price', 'LIKE', "%{$keyword}%");
+            })
+            ->filterColumn('total', function ($query, $keyword) {
+                $query->where('ps.total', 'LIKE', "%{$keyword}%");
+            })
+
+            ->orderColumn('reference_no', 's.reference_no $1')
+            ->orderColumn('product_name', 'p.name $1')
+            ->orderColumn('product_code', 'p.code $1')
+            ->orderColumn('category_name', 'cat.name $1')
+            ->orderColumn('customer_name', 'c.name $1')
+            ->orderColumn('biller_name', 'b.name $1')
+            ->orderColumn('warehouse_name', 'w.name $1')
+            ->orderColumn('qty', 'ps.qty $1')
+            ->orderColumn('net_unit_price', 'ps.net_unit_price $1')
+            ->orderColumn('total', 'ps.total $1')
 
             ->addColumn('action', function ($row) {
                 // Two buttons: View Detail (opens modal) + quick Return shortcut
