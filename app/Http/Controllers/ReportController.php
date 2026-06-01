@@ -5867,66 +5867,33 @@ class ReportController extends Controller
                             ->orWhere('w.name', 'LIKE', "%{$search}%");
                     });
                 }
-            }, true)
-
-            ->filterColumn('reference_no', function ($query, $keyword) {
+            }, true)->filterColumn('reference_no', function ($query, $keyword) {
                 $query->where('s.reference_no', 'LIKE', "%{$keyword}%");
-            })
-            ->filterColumn('product_name', function ($query, $keyword) {
+            })->filterColumn('product_name', function ($query, $keyword) {
                 $query->where('p.name', 'LIKE', "%{$keyword}%");
-            })
-            ->filterColumn('product_code', function ($query, $keyword) {
+            })->filterColumn('product_code', function ($query, $keyword) {
                 $query->where('p.code', 'LIKE', "%{$keyword}%");
-            })
-            ->filterColumn('category_name', function ($query, $keyword) {
+            })->filterColumn('category_name', function ($query, $keyword) {
                 $query->where('cat.name', 'LIKE', "%{$keyword}%");
-            })
-            ->filterColumn('customer_name', function ($query, $keyword) {
+            })->filterColumn('customer_name', function ($query, $keyword) {
                 $query->where('c.name', 'LIKE', "%{$keyword}%");
-            })
-            ->filterColumn('biller_name', function ($query, $keyword) {
+            })->filterColumn('biller_name', function ($query, $keyword) {
                 $query->where('b.name', 'LIKE', "%{$keyword}%");
-            })
-            ->filterColumn('warehouse_name', function ($query, $keyword) {
+            })->filterColumn('warehouse_name', function ($query, $keyword) {
                 $query->where('w.name', 'LIKE', "%{$keyword}%");
-            })
-            ->filterColumn('qty', function ($query, $keyword) {
+            })->filterColumn('qty', function ($query, $keyword) {
                 $query->where('ps.qty', 'LIKE', "%{$keyword}%");
-            })
-            ->filterColumn('net_unit_price', function ($query, $keyword) {
+            })->filterColumn('net_unit_price', function ($query, $keyword) {
                 $query->where('ps.net_unit_price', 'LIKE', "%{$keyword}%");
-            })
-            ->filterColumn('total', function ($query, $keyword) {
+            })->filterColumn('total', function ($query, $keyword) {
                 $query->where('ps.total', 'LIKE', "%{$keyword}%");
-            })
-
-            ->orderColumn('reference_no', 's.reference_no $1')
-            ->orderColumn('product_name', 'p.name $1')
-            ->orderColumn('product_code', 'p.code $1')
-            ->orderColumn('category_name', 'cat.name $1')
-            ->orderColumn('customer_name', 'c.name $1')
-            ->orderColumn('biller_name', 'b.name $1')
-            ->orderColumn('warehouse_name', 'w.name $1')
-            ->orderColumn('qty', 'ps.qty $1')
-            ->orderColumn('net_unit_price', 'ps.net_unit_price $1')
-            ->orderColumn('total', 'ps.total $1')
-
-            ->addColumn('action', function ($row) {
+            })->orderColumn('reference_no', 's.reference_no $1')->orderColumn('product_name', 'p.name $1')
+            ->orderColumn('product_code', 'p.code $1')->orderColumn('category_name', 'cat.name $1')->orderColumn('customer_name', 'c.name $1')->orderColumn('biller_name', 'b.name $1')->orderColumn('warehouse_name', 'w.name $1')->orderColumn('qty', 'ps.qty $1')
+            ->orderColumn('net_unit_price', 'ps.net_unit_price $1')->orderColumn('total', 'ps.total $1')->addColumn('action', function ($row) {
                 // Two buttons: View Detail (opens modal) + quick Return shortcut
-                return '
-                <div class="btn-group btn-group-sm">
-                    <button type="button"
-                            class="btn btn-info fetchProductDetails"
-                            title="View Detail &amp; Return"
-                            data-sale_id="'    . $row->sale_id . '"
-                            data-product_id="' . $row->id      . '">
-                        <i class="fa fa-eye"></i> Detail
-                    </button>
-                </div>';
-            })
-
-            ->rawColumns(['payment_status', 'action'])
-            ->make(true);
+                return '<div class="btn-group btn-group-sm"><button type="button"  class="btn btn-info fetchProductDetails"
+                            title="View Detail &amp; Return"  data-sale_id="'    . $row->sale_id . '"  data-product_id="' . $row->id      . '"> <i class="fa fa-eye"></i> Detail </button></div>';
+            })->rawColumns(['payment_status', 'action'])->make(true);
     }
 
 

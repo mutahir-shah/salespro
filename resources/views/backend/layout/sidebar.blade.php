@@ -628,9 +628,11 @@
                     <a id="sale-report-link" class="{{ request()->is('report/sale_report') ? 'active' : '' }}" href="">{{__('db.Sale Report')}}</a>
                 </form>
             </li>
+            @endcan
+
+            @can('sale-report-detailed')
             <li id="sale-report-menu">
-                
-            <a class="{{ request()->is('report/reports_new/sale') ? 'active' : '' }}" href="{{ route('report.sale.view') }}"> {{__('db.Detailed Sale Report')}}</a>
+                <a class="{{ request()->is('report/reports_new/sale') ? 'active' : '' }}" href="{{ route('report.sale.view') }}"> {{__('Detailed Sale Report')}}</a>
             </li>
 
 

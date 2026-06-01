@@ -1542,6 +1542,20 @@
 														</div>
 													</div>
 												</span>
+
+													<span>
+													<div aria-checked="false" aria-disabled="false">
+														<div class="checkbox">
+															@if(in_array("sale-report-detailed", $all_permission))
+															<input type="checkbox" value="1" id="sale-report-detailed" name="sale-report-detailed" checked>
+															@else
+															<input type="checkbox" value="1" id="sale-report-detailed" name="sale-report-detailed">
+															@endif
+															<label for="sale-report-detailed" class="padding05">{{__('Detailed Sale Report')}} &nbsp;&nbsp;</label>
+														</div>
+													</div>
+												</span>
+
 												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
