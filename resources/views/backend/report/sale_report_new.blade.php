@@ -456,6 +456,18 @@
         });
     }
 });
+
+    // ── Update hidden date fields when daterangepicker changes ────────────────
+    $(document).on('apply.daterangepicker', '.daterangepicker-field', function(ev, picker) {
+        var sd = picker.startDate.format('YYYY-MM-DD');
+        var ed = picker.endDate.format('YYYY-MM-DD');
+
+        $(this).val(sd + ' To ' + ed);
+        $('input[name=start_date]').val(sd);
+        $('input[name=end_date]').val(ed);
+
+        table.ajax.reload();
+    });
  
     // ── Open detail modal ───────────────────────────────────────────────────
     $(document).on('click', '.fetchProductDetails', function () {

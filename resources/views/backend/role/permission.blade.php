@@ -2291,7 +2291,6 @@
 														</div>
 													</div>
 												</span>
-
 												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
@@ -2304,8 +2303,6 @@
 														</div>
 													</div>
 												</span>
-
-
 												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
@@ -2318,12 +2315,8 @@
 														</div>
 													</div>
 												</span>
-
-
-
 											</td>
 										</tr>
-
 										<tr>
 											<td>{{__('db.dashboard Statistics')}}</td>
 											<td class="report-permissions" colspan="5">
