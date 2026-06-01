@@ -2325,7 +2325,7 @@
 										</tr>
 
 										<tr>
-											<td>{{__('db.Dashboar Statistics')}}</td>
+											<td>{{__('db.Dashboard Statistics')}}</td>
 											<td class="report-permissions" colspan="5">
 												<span>
 													<div aria-checked="false" aria-disabled="false">
