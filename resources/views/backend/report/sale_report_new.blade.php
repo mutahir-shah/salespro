@@ -422,8 +422,9 @@
     ajax: {
         url: "{{ route('report.sale.data1') }}",
         data: function (d) {
-            d.start_date   = $('input[name=start_date]').val();
-            d.end_date     = $('input[name=end_date]').val();
+            var dateRange = $('.daterangepicker-field').val().split(' To ');
+            d.start_date   = dateRange[0] || $('input[name=start_date]').val();
+            d.end_date     = dateRange[1] || $('input[name=end_date]').val();
             d.warehouse_id = $('select[name=warehouse_id]').val();
             d.category_id  = $('select[name=category_id]').val();
         }
@@ -466,7 +467,16 @@
         $('input[name=start_date]').val(sd);
         $('input[name=end_date]').val(ed);
 
-        table.ajax.reload();
+        table.ajax.reload(null, false);
+    });
+
+    $(document).on('change', '.daterangepicker-field', function() {
+        var dateRange = $(this).val().split(' To ');
+        if (dateRange.length === 2) {
+            $('input[name=start_date]').val(dateRange[0]);
+            $('input[name=end_date]').val(dateRange[1]);
+            table.ajax.reload(null, false);
+        }
     });
  
     // ── Open detail modal ───────────────────────────────────────────────────
