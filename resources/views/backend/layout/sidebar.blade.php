@@ -631,7 +631,7 @@
             @endcan
 
             @can('sale-report-detailed')
-            <li id="sale-report-menu">
+            <li id="sale-report-detailed-menu">
                 <a class="{{ request()->is('report/reports_new/sale') ? 'active' : '' }}" href="{{ route('report.sale.view') }}"> {{__('Detailed Sale Report')}}</a>
             </li>
 

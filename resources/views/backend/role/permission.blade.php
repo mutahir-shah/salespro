@@ -1543,7 +1543,7 @@
 													</div>
 												</span>
 
-													<span>
+												<span>
 													<div aria-checked="false" aria-disabled="false">
 														<div class="checkbox">
 															@if(in_array("sale-report-detailed", $all_permission))
