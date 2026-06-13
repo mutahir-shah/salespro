@@ -149,7 +149,7 @@ $authUser =  Auth::user()->role_id; ?>
                                                     @endif
                                                 @endforeach
                                             </select>
-                                            <!-- <input type="hidden" name="biller_id" value="{{$userBillerId}}" /> -->
+                                            <input type="hidden" name="biller_id" value="{{$userBillerId}}" />
                                         </div>
                                     </div>
                                     @else
