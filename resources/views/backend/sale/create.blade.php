@@ -95,7 +95,6 @@ $authUser =  Auth::user()->role_id; ?>
                                             </div>
                                         </div>
                                     </div>
-
                                     @if(isset(auth()->user()->warehouse_id))
                                     <div class="col-md-4">
                                         <div class="form-group">
