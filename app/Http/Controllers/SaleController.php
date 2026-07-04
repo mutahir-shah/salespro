@@ -819,7 +819,7 @@ class SaleController extends Controller
                 $all_permission[] = $permission->name;
             if (empty($all_permission))
                 $all_permission[] = 'dummy text';
-            $lims_customer_list = Customer::where('is_active', true)->get();
+            $lims_customer_list = Customer::where('is_active', true)->orderBy('id', 'asc')->get();
             if (Auth::user()->role_id > 2) {
                 $lims_warehouse_list = Warehouse::where([
                     ['is_active', true],
@@ -2101,7 +2101,7 @@ class SaleController extends Controller
                 $all_permission[] = 'dummy text';
 
             $lims_customer_list = Cache::remember('customer_list', 60 * 60 * 24, function () {
-                return Customer::where('is_active', true)->get();
+                return Customer::where('is_active', true)->orderBy('id', 'asc')->get();
             });
             $lims_customer_group_all = Cache::remember('customer_group_list', 60 * 60 * 24, function () {
                 return CustomerGroup::where('is_active', true)->get();
@@ -2327,7 +2327,7 @@ class SaleController extends Controller
         if ($role->hasPermissionTo('sales-edit')) {
             $lims_biller_list = Biller::where('is_active', true)->get();
             $lims_reward_point_setting_data = RewardPointSetting::latest()->first();
-            $lims_customer_list = Customer::where('is_active', true)->get();
+            $lims_customer_list = Customer::where('is_active', true)->orderBy('id', 'asc')->get();
             $lims_customer_group_all = CustomerGroup::where('is_active', true)->get();
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
             $lims_tax_list = Tax::where('is_active', true)->get();
@@ -2931,7 +2931,7 @@ class SaleController extends Controller
     {
         $role = Role::find(Auth::user()->role_id);
         if ($role->hasPermissionTo('sales-add')) {
-            $lims_customer_list = Customer::where('is_active', true)->get();
+            $lims_customer_list = Customer::where('is_active', true)->orderBy('id', 'asc')->get();
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
             $lims_biller_list = Biller::where('is_active', true)->get();
             $lims_tax_list = Tax::where('is_active', true)->get();
@@ -3129,7 +3129,7 @@ class SaleController extends Controller
                 $all_permission[] = $permission->name;
             if (empty($all_permission))
                 $all_permission[] = 'dummy text';
-            $lims_customer_list = Customer::where('is_active', true)->get();
+            $lims_customer_list = Customer::where('is_active', true)->orderBy('id', 'asc')->get();
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
             $lims_biller_list = Biller::where('is_active', true)->get();
             $lims_tax_list = Tax::where('is_active', true)->get();
