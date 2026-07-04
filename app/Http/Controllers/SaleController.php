@@ -820,6 +820,9 @@ class SaleController extends Controller
             if (empty($all_permission))
                 $all_permission[] = 'dummy text';
             $lims_customer_list = Customer::where('is_active', true)->orderBy('id', 'asc')->get();
+            if (!empty(request()->input('test'))) {
+                dd($lims_customer_list);
+            }
             if (Auth::user()->role_id > 2) {
                 $lims_warehouse_list = Warehouse::where([
                     ['is_active', true],
