@@ -199,12 +199,23 @@
             let api = this.api();
 
             function columnSum(index) {
+
                 return api.column(index, {
                         page: 'current'
                     })
                     .data()
-                    .reduce((a, b) => parseFloat(a) + parseFloat(b || 0), 0)
-                    .toFixed(2);
+                    .reduce(function(total, value) {
+
+                        value = String(value)
+                            .replace(/,/g, '');
+
+                        return total + parseFloat(value || 0);
+
+                    }, 0)
+                    .toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
             }
 
             $(api.column(2).footer()).html(columnSum(2));

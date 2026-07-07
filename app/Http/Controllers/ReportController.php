@@ -1589,95 +1589,79 @@ class ReportController extends Controller
 
     public function categoryStock()
     {
-        $start_date = $request->start_date ?? date('Y-m') . '-' . '01';
-        $end_date = $request->end_date ?? date('Y-m-d');
-        $warehouse_id = $data['warehouse_id'] ?? 0;
-        $category_id = $data['category_id'] ?? 0;
-        $lims_warehouse_list = Warehouse::where('is_active', true)->get();
+        $start_date = date('Y-m-01');
+        $end_date   = date('Y-m-d');
+
+        $warehouse_id = 0;
+        $category_id  = 0;
+
+        $lims_warehouse_list = Warehouse::where('is_active', 1)->get();
+        $categories_list     = Category::orderBy('name')->get();
+
         return view(
             'backend.report.category_stock',
-            compact('start_date', 'end_date', 'warehouse_id', 'category_id', 'lims_warehouse_list')
+            compact(
+                'start_date',
+                'end_date',
+                'warehouse_id',
+                'category_id',
+                'lims_warehouse_list',
+                'categories_list'
+            )
         );
     }
 
-    public function categoryStockSummaryDatatable(Request $request)
-    {
-        $warehouse_id = $request->warehouse_id;
-        $start_date = null;
-        $end_date   = null;
 
-        try {
-            if ($request->starting_date && $request->ending_date) {
-                $start_date = Carbon::createFromFormat('d/m/Y', $request->starting_date)->startOfDay();
-                $end_date   = Carbon::createFromFormat('d/m/Y', $request->ending_date)->endOfDay();
-            }
-        } catch (\Exception $e) {
-        }
 
-        /*
-    |--------------------------------------------------------------------------
-    | CATEGORY SUMMARY QUERY
-    |--------------------------------------------------------------------------
-    */
+   public function categoryStockSummaryDatatable(Request $request)
+{
+    $warehouse_id = $request->warehouse_id;
+    $category_id  = $request->category_id;
 
-        $query = Product::query()
-            ->join('categories', 'products.category_id', '=', 'categories.id')
-            ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
+    $query = Product::query()
+        ->join('categories', 'products.category_id', '=', 'categories.id')
+        ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
 
-            ->when(
-                $warehouse_id,
-                fn($q) => $q->where('pw.warehouse_id', $warehouse_id)
-            )
+        ->when($warehouse_id, function ($q) use ($warehouse_id) {
+            $q->where('pw.warehouse_id', $warehouse_id);
+        })
 
-            ->when(
-                $request->category_id,
-                fn($q) => $q->where('products.category_id', $request->category_id)
-            )
+        ->when($category_id, function ($q) use ($category_id) {
+            $q->where('products.category_id', $category_id);
+        })
 
-            ->when(
-                $start_date && $end_date,
-                fn($q) => $q->whereBetween('pw.updated_at', [$start_date, $end_date])
-            )
+        ->where('pw.qty', '>', 0)
 
-            ->where('pw.qty', '>', 0)
+        ->select(
+            'categories.id',
+            'categories.name as category_name',
+            DB::raw('SUM(pw.qty) as remaining_quantity'),
+            DB::raw('SUM(pw.qty * products.cost) as total_cost_price'),
+            DB::raw('SUM(pw.qty * products.price) as total_sales_price')
+        )
 
-            ->groupBy(
-                'categories.id',
-                'categories.name'
-            )
+        ->groupBy(
+            'categories.id',
+            'categories.name'
+        );
 
-            ->select([
-                'categories.id',
-                'categories.name as category_name',
+    return DataTables::of($query)
+        ->addIndexColumn()
 
-                DB::raw('SUM(pw.qty) as remaining_quantity'),
+        ->editColumn('remaining_quantity', function ($row) {
+            return number_format($row->remaining_quantity, 2);
+        })
 
-                DB::raw('SUM(pw.qty * products.cost) as total_cost_price'),
+        ->editColumn('total_cost_price', function ($row) {
+            return number_format($row->total_cost_price, 2);
+        })
 
-                DB::raw('SUM(pw.qty * products.price) as total_sales_price'),
-            ]);
+        ->editColumn('total_sales_price', function ($row) {
+            return number_format($row->total_sales_price, 2);
+        })
 
-        return DataTables::of($query)
-            ->addIndexColumn()
-
-            ->editColumn(
-                'remaining_quantity',
-                fn($r) => number_format($r->remaining_quantity, 2)
-            )
-
-            ->editColumn(
-                'total_cost_price',
-                fn($r) => number_format($r->total_cost_price, 2)
-            )
-
-            ->editColumn(
-                'total_sales_price',
-                fn($r) => number_format($r->total_sales_price, 2)
-            )
-
-            ->make(true);
-    }
-
+        ->make(true);
+}
     private function findImeis(string $product_id, string $variant_id = '0')
     {
         $imei_numbers = [];
@@ -5812,12 +5796,19 @@ class ReportController extends Controller
                 'c.name as customer_name',
                 'b.name as biller_name',
                 'w.name as warehouse_name',
-                'ps.qty','ps.return_qty',DB::raw('(ps.qty - ps.return_qty) as remaining_qty'),
-                'ps.net_unit_price','ps.discount','ps.tax','ps.total',
+                'ps.qty',
+                'ps.return_qty',
+                DB::raw('(ps.qty - ps.return_qty) as remaining_qty'),
+                'ps.net_unit_price',
+                'ps.discount',
+                'ps.tax',
+                'ps.total',
                 // product_sales has no product_cost; use p.cost from products table
                 DB::raw('((ps.net_unit_price - COALESCE(p.cost, 0)) * (ps.qty - ps.return_qty)) as profit'),
                 DB::raw('COALESCE(bc.commission_amount, 0) as commission'),
-                's.payment_status', 's.sale_status',])->whereNull('s.deleted_at')      // exclude soft-deleted sales
+                's.payment_status',
+                's.sale_status',
+            ])->whereNull('s.deleted_at')      // exclude soft-deleted sales
             ->where('s.sale_status', 1);     // completed sales only
         // Filters
         if ($request->start_date) {
