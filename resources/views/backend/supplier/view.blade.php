@@ -197,14 +197,20 @@
                 {
                     data: 'debit',
                     render: function (data) {
-                        var amount = data && data !== '' ? parseFloat(data) : 0;
+                        if (data === null || data === '' || data === 0 || data === '0' || data === '0.00') {
+                            return '';
+                        }
+                        var amount = parseFloat(data);
                         return '<span class="badge badge-danger rounded-pill px-2 py-1" style="font-size: 12px; font-weight: 600;">' + amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</span>';
                     }
                 },
                 {
                     data: 'credit',
                     render: function (data) {
-                        var amount = data && data !== '' ? parseFloat(data) : 0;
+                        if (data === null || data === '' || data === 0 || data === '0' || data === '0.00') {
+                            return '';
+                        }
+                        var amount = parseFloat(data);
                         return '<span class="badge badge-success rounded-pill px-2 py-1" style="font-size: 12px; font-weight: 600;">' + amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</span>';
                     }
                 },
