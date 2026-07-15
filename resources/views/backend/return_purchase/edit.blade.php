@@ -2,6 +2,11 @@
 
 <x-error-message key="not_permitted" />
 
+@php
+    $line_discount_total = (float) $lims_product_return_data->sum('discount');
+    $initial_extra_discount = max(0, (float) $lims_return_data->total_discount - $line_discount_total);
+@endphp
+
 <section class="forms">
     <div class="container-fluid">
         <div class="row">
@@ -251,7 +256,13 @@
                                             </select>
                                         </div>
                                     </div>
-                                	<div class="col-md-4">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Static Discount</label>
+                                            <input type="number" name="extra_discount" class="form-control" value="{{ number_format((float) $initial_extra_discount, $general_setting->decimal, '.', '') }}" step="any" min="0" />
+                                        </div>
+                                    </div>
+                                 	<div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{__('db.Attach Document')}}</label>
                                             <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
@@ -296,6 +307,9 @@
             </td>
             <td><strong>{{__('db.Total')}}</strong>
                 <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+            </td>
+            <td><strong>Discount</strong>
+                <span class="pull-right" id="discount_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
             </td>
             <td><strong>{{__('db.Order Tax')}}</strong>
                 <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
@@ -422,8 +436,13 @@ $('.selectpicker').selectpicker('refresh');
 
 $('#item').text($('input[name="item"]').val() + '(' + $('input[name="total_qty"]').val() + ')');
 $('#subtotal').text(parseFloat($('input[name="total_cost"]').val()).toFixed({{$general_setting->decimal}}));
+$('#discount_total').text(parseFloat($('input[name="total_discount"]').val()).toFixed({{$general_setting->decimal}}));
 $('#order_tax').text(parseFloat($('input[name="order_tax"]').val()).toFixed({{$general_setting->decimal}}));
 $('#grand_total').text(parseFloat($('input[name="grand_total"]').val()).toFixed({{$general_setting->decimal}}));
+$('input[name="extra_discount"]').on("input", function() {
+    calculateTotal();
+});
+calculateTotal();
 
 var id = $('select[name="warehouse_id"]').val();
 $.get('../getproduct/' + id, function(data) {
@@ -791,6 +810,8 @@ function calculateTotal() {
     $(".discount").each(function() {
         total_discount += parseFloat($(this).text());
     });
+    var extra_discount = parseFloat($('input[name="extra_discount"]').val()) || 0;
+    total_discount += extra_discount;
     $("#total-discount").text(total_discount.toFixed({{$general_setting->decimal}}));
     $('input[name="total_discount"]').val(total_discount.toFixed({{$general_setting->decimal}}));
 
@@ -807,8 +828,10 @@ function calculateTotal() {
     $(".sub-total").each(function() {
         total += parseFloat($(this).text());
     });
-    $("#total").text(total.toFixed({{$general_setting->decimal}}));
-    $('input[name="total_cost"]').val(total.toFixed({{$general_setting->decimal}}));
+    var discounted_total = Math.max(0, total - total_discount);
+    $("#total").text(discounted_total.toFixed({{$general_setting->decimal}}));
+    $('input[name="total_cost"]').val(discounted_total.toFixed({{$general_setting->decimal}}));
+    $('#discount_total').text(total_discount.toFixed({{$general_setting->decimal}}));
 
     calculateGrandTotal();
 }

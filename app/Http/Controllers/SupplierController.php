@@ -239,6 +239,7 @@ class SupplierController extends Controller
             $image->move(public_path('images/supplier'), $imageName);
             $lims_supplier_data['image'] = $imageName;
         }
+        
         $create_supplier = Supplier::create($lims_supplier_data);
 
         // create dummy purchase if supplier has opening balance (due)

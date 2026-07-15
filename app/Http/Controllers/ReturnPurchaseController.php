@@ -437,8 +437,7 @@ class ReturnPurchaseController extends Controller
                 $document->move(public_path('documents/purchase_return'), $documentName);
             }
             $data['document'] = $documentName;
-        }
-
+        } 
         $lims_return_data = ReturnPurchase::create($data);
         $mail_data['email'] = '';
         if($data['supplier_id']) {

@@ -184,8 +184,12 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                    </div>
-                                	<div class="col-md-4">
+                                    </div>                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Static Discount</label>
+                                            <input type="number" name="extra_discount" class="form-control" value="0" step="any" min="0" />
+                                        </div>
+                                    </div>                                	<div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{__('db.Attach Document')}}</label>
                                             <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
@@ -230,6 +234,9 @@
             </td>
             <td><strong>{{__('db.Total')}}</strong>
                 <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+            </td>
+            <td><strong>Discount</strong>
+                <span class="pull-right" id="discount_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
             </td>
             <td><strong>{{__('db.Order Tax')}}</strong>
                 <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
@@ -395,6 +402,7 @@ function calculateTotal() {
     var total_tax = 0;
     var total = 0;
     var item = 0;
+    var extra_discount = parseFloat($('input[name="extra_discount"]').val()) || 0;
     $(".is-return").each(function(i) {
         if ($(this).is(":checked")) {
             var actual_qty = $('table.order-list tbody tr:nth-child(' + (i + 1) + ') .actual-qty').val();
@@ -419,19 +427,28 @@ function calculateTotal() {
             item++;
         }
     });
+    total_discount += extra_discount;
+    var discounted_total = Math.max(0, total - total_discount);
     $('input[name="total_qty"]').val(total_qty);
 
     $('input[name="total_discount"]').val(total_discount.toFixed({{$general_setting->decimal}}));
 
     $('input[name="total_tax"]').val(total_tax.toFixed({{$general_setting->decimal}}));
 
-    $('input[name="total_cost"]').val(total.toFixed({{$general_setting->decimal}}));
+    $('input[name="total_cost"]').val(discounted_total.toFixed({{$general_setting->decimal}}));
     $('input[name="item"]').val(item);
     item += '(' + total_qty + ')';
     $('#item').text(item);
+    $('#discount_total').text(total_discount.toFixed({{$general_setting->decimal}}));
 
     calculateGrandTotal();
 }
+
+$('input[name="extra_discount"]').on("input", function() {
+    calculateTotal();
+});
+
+calculateTotal();
 
 function calculateGrandTotal() {
     var total_qty = parseFloat($('input[name="total_qty"]').val());
