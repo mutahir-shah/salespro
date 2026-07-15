@@ -362,7 +362,7 @@ class SupplierController extends Controller
         $returns = ReturnPurchase::where('supplier_id', $id)->get()->map(function ($r) {
             return [
                 'id' => $r->id,
-                'date' => $r->created_at,
+                'date' =>  $r->created_at->format('Y-m-d'),
                 'type' => 'Purchase Return',
                 'reference' => $r->reference_no,
                 'debit' => 0,
