@@ -194,8 +194,20 @@
                 { data: 'date' },
                 { data: 'type' },
                 { data: 'reference' },
-                { data: 'debit' },
-                { data: 'credit' },
+                {
+                    data: 'debit',
+                    render: function (data) {
+                        var amount = data && data !== '' ? parseFloat(data) : 0;
+                        return '<span class="badge badge-danger rounded-pill px-2 py-1" style="font-size: 12px; font-weight: 600;">' + amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</span>';
+                    }
+                },
+                {
+                    data: 'credit',
+                    render: function (data) {
+                        var amount = data && data !== '' ? parseFloat(data) : 0;
+                        return '<span class="badge badge-success rounded-pill px-2 py-1" style="font-size: 12px; font-weight: 600;">' + amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</span>';
+                    }
+                },
                 { data: 'balance' }
             ],
             order: [[0, 'desc']],
