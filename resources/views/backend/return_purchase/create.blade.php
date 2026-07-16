@@ -405,8 +405,8 @@ function calculateTotal() {
     var extra_discount = parseFloat($('input[name="extra_discount"]').val()) || 0;
     $(".is-return").each(function(i) {
         if ($(this).is(":checked")) {
-            var actual_qty = $('table.order-list tbody tr:nth-child(' + (i + 1) + ') .actual-qty').val();
-            var qty = $('table.order-list tbody tr:nth-child(' + (i + 1) + ') .qty').val();
+            var actual_qty = parseInt($('table.order-list tbody tr:nth-child(' + (i + 1) + ') .actual-qty').val()) || 0;
+            var qty = parseInt($('table.order-list tbody tr:nth-child(' + (i + 1) + ') .qty').val()) || 0;
             if(qty > actual_qty) {
                 console.log('Quantity '+qty+' is bigger than the actual quantity '+actual_qty);
                 alert('Quantity can not be bigger than the actual quantity!');
