@@ -1315,6 +1315,7 @@ class SaleController extends Controller
 
             Product_Sale::create($product_sale);
         }
+        $sale_date = isset($data['created_at']) ? Carbon::parse($data['created_at'])->format('Y-m-d') : date('Y-m-d');
         BillerCommission::create([
             /**
              * Identifier of the sale record.
