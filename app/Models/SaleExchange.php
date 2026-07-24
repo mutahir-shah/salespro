@@ -27,6 +27,7 @@ class SaleExchange extends Model
         'document',
         'exchange_note',
         'staff_note',
+        'created_at'
     ];
 
     protected $casts = [

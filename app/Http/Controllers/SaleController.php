@@ -1294,15 +1294,19 @@ class SaleController extends Controller
                 }
             }
             // Billier commission new option created by mutahir
-            $profit =   $product_sale['net_unit_price'] - $lims_product_data->price;
+            $profit_per_unit = $product_sale['net_unit_price'] - $lims_product_data->price;
+            $line_qty        = $qty[$i];
+            $profit          = $profit_per_unit * $line_qty;
+
             $commission = 0;
             if ($profit > 0) {
                 $commission = $profit * 0.10;
             }
-            $totalProfit += $profit;
+
+            $totalProfit     += $profit;
             $totalCommission += $commission;
-            $totalItems++;
-            // End Billier commission new optioin created by mutahir
+            $totalItems      += $line_qty; // counts actual quantity sold, not just line count
+            // End Billier commission new option created by mutahir
             Product_Sale::create($product_sale);
         }
         BillerCommission::create([
