@@ -1293,20 +1293,26 @@ class SaleController extends Controller
                     $product_sale['topping_id'] = $data['topping_product'][$i];
                 }
             }
+
+
+
             // Billier commission new option created by mutahir
             $profit_per_unit = $product_sale['net_unit_price'] - $lims_product_data->price;
             $line_qty        = $qty[$i];
             $profit          = $profit_per_unit * $line_qty;
 
-            $commission = 0;
-            if ($profit > 0) {
-                $commission = $profit * 0.10;
-            }
+            // If sold at or below cost, treat this line's profit/commission as zero
+            // instead of letting a loss drag down totals.
+            $profit = max(0, $profit);
+
+            $commission = $profit > 0 ? $profit * 0.10 : 0;
 
             $totalProfit     += $profit;
             $totalCommission += $commission;
             $totalItems      += $line_qty; // counts actual quantity sold, not just line count
             // End Billier commission new option created by mutahir
+
+
             Product_Sale::create($product_sale);
         }
         BillerCommission::create([
