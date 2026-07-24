@@ -1328,7 +1328,7 @@ class SaleController extends Controller
             'total_items'       => $totalItems,
             'total_profit'      => $totalProfit,
             'commission_amount' => $totalCommission,
-            'calculated_at'     => now(),
+            'calculated_at'     => $sale_date,
         ]);
 
         // Billier commission new option created by mutahir
