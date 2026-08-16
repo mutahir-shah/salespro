@@ -459,7 +459,6 @@ class HomeController extends Controller
         $remaining =  Product_Warehouse::when($warehouse_id, function ($q) use ($warehouse_id) {
             $q->where('warehouse_id', $warehouse_id);
         })->sum('qty');
-        dd($remaining);
         return $remaining;
     }
 
