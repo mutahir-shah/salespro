@@ -196,10 +196,8 @@ class HomeController extends Controller
                     ->whereDate('created_at', '<=', $end_date)
                     ->whereNull('deleted_at')
                     ->where(function ($q) {
-                        $q->where('purchase_type', '!=', 'opening balance')
-                            ->orWhereNull('purchase_type');
-                    })
-                    ->sum(DB::raw('grand_total / exchange_rate'));
+                        $q->where('purchase_type', '!=', 'opening balance')->orWhereNull('purchase_type');
+                    })->sum(DB::raw('grand_total / exchange_rate'));
             }
             $yearly_sale_amount[] = number_format((float)$sale_amount, config('decimal'), '.', '');
             $yearly_purchase_amount[] = number_format((float)$purchase_amount, config('decimal'), '.', '');

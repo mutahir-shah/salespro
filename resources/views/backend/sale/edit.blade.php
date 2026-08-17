@@ -1063,7 +1063,7 @@ $('button[name="update_btn"]').on("click", function() {
     }
 
     var edit_discount = $('input[name="edit_discount"]').val();
-    var edit_qty = $('input[name="edit_qty"]').val();
+    var edit_qty = parseFloat($('input[name="edit_qty"]').val());
     var edit_unit_price = $('input[name="edit_unit_price"]').val();
 
     if (parseFloat(edit_discount) > parseFloat(edit_unit_price)) {
@@ -1071,17 +1071,42 @@ $('button[name="update_btn"]').on("click", function() {
         return;
     }
 
-    if(edit_qty < 0) {
+    if (isNaN(edit_qty) || edit_qty === '') {
         $('input[name="edit_qty"]').val(1);
         edit_qty = 1;
-        alert("Quantity can't be less than 0");
+        alert("Quantity must be a number.");
+    }
+
+    if(edit_qty <= 0) {
+        $('input[name="edit_qty"]').val(1);
+        edit_qty = 1;
+        alert("Quantity must be greater than 0.");
+    }
+
+    var product_type = $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val();
+    var max_qty = parseFloat($('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.qty').attr('max'));
+
+    if (without_stock == 'no' && !isNaN(max_qty) && (product_type.trim() == 'standard' || product_type.trim() == 'combo')) {
+        var operator = unit_operator[rowindex].split(',');
+        var operation_value = unit_operation_value[rowindex].split(',');
+        var total_qty = edit_qty;
+
+        if (operator[0] == '*') {
+            total_qty = edit_qty * parseFloat(operation_value[0]);
+        } else if (operator[0] == '/') {
+            total_qty = edit_qty / parseFloat(operation_value[0]);
+        }
+
+        if (total_qty > max_qty) {
+            alert('Quantity exceeds stock quantity!');
+            edit_qty = max_qty;
+            $('input[name="edit_qty"]').val(edit_qty);
+        }
     }
 
     var tax_rate_all = <?php echo json_encode($tax_rate_all) ?>;
     tax_rate[rowindex]  = parseFloat(tax_rate_all[$('select[name="edit_tax_rate"]').val()]);
     tax_name[rowindex]  = $('select[name="edit_tax_rate"] option:selected').text();
-
-    var product_type = $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val();
 
     product_discount[rowindex] = $('input[name="edit_discount"]').val();
     if(product_type == 'standard'){
