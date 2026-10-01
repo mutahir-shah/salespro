@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use Auth;
-use App\Models\Product;
-use App\Models\Warehouse;
+use App\Models\{Product, Warehouse, Product_Warehouse};
 use App\Traits\CacheForget;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Models\Product_Warehouse;
 use Illuminate\Support\Facades\DB;
 
 class WarehouseController extends Controller
@@ -16,7 +14,7 @@ class WarehouseController extends Controller
     use CacheForget;
     public function index()
     {
-        $lims_warehouse_all = Warehouse::where('is_active', true)->get();
+        $lims_warehouse_all = Warehouse::all();
         $numberOfWarehouse = Warehouse::where('is_active', true)->count();
         return view('backend.warehouse.create', compact('lims_warehouse_all', 'numberOfWarehouse'));
     }
@@ -26,7 +24,7 @@ class WarehouseController extends Controller
         $this->validate($request, [
             'name' => [
                 'max:255',
-                    Rule::unique('warehouses')->where(function ($query) {
+                Rule::unique('warehouses')->where(function ($query) {
                     return $query->where('is_active', 1);
                 }),
             ],
@@ -59,7 +57,7 @@ class WarehouseController extends Controller
         $this->validate($request, [
             'name' => [
                 'max:255',
-                    Rule::unique('warehouses')->ignore($request->warehouse_id)->where(function ($query) {
+                Rule::unique('warehouses')->ignore($request->warehouse_id)->where(function ($query) {
                     return $query->where('is_active', 1);
                 }),
             ],
@@ -74,40 +72,39 @@ class WarehouseController extends Controller
     public function importWarehouse(Request $request)
     {
         //get file
-        $upload=$request->file('file');
+        $upload = $request->file('file');
         $ext = pathinfo($upload->getClientOriginalName(), PATHINFO_EXTENSION);
-        if($ext != 'csv')
+        if ($ext != 'csv')
             return redirect()->back()->with('not_permitted', __('db.Please upload a CSV file'));
-        $filename =  $upload->getClientOriginalName();
-        $upload=$request->file('file');
-        $filePath=$upload->getRealPath();
+        $filename = $upload->getClientOriginalName();
+        $upload = $request->file('file');
+        $filePath = $upload->getRealPath();
         //open and read
-        $file=fopen($filePath, 'r');
-        $header= fgetcsv($file);
-        $escapedHeader=[];
+        $file = fopen($filePath, 'r');
+        $header = fgetcsv($file);
+        $escapedHeader = [];
         //validate
         foreach ($header as $key => $value) {
-            $lheader=strtolower($value);
-            $escapedItem=preg_replace('/[^a-z]/', '', $lheader);
+            $lheader = strtolower($value);
+            $escapedItem = preg_replace('/[^a-z]/', '', $lheader);
             array_push($escapedHeader, $escapedItem);
         }
         //looping through othe columns
-        while($columns=fgetcsv($file))
-        {
-            if($columns[0]=="")
+        while ($columns = fgetcsv($file)) {
+            if ($columns[0] == "")
                 continue;
             foreach ($columns as $key => $value) {
-                $value=preg_replace('/\D/','',$value);
+                $value = preg_replace('/\D/', '', $value);
             }
-           $data= array_combine($escapedHeader, $columns);
+            $data = array_combine($escapedHeader, $columns);
 
-           $warehouse = Warehouse::firstOrNew([ 'name'=>$data['name'], 'is_active'=>true ]);
-           $warehouse->name = $data['name'];
-           $warehouse->phone = $data['phone'];
-           $warehouse->email = $data['email'];
-           $warehouse->address = $data['address'];
-           $warehouse->is_active = true;
-           $warehouse->save();
+            $warehouse = Warehouse::firstOrNew(['name' => $data['name'], 'is_active' => true]);
+            $warehouse->name = $data['name'];
+            $warehouse->phone = $data['phone'];
+            $warehouse->email = $data['email'];
+            $warehouse->address = $data['address'];
+            $warehouse->is_active = true;
+            $warehouse->save();
         }
         $this->cacheForget('warehouse_list');
         return redirect('warehouse')->with('message', __('db.Warehouse imported successfully'));
@@ -134,19 +131,55 @@ class WarehouseController extends Controller
 
     public function warehouseAll()
     {
-        if(Auth::user()->role_id > 2)
+        if (Auth::user()->role_id > 2)
             $lims_warehouse_list = DB::table('warehouses')->where([
-            ['is_active', true],
-            ['id', Auth::user()->warehouse_id]
-        ])->get();
+                ['is_active', true],
+                ['id', Auth::user()->warehouse_id]
+            ])->get();
         else
             $lims_warehouse_list = DB::table('warehouses')->where('is_active', true)->get();
 
         $html = '';
-        foreach($lims_warehouse_list as $warehouse){
-            $html .='<option value="'.$warehouse->id.'">'.$warehouse->name.'</option>';
+        foreach ($lims_warehouse_list as $warehouse) {
+            $html .= '<option value="' . $warehouse->id . '">' . $warehouse->name . '</option>';
         }
 
         return response()->json($html);
+    }
+
+    public function toggleStatus(Request $request)
+    {
+        if (env('USER_VERIFIED') === '0' || env('USER_VERIFIED') === false) {
+            return response()->json(['success' => false, 'message' => __('db.This feature is disable for demo!')]);
+        }
+
+        $warehouse = Warehouse::find($request->id);
+
+        if ($warehouse) {
+            if ($request->is_active) {
+                $duplicate = Warehouse::where('name', $warehouse->name)
+                    ->where('is_active', 1)
+                    ->where('id', '!=', $warehouse->id)
+                    ->exists();
+                if ($duplicate) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('db.Another active warehouse with this name already exists.')
+                    ]);
+                }
+            }
+
+            $warehouse->is_active = (bool)$request->is_active;
+            $warehouse->save();
+
+            $this->cacheForget('warehouse_list');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Warehouse status updated successfully.'
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Warehouse not found.']);
     }
 }

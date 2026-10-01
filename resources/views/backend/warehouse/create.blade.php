@@ -1,6 +1,68 @@
 @extends('backend.layout.main')
 @section('content')
 
+@push('css')
+<style>
+/* Base container alignment */
+.custom-control.custom-switch {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Switch track */
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #7c5cc4;
+    border-color: #7c5cc4;
+}
+
+.custom-control-input:not(:checked) ~ .custom-control-label::before {
+    background-color: #ddd;
+    border-color: #ddd;
+}
+
+/* Switch knob */
+.custom-control-label::before {
+    height: 22px;
+    width: 40px;
+    border-radius: 20px;
+    background-color: #ccc;
+    border: 1px solid #aaa;
+    transition: background-color 0.25s, border-color 0.25s;
+}
+
+.custom-control-label::after {
+    top: 5px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s ease-in-out;
+}
+
+/* Move knob when checked */
+.custom-control-input:checked ~ .custom-control-label::after {
+    transform: translateX(18px);
+}
+
+/* Accessibility focus outline */
+.custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 0.2rem rgba(124, 92, 196, 0.25);
+}
+
+/* Optional: hover effect */
+.custom-control-label:hover::before {
+    filter: brightness(0.95);
+}
+
+/* Optional: disable text selection */
+.custom-control-label {
+    user-select: none;
+}
+</style>
+@endpush
+
 <x-validation-error fieldName="name" />
 <x-success-message key="message" />
 <x-error-message key="not_permitted" />
@@ -21,6 +83,7 @@
                     <th>{{__('db.Address')}}</th>
                     <th>{{__('db.Number of Product')}}</th>
                     <th>{{__('db.Stock Quantity')}}</th>
+                    <th>{{__('db.status')}}</th>
                     <th class="not-exported">{{__('db.action')}}</th>
                 </tr>
             </thead>
@@ -47,6 +110,17 @@
                     <td>{{ $warehouse->address}}</td>
                     <td>{{$number_of_product}}</td>
                     <td>{{$stock_qty}}</td>
+                    <td class="text-center">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox"
+                                class="custom-control-input warehouse-status-toggle"
+                                id="switch_{{ $warehouse->id }}"
+                                data-id="{{ $warehouse->id }}"
+                                {{ $warehouse->is_active ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="switch_{{ $warehouse->id }}"></label>
+                        </div>
+                        <span class="d-none status-label">{{ $warehouse->is_active ? __('db.Active') : __('db.Inactive') }}</span>
+                    </td>
                     <td>
                         <div class="btn-group">
                             <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{__('db.action')}}
@@ -254,7 +328,7 @@
         'columnDefs': [
             {
                 "orderable": false,
-                'targets': [0, 5, 6, 7]
+                'targets': [0, 5, 6, 7, 8]
             },
             {
                 'render': function(data, type, row, meta){
@@ -309,8 +383,11 @@
                 action: function ( e, dt, node, config ) {
                     if(user_verified == '1') {
                         var warehouse_id = [];
-                        $('table tbody :checkbox:checked').each(function(i) {
-                            warehouse_id[i] = $(this).closest('tr').data('id');
+                        let selectedRows = [];
+                        $('#warehouse-table tbody input.dt-checkboxes:checked').each(function(i) {
+                            let row = $(this).closest('tr');
+                            warehouse_id.push(row.data('id'));
+                            selectedRows.push(row);
                         });
 
                         if(warehouse_id.length && confirm("Are you sure want to delete?")) {
@@ -321,12 +398,11 @@
                                     warehouseIdArray: warehouse_id
                                 },
                                 success:function(data){
-                                    $(':checkbox:checked').each(function(i) {
-                                            if (i) {
-                                                 dt.row($(this).closest('tr')).remove().draw(false);
-                                            }
-                                        });
-                                        alert(data);
+                                    selectedRows.forEach(function(row){
+                                        dt.row(row).remove();
+                                    });
+                                    dt.draw(false);
+                                    alert(data);
                                 }
                             });
 
@@ -355,24 +431,23 @@ $.ajaxSetup({
 
 $( "#select_all" ).on( "change", function() {
     if ($(this).is(':checked')) {
-        $("tbody input[type='checkbox']").prop('checked', true);
+        $("#warehouse-table tbody input.dt-checkboxes").prop('checked', true);
     }
     else {
-        $("tbody input[type='checkbox']").prop('checked', false);
+        $("#warehouse-table tbody input.dt-checkboxes").prop('checked', false);
     }
 });
 
 $("#export").on("click", function(e){
     e.preventDefault();
     var warehouse = [];
-    $(':checkbox:checked').each(function(i){
-      warehouse[i] = $(this).val();
+    $('#warehouse-table tbody input.dt-checkboxes:checked').each(function(i){
+      warehouse[i] = $(this).closest('tr').data('id') || $(this).val();
     });
     $.ajax({
        type:'POST',
        url:'/exportwarehouse',
        data:{
-
             warehouseArray: warehouse
         },
        success:function(data){
@@ -381,5 +456,47 @@ $("#export").on("click", function(e){
        }
     });
 });
+
+$(document).on('change', '.warehouse-status-toggle', function() {
+    let checkbox = $(this);
+    let warehouseId = checkbox.data('id');
+    let isActive = checkbox.is(':checked') ? 1 : 0;
+
+    if (user_verified == '0') {
+        alert('This feature is disable for demo!');
+        checkbox.prop('checked', !isActive);
+        return;
+    }
+
+    $.ajax({
+        url: "{{ route('warehouse.toggleStatus') }}",
+        type: "POST",
+        data: {
+            _token: "{{ csrf_token() }}",
+            id: warehouseId,
+            is_active: isActive
+        },
+        success: function(response) {
+            $('#content .alert.alert-dismissible').remove();
+            if (response.success) {
+                checkbox.closest('td').find('.status-label').text(isActive ? '{{__("db.Active")}}' : '{{__("db.Inactive")}}');
+                var success = '<div class="alert alert-success alert-dismissible text-center"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' + response.message + '</div>';
+                $('#content').prepend(success);
+            } else {
+                checkbox.prop('checked', !isActive);
+                var error = '<div class="alert alert-danger alert-dismissible text-center"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' + (response.message || 'Something went wrong') + '</div>';
+                $('#content').prepend(error);
+            }
+        },
+        error: function(xhr) {
+            checkbox.prop('checked', !isActive);
+            $('#content .alert.alert-dismissible').remove();
+            var msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Something went wrong';
+            var error = '<div class="alert alert-danger alert-dismissible text-center"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' + msg + '</div>';
+            $('#content').prepend(error);
+        }
+    });
+});
 </script>
 @endpush
+

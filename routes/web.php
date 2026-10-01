@@ -282,6 +282,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
         Route::post('warehouse/deletebyselection', 'deleteBySelection');
         Route::get('warehouse/lims_warehouse_search', 'limsWarehouseSearch')->name('warehouse.search');
         Route::get('warehouse/all', 'warehouseAll')->name('warehouse.all');
+        Route::post('warehouse/toggle-status', 'toggleStatus')->name('warehouse.toggleStatus');
     });
     Route::resource('warehouse', WarehouseController::class);
 
