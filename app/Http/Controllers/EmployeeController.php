@@ -151,25 +151,25 @@ class EmployeeController extends Controller
         $isSaleAgent = $data['is_sale_agent'] ?? 0;
 
         Employee::create([
-            'name'                  => $data['name'],
-            'email'                 => $data['email'] ?? null,
-            'phone_number'          => $data['phone_number'] ?? null,
-            'address'               => $data['address'] ?? null,
-            'city'                  => $data['city'] ?? null,
-            'country'               => $data['country'] ?? null,
-            'basic_salary'          => $data['basic_salary'] ?? null,
-            'staff_id'              => $data['staff_id'] ?? null,
-            'department_id'         => $data['department_id'] ?? null,
-            'shift_id'              => $data['shift_id'] ?? null,
-            'designation_id'        => $data['designation_id'] ?? null,
-            'role_id'               => $data['role_id'] ?? null,
-            'warehouse_id'          => $data['warehouse_id'] ?? null, // ← warehouse_id
-            'biller_id'             => $data['biller_id'] ?? null,
-            'user_id'               => $data['user_id'] ?? null,
-            'image'                 => $data['image'] ?? null,
-            'is_active'             => true,
-            'is_sale_agent'         => $isSaleAgent,
-            'sales_target'          => $isSaleAgent == 1 ? ($data['sales_target'] ?? null) : null,
+            'name' => $data['name'],
+            'email' => $data['email'] ?? null,
+            'phone_number' => $data['phone_number'] ?? null,
+            'address' => $data['address'] ?? null,
+            'city' => $data['city'] ?? null,
+            'country' => $data['country'] ?? null,
+            'basic_salary' => $data['basic_salary'] ?? null,
+            'staff_id' => $data['staff_id'] ?? null,
+            'department_id' => $data['department_id'] ?? null,
+            'shift_id' => $data['shift_id'] ?? null,
+            'designation_id' => $data['designation_id'] ?? null,
+            'role_id' => $data['role_id'] ?? null,
+            'warehouse_id' => $data['warehouse_id'] ?? null, // ← warehouse_id
+            'biller_id' => $data['biller_id'] ?? null,
+            'user_id' => $data['user_id'] ?? null,
+            'image' => $data['image'] ?? null,
+            'is_active' => true,
+            'is_sale_agent' => $isSaleAgent,
+            'sales_target' => $isSaleAgent == 1 ? ($data['sales_target'] ?? null) : null,
         ]);
 
         if ($isSaleAgent) {
@@ -228,22 +228,22 @@ class EmployeeController extends Controller
             $data['image'] = $imageName;
         }
         $lims_employee_data->update([
-            'name'           => $data['name'],
-            'email'          => $data['email'] ?? $lims_employee_data->email,
-            'phone_number'   => $data['phone_number'] ?? $lims_employee_data->phone_number,
-            'address'        => $data['address'] ?? $lims_employee_data->address,
-            'city'           => $data['city'] ?? $lims_employee_data->city,
-            'country'        => $data['country'] ?? $lims_employee_data->country,
-            'basic_salary'   => $data['basic_salary'] ?? $lims_employee_data->basic_salary,
-            'staff_id'       => $data['staff_id'] ?? $lims_employee_data->staff_id,
-            'department_id'  => $data['department_id'] ?? $lims_employee_data->department_id,
-            'shift_id'       => $data['shift_id'] ?? $lims_employee_data->shift_id,
+            'name' => $data['name'],
+            'email' => $data['email'] ?? $lims_employee_data->email,
+            'phone_number' => $data['phone_number'] ?? $lims_employee_data->phone_number,
+            'address' => $data['address'] ?? $lims_employee_data->address,
+            'city' => $data['city'] ?? $lims_employee_data->city,
+            'country' => $data['country'] ?? $lims_employee_data->country,
+            'basic_salary' => $data['basic_salary'] ?? $lims_employee_data->basic_salary,
+            'staff_id' => $data['staff_id'] ?? $lims_employee_data->staff_id,
+            'department_id' => $data['department_id'] ?? $lims_employee_data->department_id,
+            'shift_id' => $data['shift_id'] ?? $lims_employee_data->shift_id,
             'designation_id' => $data['designation_id'] ?? $lims_employee_data->designation_id,
-            'role_id'        => $data['role_id'] ?? $lims_employee_data->role_id,
-            'warehouse_id'   => $data['warehouse_id'] ?? $lims_employee_data->warehouse_id, // ← warehouse_id
-            'biller_id'      => $data['biller_id'] ?? $lims_employee_data->biller_id,
-            'user_id'        => $data['user_id'] ?? $lims_employee_data->user_id,
-            'image'          => $data['image'] ?? $lims_employee_data->image,
+            'role_id' => $data['role_id'] ?? $lims_employee_data->role_id,
+            'warehouse_id' => $data['warehouse_id'] ?? $lims_employee_data->warehouse_id, // ← warehouse_id
+            'biller_id' => $data['biller_id'] ?? $lims_employee_data->biller_id,
+            'user_id' => $data['user_id'] ?? $lims_employee_data->user_id,
+            'image' => $data['image'] ?? $lims_employee_data->image,
         ]);
         return redirect('employees')->with('message', __('db.Employee updated successfully'));
     }
@@ -271,8 +271,10 @@ class EmployeeController extends Controller
         $lims_employee_data = Employee::find($id);
         if ($lims_employee_data->user_id) {
             $lims_user_data = User::find($lims_employee_data->user_id);
-            $lims_user_data->is_deleted = true;
-            $lims_user_data->save();
+            if ($lims_user_data) {
+                $lims_user_data->is_deleted = true;
+                $lims_user_data->save();
+            }
         }
 
         $this->fileDelete(public_path('images/employee/'), $lims_employee_data->image);
@@ -368,7 +370,7 @@ class EmployeeController extends Controller
                 return '<span class="badge badge-warning">Unpaid</span>';
             })
             ->editColumn('commission_date', function ($row) {
-                return $row->commission_date  ? \Carbon\Carbon::parse($row->commission_date)->format('d/m/Y') : '—';
+                return $row->commission_date ? \Carbon\Carbon::parse($row->commission_date)->format('d/m/Y') : '—';
             })
             ->editColumn('sale_date', function ($row) {
                 return $row->sale_date
@@ -376,8 +378,8 @@ class EmployeeController extends Controller
                     : '—';
             })
             ->addColumn('action', function ($row) {
-                $viewUrl   = route('sales.show', $row->sale_id);
-                $payUrl    = $row->commission_id && !$row->is_paid
+                $viewUrl = route('sales.show', $row->sale_id);
+                $payUrl = $row->commission_id && !$row->is_paid
                     ? route('employee.commission.pay', $row->commission_id)
                     : null;
 
@@ -424,10 +426,10 @@ class EmployeeController extends Controller
         }
 
         DB::table('biller_commissions')->where('id', $commissionId)->update([
-            'is_paid'      => 1,
-            'paid_amount'  => $commission->commission_amount,
-            'paid_at'      => now(),
-            'updated_at'   => now(),
+            'is_paid' => 1,
+            'paid_amount' => $commission->commission_amount,
+            'paid_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return response()->json(['success' => true, 'message' => 'Commission marked as paid.']);
@@ -454,9 +456,9 @@ class EmployeeController extends Controller
             ->whereIn('sale_id', $saleIds)
             ->where('is_paid', 0)
             ->update([
-                'is_paid'     => 1,
-                'paid_at'     => now(),
-                'updated_at'  => now(),
+                'is_paid' => 1,
+                'paid_at' => now(),
+                'updated_at' => now(),
             ]);
 
         // Also update paid_amount = commission_amount for those records
@@ -466,7 +468,7 @@ class EmployeeController extends Controller
             ->whereColumn('paid_amount', '<', 'commission_amount')
             ->update([
                 'paid_amount' => DB::raw('commission_amount'),
-                'updated_at'  => now(),
+                'updated_at' => now(),
             ]);
 
         return response()->json([

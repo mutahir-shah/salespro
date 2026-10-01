@@ -3,29 +3,14 @@
 namespace App\Http\Controllers;
 
 use Mail;
-use App\Models\Account;
-use App\Models\Payment;
-use App\Models\Customer;
-use App\Models\Purchase;
-use App\Models\Supplier;
-use App\Models\MailSetting;
-use App\Mail\CustomerCreate;
-use App\Mail\SupplierCreate;
-use App\Models\CashRegister;
-use Illuminate\Http\Request;
-use App\Models\CustomerGroup;
-use App\Models\PaymentAllocation;
-use App\Models\PaymentWithCheque;
-use App\Models\PaymentWithCreditCard;
-use App\Models\Product;
-use App\Models\PurchaseProductReturn;
-use App\Models\ReturnPurchase;
+use App\Models\{Account, Payment, Customer, Purchase, Supplier, MailSetting, CashRegister, CustomerGroup, PaymentAllocation, PaymentWithCheque};
+use App\Models\{PaymentWithCreditCard, Product, PurchaseProductReturn, ReturnPurchase};
+use App\Mail\{CustomerCreate, SupplierCreate};
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\{DB, Auth};
+use Spatie\Permission\Models\{Role, Permission};
 
 class SupplierController extends Controller
 {
@@ -53,8 +38,8 @@ class SupplierController extends Controller
     {
         DB::beginTransaction();
         try {
-            $supplier           = Supplier::findOrFail($request->supplier_id);
-            $previous_balance   = $supplier->opening_balance;
+            $supplier = Supplier::findOrFail($request->supplier_id);
+            $previous_balance = $supplier->opening_balance;
             $totalPaymentAmount = $request->amount;
             // Use Carbon instance, not a formatted string
 
@@ -62,16 +47,16 @@ class SupplierController extends Controller
             // Create main payment record (make sure Payment::$fillable allows created_at/updated_at)
             $paymentArray = [
                 'payment_reference' => 'ppr-' . date('Ymd') . '-' . date('His'),
-                'user_id'           => Auth::id(),
-                'purchase_id'       => null,
-                'cash_register_id'  => null,
-                'account_id'        => $request->account_id,
-                'amount'            => $totalPaymentAmount,
-                'change'            => $request->change,
-                'paying_method'     => $request->paying_method,
-                'payment_note'      => $request->note,
-                'created_at'        => $created,
-                'updated_at'        => $created,
+                'user_id' => Auth::id(),
+                'purchase_id' => null,
+                'cash_register_id' => null,
+                'account_id' => $request->account_id,
+                'amount' => $totalPaymentAmount,
+                'change' => $request->change,
+                'paying_method' => $request->paying_method,
+                'payment_note' => $request->note,
+                'created_at' => $created,
+                'updated_at' => $created,
             ];
             $payment = Payment::create($paymentArray);
 
@@ -81,25 +66,26 @@ class SupplierController extends Controller
 
             $remainingAmount = $totalPaymentAmount;
             $warehouse_id = null;  // avoid undefined var
-            $purchase_id  = null;  // avoid undefined var
+            $purchase_id = null;  // avoid undefined var
 
             foreach ($outstandingPurchases as $purchase) {
-                if ($remainingAmount <= 0) break;
+                if ($remainingAmount <= 0)
+                    break;
 
                 $outstandingBalance = $purchase->grand_total - $purchase->paid_amount;
-                $allocatedAmount    = min($remainingAmount, $outstandingBalance);
+                $allocatedAmount = min($remainingAmount, $outstandingBalance);
                 PaymentAllocation::create(['payment_id' => $payment->id, 'purchase_id' => $purchase->id, 'allocated_amount' => $allocatedAmount]);
                 $purchase->update([
-                    'paid_amount'    => $purchase->paid_amount + $allocatedAmount,
+                    'paid_amount' => $purchase->paid_amount + $allocatedAmount,
                     'payment_status' => $this->determinePaymentStatus(
                         $purchase->grand_total,
                         $purchase->paid_amount + $allocatedAmount
                     ),
                 ]);
 
-                $remainingAmount   -= $allocatedAmount;
-                $warehouse_id       = $purchase->warehouse_id;
-                $purchase_id        = $purchase->id;
+                $remainingAmount -= $allocatedAmount;
+                $warehouse_id = $purchase->warehouse_id;
+                $purchase_id = $purchase->id;
 
                 // $supplier->opening_balance  = $previous_balance - $allocatedAmount;
                 // $supplier->save();
@@ -108,7 +94,7 @@ class SupplierController extends Controller
             $lims_cash_register_data = CashRegister::select('id')->where('user_id', Auth::id())->where('warehouse_id', $warehouse_id)->where('status', 1)->first();
             $cash_register_id = $lims_cash_register_data ? $lims_cash_register_data->id : null;
             // If you *really* want to keep the original updated_at, disable timestamps just for this save.
-            $payment->purchase_id      = $purchase_id;
+            $payment->purchase_id = $purchase_id;
             $payment->cash_register_id = $cash_register_id;
             // NOTE: You set account_id from request earlier, but here you overwrite with default account.
             // If that's intentional, keep it. If not, remove these 2 lines.
@@ -134,7 +120,8 @@ class SupplierController extends Controller
     private function determinePaymentStatus($totalAmount, $paidAmount)
     {
         // paidAmount grand total amount
-        if ($paidAmount >= $totalAmount) return '2';
+        if ($paidAmount >= $totalAmount)
+            return '2';
         return '1';
     }
 
@@ -239,7 +226,7 @@ class SupplierController extends Controller
             $image->move(public_path('images/supplier'), $imageName);
             $lims_supplier_data['image'] = $imageName;
         }
-        
+
         $create_supplier = Supplier::create($lims_supplier_data);
 
         // create dummy purchase if supplier has opening balance (due)
@@ -333,11 +320,11 @@ class SupplierController extends Controller
         $purchases = Purchase::where('supplier_id', $id)->whereNull('deleted_at')->get()->map(function ($p) {
             return [
                 'id' => $p->id,
-                'date'      => $p->date ?? $p->created_at->format('Y-m-d'),
-                'type'      => $p->purchase_type ?? 'Purchase',
+                'date' => $p->date ?? $p->created_at->format('Y-m-d'),
+                'type' => $p->purchase_type ?? 'Purchase',
                 'reference' => $p->reference_no,
-                'debit'     => floatval($p->grand_total), // increase payable
-                'credit'    => 0,
+                'debit' => floatval($p->grand_total), // increase payable
+                'credit' => 0,
             ];
         });
 
@@ -346,12 +333,12 @@ class SupplierController extends Controller
         foreach ($purchases as $purchase) {
             $purchasePayments = Payment::where('purchase_id', $purchase['id'])->get()->map(function ($p) {
                 return [
-                    'id'        => $p->id,
-                    'date'      => $p->date ?? $p->created_at->format('Y-m-d'),
-                    'type'      => 'Payment',
+                    'id' => $p->id,
+                    'date' => $p->date ?? $p->created_at->format('Y-m-d'),
+                    'type' => 'Payment',
                     'reference' => $p->payment_reference . '(' . $p->payment_note . ')' ?? '-',
-                    'debit'     => 0,
-                    'credit'    => floatval($p->amount),
+                    'debit' => 0,
+                    'credit' => floatval($p->amount),
                 ];
             })->toArray(); // convert collection to array
 
@@ -362,7 +349,7 @@ class SupplierController extends Controller
         $returns = ReturnPurchase::where('supplier_id', $id)->get()->map(function ($r) {
             return [
                 'id' => $r->id,
-                'date' =>  $r->created_at->format('Y-m-d'),
+                'date' => $r->created_at->format('Y-m-d'),
                 'type' => 'Purchase Return',
                 'reference' => $r->reference_no,
                 'debit' => 0,
@@ -458,7 +445,7 @@ class SupplierController extends Controller
         $ext = pathinfo($upload->getClientOriginalName(), PATHINFO_EXTENSION);
         if ($ext != 'csv')
             return redirect()->back()->with('not_permitted', __('db.Please upload a CSV file'));
-        $filename =  $upload->getClientOriginalName();
+        $filename = $upload->getClientOriginalName();
         $filePath = $upload->getRealPath();
         //open and read
         $file = fopen($filePath, 'r');
@@ -582,7 +569,7 @@ class SupplierController extends Controller
     public function supplierInventoryIndex()
     {
         $suppliers = Supplier::select('id', 'name')->get();
-        $products =  Product::select('id', 'name')->get();
+        $products = Product::select('id', 'name')->get();
 
         return view('backend.supplier.supplier-report', compact('suppliers', 'products'));
     }
@@ -721,7 +708,7 @@ class SupplierController extends Controller
     }
 
 
-        private function getTotalSoldQuantity($productId)
+    private function getTotalSoldQuantity($productId)
     {
         // Calculate total sold quantity
         // Assuming you have a sales/orders table structure
@@ -740,11 +727,11 @@ class SupplierController extends Controller
             ->join('purchases as pu', 'pu.id', '=', 'pp.purchase_id')
             ->where('pp.product_id', $productId)
             ->sum('pp.qty');
-            
+
         $currentStock = DB::table('product_warehouse')
             ->where('product_id', $productId)
             ->sum('qty');
-            
+
         return max(0, $totalPurchased - $currentStock);
         */
     }
