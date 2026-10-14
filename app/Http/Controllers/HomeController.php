@@ -455,30 +455,39 @@ class HomeController extends Controller
 
     public function totalQuantity($warehouse_id = null)
     {
-        $remaining = Product_Warehouse::when($warehouse_id, function ($q) use ($warehouse_id) {
-            $q->where('warehouse_id', $warehouse_id);
-        })->where('warehouse_id', '<>', '2')->sum('qty');
-        return $remaining;
+        return Product_Warehouse::query()
+            ->where('warehouse_id', '<>', 2)
+            ->when(
+                $warehouse_id !== null,
+                fn($q) => $q->where('warehouse_id', $warehouse_id)
+            )
+            ->sum('qty');
     }
 
     public function totalCostValue($warehouse_id = null)
     {
-        return Product_Warehouse::with('product')->where('warehouse_id', '<>', '2')
+        return Product_Warehouse::with('product')
+            ->where('warehouse_id', '<>', 2)
             ->when(
-                $warehouse_id,
+                $warehouse_id !== null,
                 fn($q) => $q->where('warehouse_id', $warehouse_id)
-            )->get()->sum(function ($item) {
+            )
+            ->get()
+            ->sum(function ($item) {
                 return $item->qty * ($item->product->cost ?? 0);
             });
     }
 
     public function totalSaleValue($warehouse_id = null)
     {
-        return Product_Warehouse::with('product')->where('warehouse_id', '<>', '2')
+        return Product_Warehouse::with('product')
+            ->where('warehouse_id', '<>', '2')
             ->when(
                 $warehouse_id,
                 fn($q) => $q->where('warehouse_id', $warehouse_id)
-            )->get()->sum(function ($item) {
+            )
+            ->get()
+            ->sum(function ($item) {
                 return $item->qty * ($item->product->price ?? 0);
             });
     }
