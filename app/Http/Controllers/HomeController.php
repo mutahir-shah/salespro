@@ -160,8 +160,8 @@ class HomeController extends Controller
             }
             $sent_amount = $sent_amount + $return_amount + $expense_amount + $payroll_amount;
 
-            $payment_recieved[] = number_format((float)($recieved_amount + $purchase_return_amount), config('decimal'), '.', '');
-            $payment_sent[] = number_format((float)$sent_amount, config('decimal'), '.', '');
+            $payment_recieved[] = number_format((float) ($recieved_amount + $purchase_return_amount), config('decimal'), '.', '');
+            $payment_sent[] = number_format((float) $sent_amount, config('decimal'), '.', '');
             $month[] = date("F", strtotime($start_date));
             $start = strtotime("+1 month", $start);
         }
@@ -199,8 +199,8 @@ class HomeController extends Controller
                         $q->where('purchase_type', '!=', 'opening balance')->orWhereNull('purchase_type');
                     })->sum(DB::raw('grand_total / exchange_rate'));
             }
-            $yearly_sale_amount[] = number_format((float)$sale_amount, config('decimal'), '.', '');
-            $yearly_purchase_amount[] = number_format((float)$purchase_amount, config('decimal'), '.', '');
+            $yearly_sale_amount[] = number_format((float) $sale_amount, config('decimal'), '.', '');
+            $yearly_purchase_amount[] = number_format((float) $purchase_amount, config('decimal'), '.', '');
             $start = strtotime("+1 month", $start);
         }
 
@@ -220,10 +220,10 @@ class HomeController extends Controller
 
     public function dashboardFilter($start_date, $end_date, $warehouse_id)
     {
-        $start_date     = Carbon::parse($start_date)->startOfDay();
-        $end_date       = Carbon::parse($end_date)->endOfDay();
+        $start_date = Carbon::parse($start_date)->startOfDay();
+        $end_date = Carbon::parse($end_date)->endOfDay();
         $payroll_amount = 0;
-        $billers        = 0;
+        $billers = 0;
 
         if (Auth::user()->role_id > 2 && cache()->get('general_setting')->staff_access == 'own') {
             config()->set('database.connections.mysql.strict', false);
@@ -373,10 +373,10 @@ class HomeController extends Controller
                 })->sum('amount');
 
             $payroll_amount = Payroll::whereBetween('created_at', [Carbon::parse($start_date)->startOfDay(), Carbon::parse($end_date)->endOfDay()])->sum('amount');
-            $billers           = $this->getTotalEmployees($warehouse_id);
-            $remaining_stock   = $this->totalQuantity($warehouse_id);
+            $billers = $this->getTotalEmployees($warehouse_id);
+            $remaining_stock = $this->totalQuantity($warehouse_id);
             $totalQuantitySold = $this->totalQuantitySold($warehouse_id, $start_date, $end_date);
-            $totalDues         = $this->getTotalDues(); // Call the method to get dues, but not using the returned values here. You can modify this as needed.
+            $totalDues = $this->getTotalDues(); // Call the method to get dues, but not using the returned values here. You can modify this as needed.
             $remainingProductSellingCost = $this->remainingProductSellingCost($warehouse_id);
 
 
@@ -385,16 +385,16 @@ class HomeController extends Controller
         }
         // ✅ return all 8 values
 
-        $data[0]  = $revenue;
-        $data[1]  = $return;
-        $data[2]  = $profit;
-        $data[3]  = $purchase_return;
-        $data[4]  = $total_sale;
-        $data[5]  = $invoice_due ?? 0;
-        $data[6]  = $purchase - $purchase_return;
-        $data[7]  = $purchase_due ?? 0;
-        $data[8]  = $expense ?? 0;
-        $data[9]  = $remainingProductSellingCost['product_cost'] ?? 0;
+        $data[0] = $revenue;
+        $data[1] = $return;
+        $data[2] = $profit;
+        $data[3] = $purchase_return;
+        $data[4] = $total_sale;
+        $data[5] = $invoice_due ?? 0;
+        $data[6] = $purchase - $purchase_return;
+        $data[7] = $purchase_due ?? 0;
+        $data[8] = $expense ?? 0;
+        $data[9] = $remainingProductSellingCost['product_cost'] ?? 0;
         $data[10] = $payroll_amount ?? 0;
         $data[11] = $billers ?? 0;
         $data[12] = $remaining_stock ?? 0;
@@ -402,7 +402,7 @@ class HomeController extends Controller
         $data[14] = $totalDues['supplier_total_dues'] ?? 0;
         $data[15] = $totalDues['customer_total_dues'] ?? 0;
         $data[16] = $remainingProductSellingCost['selling_cost'] ?? 0;
-        return      $data;
+        return $data;
     }
 
 
@@ -411,6 +411,7 @@ class HomeController extends Controller
         $result = Product::query()
             ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
             ->where('products.is_active', 1)->where('pw.qty', '>', 0)
+            ->where('pw.warehouse_id', '<>', '0')
             ->when($warehouse_id, function ($query) use ($warehouse_id) {
                 $query->where('pw.warehouse_id', $warehouse_id);
             })->selectRaw("COALESCE(SUM(pw.qty * products.price),0) as selling_cost,COALESCE(SUM(pw.qty * products.cost),0) as product_cost")->first();
@@ -454,9 +455,9 @@ class HomeController extends Controller
 
     public function totalQuantity($warehouse_id = null)
     {
-        $remaining =  Product_Warehouse::when($warehouse_id, function ($q) use ($warehouse_id) {
+        $remaining = Product_Warehouse::when($warehouse_id, function ($q) use ($warehouse_id) {
             $q->where('warehouse_id', $warehouse_id);
-        })->sum('qty');
+        })->where('warehouse_id', '<>', '0')->sum('qty');
         return $remaining;
     }
 
@@ -466,7 +467,7 @@ class HomeController extends Controller
             ->when(
                 $warehouse_id,
                 fn($q) => $q->where('warehouse_id', $warehouse_id)
-            )->get()->sum(function ($item) {
+            )->where('warehouse_id', '<>', '0')->get()->sum(function ($item) {
                 return $item->qty * ($item->product->cost ?? 0);
             });
     }
@@ -477,7 +478,7 @@ class HomeController extends Controller
             ->when(
                 $warehouse_id,
                 fn($q) => $q->where('warehouse_id', $warehouse_id)
-            )->get()->sum(function ($item) {
+            )->where('warehouse_id', '<>', '0')->get()->sum(function ($item) {
                 return $item->qty * ($item->product->price ?? 0);
             });
     }
@@ -505,7 +506,7 @@ class HomeController extends Controller
     public function categoryTotalExpense(Request $request)
     {
         $start_date = Carbon::now()->startOfMonth();
-        $end_date   = Carbon::now()->endOfMonth();
+        $end_date = Carbon::now()->endOfMonth();
 
         if (!empty($request->starting_date)) {
             $start_date = Carbon::parse($request->starting_date)->startOfDay();
@@ -515,7 +516,7 @@ class HomeController extends Controller
         }
 
         $warehouse_id = $request->warehouse_id;
-        $category_id  = $request->category_id; // pass this from frontend
+        $category_id = $request->category_id; // pass this from frontend
 
         $total = Expense::join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
             ->leftJoin('warehouses', 'expenses.warehouse_id', '=', 'warehouses.id')
@@ -537,7 +538,7 @@ class HomeController extends Controller
         if (!$total) {
             $total = (object) [
                 'category_name' => null,
-                'total_amount'  => 0,
+                'total_amount' => 0,
             ];
         }
 
@@ -547,7 +548,7 @@ class HomeController extends Controller
     public function categoryWiseExpenses(Request $request)
     {
         $start_date = Carbon::now()->startOfMonth();
-        $end_date   = Carbon::now()->endOfMonth();
+        $end_date = Carbon::now()->endOfMonth();
 
         if (!empty($request->starting_date)) {
             $start_date = Carbon::parse($request->starting_date)->startOfDay();
