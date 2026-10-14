@@ -155,6 +155,27 @@
                     <th class="not-exported">{{__('db.action')}}</th>
                 </tr>
             </thead>
+            <tfoot class="tfoot active">
+                <tr>
+                    <th class="not-exported"></th>
+                    <th>{{__('db.Total')}}</th>
+                    <th class="d-none"></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    @if($role_id <= 2)
+                        <th></th>
+                        <th></th>
+                    @endif
+                    @foreach($custom_fields as $fieldName)
+                        <th></th>
+                    @endforeach
+                    <th class="not-exported"></th>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </section>
@@ -683,9 +704,15 @@
                     rows: ':visible',
                     stripHtml: false
                 },
+                action: function(e, dt, button, config) {
+                    datatable_sum(dt, true);
+                    $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+                    datatable_sum(dt, false);
+                },
+                footer: true,
                 customize: function(doc) {
                     for (var i = 1; i < doc.content[1].table.body.length; i++) {
-                        if (doc.content[1].table.body[i][0].text.indexOf('<img src=') !== -1) {
+                        if (doc.content[1].table.body[i][0].text && doc.content[1].table.body[i][0].text.indexOf('<img src=') !== -1) {
                             var imagehtml = doc.content[1].table.body[i][0].text;
                             var regex = /<img.*?src=['"](.*?)['"]/;
                             var src = regex.exec(imagehtml)[1];
@@ -721,7 +748,13 @@
                             return data;
                         }
                     }
-                }
+                },
+                action: function(e, dt, button, config) {
+                    datatable_sum(dt, true);
+                    $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                    datatable_sum(dt, false);
+                },
+                footer: true
             },
             {
                 extend: 'csvHtml5',
@@ -740,7 +773,13 @@
                             return data;
                         }
                     }
-                }
+                },
+                action: function(e, dt, button, config) {
+                    datatable_sum(dt, true);
+                    $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
+                    datatable_sum(dt, false);
+                },
+                footer: true
             },
             {
                 extend: 'print',
@@ -751,6 +790,12 @@
                     rows: ':visible',
                     stripHtml: false
                 },
+                action: function(e, dt, button, config) {
+                    datatable_sum(dt, true);
+                    $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+                    datatable_sum(dt, false);
+                },
+                footer: true,
                 repeatingHead: {
                     logo: logoUrl,
                     logoPosition: 'left',
@@ -885,6 +930,10 @@
             'lengthMenu': [[10, 25, 50, -1], [10, 25, 50, "All"]],
             dom: '<"row"lfB>rtip',
             buttons: buttons,
+            drawCallback: function () {
+                var api = this.api();
+                datatable_sum(api, false);
+            }
         } );
 
         let hasFilters = window.location.search.length > 0;
@@ -905,7 +954,51 @@
         table.on('xhr.dt', function () {
             $('#filter-loading').hide();
         });
+
+        table.on('select.dt deselect.dt', function () {
+            datatable_sum(table, true);
+        });
     });
+
+    function sum_col_data(dt_selector, rows, colIdx) {
+        var total = 0;
+        var data = (rows !== undefined) ? dt_selector.cells(rows, colIdx).data() : dt_selector.column(colIdx, { page: 'current' }).data();
+        for (var i = 0; i < data.length; i++) {
+            var val = data[i];
+            if (typeof val === 'string') {
+                val = val.split('<')[0];
+                val = val.replace(/[^0-9.-]/g, '');
+            }
+            var num = parseFloat(val);
+            if (!isNaN(num)) {
+                total += num;
+            }
+        }
+        return total;
+    }
+
+    function datatable_sum(dt_selector, is_calling_first) {
+        var rows;
+        if (dt_selector.rows('.selected').any() && is_calling_first) {
+            rows = dt_selector.rows('.selected').indexes();
+        } else {
+            rows = dt_selector.rows({ page: 'current' }).indexes();
+        }
+
+        // Quantity (column 6)
+        var total_qty = sum_col_data(dt_selector, rows, 6);
+        $(dt_selector.column(6).footer()).html(total_qty.toFixed({{$general_setting->decimal ?? 2}}));
+
+        // Price (column 8)
+        var total_price = sum_col_data(dt_selector, rows, 8);
+        $(dt_selector.column(8).footer()).html(total_price.toFixed({{$general_setting->decimal ?? 2}}));
+
+        // Cost (column 9) if role_id <= 2
+        if (role_id <= 2) {
+            var total_cost = sum_col_data(dt_selector, rows, 9);
+            $(dt_selector.column(9).footer()).html(total_cost.toFixed({{$general_setting->decimal ?? 2}}));
+        }
+    }
 
     $('select').selectpicker();
 
