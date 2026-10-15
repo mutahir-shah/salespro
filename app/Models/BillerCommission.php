@@ -33,4 +33,11 @@ class BillerCommission extends Model
     {
         return $this->belongsTo(Biller::class);
     }
+
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'biller_id', 'biller_id');
+    }
+
 }

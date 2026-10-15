@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use App\Models\{Sale, Unit, Income, Biller, Expense, Payment, Payroll, Product, Returns, Customer, Employee, Purchase, Quotation, Product_Sale, ReturnPurchase};
-use App\Models\{ProductPurchase, RewardPointSetting, Product_Warehouse};
+use App\Models\{ProductPurchase, RewardPointSetting, Product_Warehouse, BillerCommission};
 use App\Traits\AutoUpdateTrait;
 use App\Traits\ENVFilePutContent;
 use Spatie\Permission\Models\Role;
@@ -360,11 +360,19 @@ class HomeController extends Controller
                 })
                 ->sum(DB::raw('(grand_total - paid_amount) / exchange_rate'));
 
+            $paid_commission = $this->totalBillerCommissionPaid(
+                $warehouse_id,
+                $start_date,
+                $end_date
+            );
+
             $expense = Expense::whereBetween('created_at', [$start_date, $end_date])
                 ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                     $q->where('warehouse_id', $warehouse_id);
-                })
-                ->sum('amount');
+                })->sum('amount');
+
+
+            $expense = $expense + $paid_commission;
 
 
             $income = Income::whereBetween('created_at', [$start_date, $end_date])
@@ -372,7 +380,12 @@ class HomeController extends Controller
                     $q->where('warehouse_id', $warehouse_id);
                 })->sum('amount');
 
-            $payroll_amount = Payroll::whereBetween('created_at', [Carbon::parse($start_date)->startOfDay(), Carbon::parse($end_date)->endOfDay()])->sum('amount');
+            //$payroll_amount = Payroll::whereBetween('created_at', [Carbon::parse($start_date)->startOfDay(), Carbon::parse($end_date)->endOfDay()])->sum('amount');
+            $start_month = Carbon::parse($start_date)->format('Y-m');
+            $end_month = Carbon::parse($end_date)->format('Y-m');
+
+            $payroll_amount = Payroll::whereBetween('month', [$start_month, $end_month])->sum('amount');
+
             $billers = $this->getTotalEmployees($warehouse_id);
             $remaining_stock = $this->totalQuantity($warehouse_id);
             $totalQuantitySold = $this->totalQuantitySold($warehouse_id, $start_date, $end_date);
@@ -384,6 +397,9 @@ class HomeController extends Controller
             $profit = $revenue + $purchase_return - $product_cost;
 
             $FinalProfit = $revenue + $purchase_return - $product_cost - $expense;
+
+
+
         }
         // ✅ return all 8 values
 
@@ -405,7 +421,19 @@ class HomeController extends Controller
         $data[15] = $totalDues['customer_total_dues'] ?? 0;
         $data[16] = $remainingProductSellingCost['selling_cost'] ?? 0;
         $data[17] = $FinalProfit;
+        $data[18] = $paid_commission;
         return $data;
+    }
+
+
+    private function totalBillerCommissionPaid($warehouse_id, $start_date, $end_date)
+    {
+        return BillerCommission::whereBetween('calculated_at', [$start_date, $end_date])
+            ->when(!empty($warehouse_id), function ($query) use ($warehouse_id) {
+                $query->whereHas('employee', function ($query) use ($warehouse_id) {
+                    $query->where('warehouse_id', $warehouse_id);
+                });
+            })->sum('paid_amount');
     }
 
 
