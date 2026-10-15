@@ -478,8 +478,26 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                         </div>
                     </div> @endif
 
-                    @if ($role_has_permissions_list->contains('name', 'expense_statistics'))
+                        @if ($role_has_permissions_list->contains('name', 'profit_statistics'))
 
+                    <!-- Count item widget-->
+                    <div class="col-sm-3">
+                        <div class="wrapper count-title">
+                            <x-info title="Revenue + Purchase Return - Product Cost - Expense" type="info" />
+                            <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
+                            <div>
+                                <div class="count-number final-profit-data">
+                                    {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                </div>
+                                <div class="name"><strong style="color: #297ff9">{{ __('Final Profit') }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                @endif
+
+                    @if ($role_has_permissions_list->contains('name', 'expense_statistics'))
                     <!-- Count item widget-->
                     <div class="col-sm-3">
                         <div class="wrapper count-title">
@@ -496,8 +514,6 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                     @endif
 
                     @if ($role_has_permissions_list->contains('name', 'total_rent_statistics'))
-
-
                     <!-- Count item widget-->
                     <div class="col-sm-3">
                         <div class="wrapper count-title">
@@ -529,29 +545,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                     </div>
                     @endif
 
-
                 @if ($role_has_permissions_list->contains('name', 'profit_statistics'))
-
-                    <!-- Count item widget-->
-                    <div class="col-sm-3">
-                        <div class="wrapper count-title">
-                            <x-info title="Revenue + Purchase Return - Product Cost - Expense" type="info" />
-                            <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
-                            <div>
-                                <div class="count-number final-profit-data">
-                                    {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                </div>
-                                <div class="name"><strong style="color: #297ff9">{{ __('Final Profit') }}</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                @endif
-
-
-
-                                @if ($role_has_permissions_list->contains('name', 'profit_statistics'))
 
                     <!-- Count item widget-->
                     <div class="col-sm-3">
@@ -562,7 +556,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                                 <div class="count-number biller-commission-data">
                                     {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
                                 </div>
-                                <div class="name"><strong style="color: #297ff9">{{ __('Biller Commission') }}</strong>
+                                <div class="name"><strong style="color: #f66162">{{ __('Biller Commission') }}</strong>
                                 </div>
                             </div>
                         </div>
