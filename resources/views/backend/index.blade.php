@@ -497,21 +497,6 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
 
                 @endif
 
-                    @if ($role_has_permissions_list->contains('name', 'expense_statistics'))
-                    <!-- Count item widget-->
-                    <div class="col-sm-3">
-                        <div class="wrapper count-title">
-                            <div class="icon"><i class="dripicons-wallet" style="color: #f66162"></i></div>
-                            <div>
-                                <div class="count-number expense-data">
-                                    {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
-                                </div>
-                                <div class="name"><strong style="color: #f66162">{{ __('db.Expense') }}</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
 
                     @if ($role_has_permissions_list->contains('name', 'total_rent_statistics'))
                     <!-- Count item widget-->
@@ -565,6 +550,22 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                 @endif
 
 
+                
+                    @if ($role_has_permissions_list->contains('name', 'expense_statistics'))
+                    <!-- Count item widget-->
+                    <div class="col-sm-3">
+                        <div class="wrapper count-title">
+                            <div class="icon"><i class="dripicons-wallet" style="color: #f66162"></i></div>
+                            <div>
+                                <div class="count-number expense-data">
+                                    {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                </div>
+                                <div class="name"><strong style="color: #f66162">{{ __('db.Expense') }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
 
                 </div>
             </div>
