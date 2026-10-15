@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BillerCommission;
 use Cache;
 use Printing;
 use Exception;
@@ -389,6 +390,13 @@ class HomeController extends Controller
             $profit = $revenue + $purchase_return - $product_cost;
 
             $FinalProfit = $revenue + $purchase_return - $product_cost - $expense;
+
+
+            $paid_commission = $this->totalBillerCommissionPaid(
+                $warehouse_id,
+                $start_date,
+                $end_date
+            );
         }
         // ✅ return all 8 values
 
@@ -410,7 +418,20 @@ class HomeController extends Controller
         $data[15] = $totalDues['customer_total_dues'] ?? 0;
         $data[16] = $remainingProductSellingCost['selling_cost'] ?? 0;
         $data[17] = $FinalProfit;
+        $data[18] = $paid_commission;
         return $data;
+    }
+
+
+    private function totalBillerCommissionPaid($warehouse_id, $start_date, $end_date)
+    {
+        return BillerCommission::whereBetween('calculated_at', [$start_date, $end_date])
+            ->when(!empty($warehouse_id), function ($query) use ($warehouse_id) {
+                $query->whereHas('employee', function ($query) use ($warehouse_id) {
+                    $query->where('warehouse_id', $warehouse_id);
+                });
+            })
+            ->sum('paid_amount');
     }
 
 

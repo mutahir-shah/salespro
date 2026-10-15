@@ -530,7 +530,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                     @endif
 
 
-                      @if ($role_has_permissions_list->contains('name', 'profit_statistics'))
+                @if ($role_has_permissions_list->contains('name', 'profit_statistics'))
 
                     <!-- Count item widget-->
                     <div class="col-sm-3">
@@ -547,7 +547,28 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                         </div>
                     </div>
 
-                    @endif
+                @endif
+
+
+
+                                @if ($role_has_permissions_list->contains('name', 'profit_statistics'))
+
+                    <!-- Count item widget-->
+                    <div class="col-sm-3">
+                        <div class="wrapper count-title">
+                            <x-info title="Biller Commission" type="info" />
+                            <div class="icon"><i class="dripicons-trophy" style="color: #b7f929ff"></i></div>
+                            <div>
+                                <div class="count-number biller-commission-data">
+                                    {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                </div>
+                                <div class="name"><strong style="color: #297ff9">{{ __('Biller Commission') }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                @endif
 
 
 
@@ -1320,6 +1341,12 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
         $('.final-profit-data').html(parseFloat(data[17] ?? 0).toFixed({{$general_setting->decimal}}));
         $('.final-profit-data').show(500);
 
+        $('.biller-commission-data').hide();
+        $('.biler-commission-data').html(parseFloat(data[18] ?? 0).toFixed({{$general_setting->decimal}}));
+        $('.biller-commission-data').show(500);
+
+
+        
         $('.product_cost-data').hide();
         $('.product_cost-data').html(parseFloat(data[9] ?? 0).toFixed({{$general_setting->decimal}}));
         $('.product_cost-data').show(500);
