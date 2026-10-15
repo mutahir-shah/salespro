@@ -372,7 +372,12 @@ class HomeController extends Controller
                     $q->where('warehouse_id', $warehouse_id);
                 })->sum('amount');
 
-            $payroll_amount = Payroll::whereBetween('created_at', [Carbon::parse($start_date)->startOfDay(), Carbon::parse($end_date)->endOfDay()])->sum('amount');
+            //$payroll_amount = Payroll::whereBetween('created_at', [Carbon::parse($start_date)->startOfDay(), Carbon::parse($end_date)->endOfDay()])->sum('amount');
+            $start_month = Carbon::parse($start_date)->format('y-m');
+            $end_month = Carbon::parse($end_date)->format('y-m');
+
+            $payroll_amount = Payroll::whereBetween('month', [$start_month, $end_month])->sum('amount');
+
             $billers = $this->getTotalEmployees($warehouse_id);
             $remaining_stock = $this->totalQuantity($warehouse_id);
             $totalQuantitySold = $this->totalQuantitySold($warehouse_id, $start_date, $end_date);
