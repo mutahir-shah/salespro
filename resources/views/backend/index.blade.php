@@ -1342,7 +1342,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
         $('.final-profit-data').show(500);
 
         $('.biller-commission-data').hide();
-        $('.biler-commission-data').html(parseFloat(data[18] ?? 0).toFixed({{$general_setting->decimal}}));
+        $('.biller-commission-data').html(parseFloat(data[18] ?? 0).toFixed({{$general_setting->decimal}}));
         $('.biller-commission-data').show(500);
 
 

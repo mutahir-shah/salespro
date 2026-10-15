@@ -361,11 +361,19 @@ class HomeController extends Controller
                 })
                 ->sum(DB::raw('(grand_total - paid_amount) / exchange_rate'));
 
+            $paid_commission = $this->totalBillerCommissionPaid(
+                $warehouse_id,
+                $start_date,
+                $end_date
+            );
+
             $expense = Expense::whereBetween('created_at', [$start_date, $end_date])
                 ->when($warehouse_id != 0, function ($q) use ($warehouse_id) {
                     $q->where('warehouse_id', $warehouse_id);
-                })
-                ->sum('amount');
+                })->sum('amount');
+
+
+            $expense = $expense + $paid_commission;
 
 
             $income = Income::whereBetween('created_at', [$start_date, $end_date])
@@ -392,11 +400,7 @@ class HomeController extends Controller
             $FinalProfit = $revenue + $purchase_return - $product_cost - $expense;
 
 
-            $paid_commission = $this->totalBillerCommissionPaid(
-                $warehouse_id,
-                $start_date,
-                $end_date
-            );
+
         }
         // ✅ return all 8 values
 
