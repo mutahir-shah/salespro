@@ -373,8 +373,8 @@ class HomeController extends Controller
                 })->sum('amount');
 
             //$payroll_amount = Payroll::whereBetween('created_at', [Carbon::parse($start_date)->startOfDay(), Carbon::parse($end_date)->endOfDay()])->sum('amount');
-            $start_month = Carbon::parse($start_date)->format('y-m');
-            $end_month = Carbon::parse($end_date)->format('y-m');
+            $start_month = Carbon::parse($start_date)->format('Y-m');
+            $end_month = Carbon::parse($end_date)->format('Y-m');
 
             $payroll_amount = Payroll::whereBetween('month', [$start_month, $end_month])->sum('amount');
 
