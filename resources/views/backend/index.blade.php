@@ -337,7 +337,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                     <!-- Count item widget-->
                     <div class="col-sm-3">
                         <div class="wrapper count-title">
-                            <x-info title="Revenue + Purchase Return - Product Cost - Expense" type="info" />
+                            <x-info title="Revenue + Purchase Return - Product Cost" type="info" />
                             <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
                             <div>
                                 <div class="count-number profit-data">
@@ -527,6 +527,26 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                             </div>
                         </div>
                     </div>
+                    @endif
+
+
+                      @if ($role_has_permissions_list->contains('name', 'profit_statistics'))
+
+                    <!-- Count item widget-->
+                    <div class="col-sm-3">
+                        <div class="wrapper count-title">
+                            <x-info title="Revenue + Purchase Return - Product Cost - Expense" type="info" />
+                            <div class="icon"><i class="dripicons-trophy" style="color: #297ff9"></i></div>
+                            <div>
+                                <div class="count-number final-profit-data">
+                                    {{ number_format((float) 0.00, $general_setting->decimal, '.', '') }}
+                                </div>
+                                <div class="name"><strong style="color: #297ff9">{{ __('Final Profit') }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     @endif
 
 
@@ -1256,7 +1276,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
 
     function dashboardFilter(data) {
         // data is an array:
-        // [revenue, sale_return, profit, purchase_return, total_sale, invoice_due, total_purchase, purchase_due]
+        // [revenue, sale_return, profit, purchase_return, total_sale, invoice_due, total_purchase, purchase_due,final_profit]
 
         $('.total_sale-data').hide();
         $('.total_sale-data').html(parseFloat(data[4] ?? 0).toFixed({{$general_setting->decimal}}));
@@ -1293,6 +1313,12 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
         $('.profit-data').hide();
         $('.profit-data').html(parseFloat(data[2] ?? 0).toFixed({{$general_setting->decimal}}));
         $('.profit-data').show(500);
+
+
+        
+        $('.final-profit-data').hide();
+        $('.final-profit-data').html(parseFloat(data[17] ?? 0).toFixed({{$general_setting->decimal}}));
+        $('.final-profit-data').show(500);
 
         $('.product_cost-data').hide();
         $('.product_cost-data').html(parseFloat(data[9] ?? 0).toFixed({{$general_setting->decimal}}));

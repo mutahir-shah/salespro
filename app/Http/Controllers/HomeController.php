@@ -381,7 +381,9 @@ class HomeController extends Controller
 
 
             $revenue = $total_sale - $return + $income;
-            $profit = $revenue + $purchase_return - $product_cost - $expense;
+            $profit = $revenue + $purchase_return - $product_cost;
+
+            $FinalProfit = $revenue + $purchase_return - $product_cost - $expense;
         }
         // ✅ return all 8 values
 
@@ -402,6 +404,7 @@ class HomeController extends Controller
         $data[14] = $totalDues['supplier_total_dues'] ?? 0;
         $data[15] = $totalDues['customer_total_dues'] ?? 0;
         $data[16] = $remainingProductSellingCost['selling_cost'] ?? 0;
+        $data[17] = $FinalProfit;
         return $data;
     }
 
