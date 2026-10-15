@@ -414,7 +414,6 @@ class HomeController extends Controller
         $result = Product::query()
             ->join('product_warehouse as pw', 'products.id', '=', 'pw.product_id')
             ->where('products.is_active', 1)->where('pw.qty', '>', 0)
-            ->where('pw.warehouse_id', '<>', '2')
             ->when($warehouse_id, function ($query) use ($warehouse_id) {
                 $query->where('pw.warehouse_id', $warehouse_id);
             })->selectRaw("COALESCE(SUM(pw.qty * products.price),0) as selling_cost,COALESCE(SUM(pw.qty * products.cost),0) as product_cost")->first();
@@ -460,13 +459,13 @@ class HomeController extends Controller
     {
         $remaining = Product_Warehouse::when($warehouse_id, function ($q) use ($warehouse_id) {
             $q->where('warehouse_id', $warehouse_id);
-        })->where('warehouse_id', '<>', '2')->sum('qty');
+        })->sum('qty');
         return $remaining;
     }
 
     public function totalCostValue($warehouse_id = null)
     {
-        return Product_Warehouse::with('product')->where('warehouse_id', '<>', '2')
+        return Product_Warehouse::with('product')
             ->when(
                 $warehouse_id,
                 fn($q) => $q->where('warehouse_id', $warehouse_id)
@@ -477,7 +476,7 @@ class HomeController extends Controller
 
     public function totalSaleValue($warehouse_id = null)
     {
-        return Product_Warehouse::with('product')->where('warehouse_id', '<>', '2')
+        return Product_Warehouse::with('product')
             ->when(
                 $warehouse_id,
                 fn($q) => $q->where('warehouse_id', $warehouse_id)
