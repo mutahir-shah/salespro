@@ -425,20 +425,12 @@ class HomeController extends Controller
 
     private function totalBillerCommissionPaid($warehouse_id, $start_date, $end_date)
     {
-        $query = BillerCommission::whereBetween('calculated_at', [$start_date, $end_date]);
-
-        if (!empty($warehouse_id)) {
-            $query->whereHas('employee', function ($q) use ($warehouse_id) {
-                $q->where('warehouse_id', $warehouse_id);
-            });
-        }
-
-        $sql = vsprintf(
-            str_replace('?', "'%s'", $query->toSql()),
-            $query->getBindings()
-        );
-
-        dd($sql);
+        return BillerCommission::whereBetween('calculated_at', [$start_date, $end_date])
+            ->when(!empty($warehouse_id), function ($query) use ($warehouse_id) {
+                $query->whereHas('employee', function ($query) use ($warehouse_id) {
+                    $query->where('warehouse_id', $warehouse_id);
+                });
+            })->sum('paid_amount');
     }
 
 
