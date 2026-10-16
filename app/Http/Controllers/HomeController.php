@@ -465,15 +465,22 @@ class HomeController extends Controller
     private function getTotalDues()
     {
         // Supplier dues
-        $supplier_total_dues = Purchase::whereNull('deleted_at')->selectRaw('COALESCE(SUM(grand_total - paid_amount),0) as remaining_balance')->value('remaining_balance');
-        $total_returned = DB::table('return_purchases')->selectRaw('COALESCE(SUM(grand_total),0) as total')->value('total');
-        $supplier_total_dues = max(0, $supplier_total_dues - $total_returned);
+        // $supplier_total_dues = Purchase::whereNull('deleted_at')->selectRaw('COALESCE(SUM(grand_total - paid_amount),0) as remaining_balance')->value('remaining_balance');
+        // $total_returned = DB::table('return_purchases')->selectRaw('COALESCE(SUM(grand_total),0) as total')->value('total');
+        // $supplier_total_dues = max(0, $supplier_total_dues - $total_returned);
 
+        $total_purchases = Purchase::select('id', 'grand_total')
+            ->where(function ($q) {
+                $q->where('purchases.purchase_type', '!=', 'opening balance')->orWhereNull('purchases.purchase_type');
+            })->whereNull('deleted_at')->sum('grand_total');
+        $total_paid = Payment::join('purchases', 'purchases.id', '=', 'payments.purchase_id')
+            ->whereNull('purchases.deleted_at')->sum('payments.amount');
+        $total_returns = ReturnPurchase::sum('grand_total');
+        $supplier_total_dues = $total_purchases - $total_returns - $total_paid;
         // Customer dues (FAST QUERY)
         $customer_total_dues = Sale::whereNull('deleted_at')
             ->where('customer_id', '!=', 1)->where(function ($q) {
-                $q->where('sale_type', '!=', 'opening balance')
-                    ->orWhereNull('sale_type');
+                $q->where('sale_type', '!=', 'opening balance')->orWhereNull('sale_type');
             })->selectRaw('COALESCE(SUM(grand_total - paid_amount),0) as remaining_balance')->value('remaining_balance');
 
         return [
