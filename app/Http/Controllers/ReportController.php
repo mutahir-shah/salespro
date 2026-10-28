@@ -629,6 +629,8 @@ class ReportController extends Controller
             return redirect()->back()->with('not_permitted', __('db.Sorry! You are not allowed to access this module'));
     }
 
+
+
     public function bestSellerByWarehouse(Request $request)
     {
         $data = $request->all();
@@ -6080,6 +6082,73 @@ class ReportController extends Controller
         ]);
     }
 
+
+      public function billerReportsMonthly(Request $request)
+    {
+        // Current month's date range by default
+        $from = $request->filled('from')
+            ? Carbon::parse($request->from)->startOfDay()
+            : now()->startOfMonth();
+
+        $to = $request->filled('to')
+            ? Carbon::parse($request->to)->endOfDay()
+            : now()->endOfMonth();
+
+        $warehouseId = $request->warehouse_id;
+
+        // Base query
+        $base = BillerCommission::with('biller')
+            ->when($warehouseId, function ($q) use ($warehouseId) {
+                $q->whereHas('sale', function ($s) use ($warehouseId) {
+                    $s->where('warehouse_id', $warehouseId);
+                });
+            })
+            ->whereBetween('calculated_at', [$from, $to]);
+
+        // Total commission by biller
+        $byCommission = (clone $base)
+            ->select(
+                'biller_id',
+                DB::raw('SUM(commission_amount) as total_commission')
+            )
+            ->groupBy('biller_id')
+            ->orderByDesc('total_commission')
+            ->limit(50)
+            ->get()
+            ->map(fn($r) => [
+                'name' => $r->biller->name ?? '—',
+                'total_commission' => number_format(
+                    $r->total_commission,
+                    2,
+                    '.',
+                    ''
+                ),
+            ]);
+
+        // Total items by biller
+        $byQuantity = (clone $base)
+            ->select(
+                'biller_id',
+                DB::raw('SUM(total_items) as total_items')
+            )
+            ->groupBy('biller_id')
+            ->orderByDesc('total_items')
+            ->limit(50)
+            ->get()
+            ->map(fn($r) => [
+                'name' => $r->biller->name ?? '—',
+                'total_items' => $r->total_items,
+            ]);
+
+        return response()->json([
+            'period' => [
+                'from' => $from->toDateString(),
+                'to' => $to->toDateString(),
+            ],
+            'commission' => $byCommission,
+            'quantity' => $byQuantity,
+        ]);
+    }
 
     public function expenseReport(Request $request)
     {
