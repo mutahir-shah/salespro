@@ -372,7 +372,7 @@ class HomeController extends Controller
                 })->sum('amount');
 
 
-            $expense = $expense + $paid_commission;
+            $expense = $expense + $paid_commission + $payroll_amount;
 
 
             $income = Income::whereBetween('created_at', [$start_date, $end_date])
@@ -384,7 +384,12 @@ class HomeController extends Controller
             $start_month = Carbon::parse($start_date)->format('Y-m');
             $end_month = Carbon::parse($end_date)->format('Y-m');
 
-            $payroll_amount = Payroll::whereBetween('month', [$start_month, $end_month])->sum('amount');
+            $payroll_amount = Payroll::whereBetween('month', [$start_month, $end_month])
+                ->when(!empty($warehouse_id) && $warehouse_id != 0, function ($query) use ($warehouse_id) {
+                    $query->whereHas('employee', function ($query) use ($warehouse_id) {
+                        $query->where('warehouse_id', $warehouse_id);
+                    });
+                })->sum('amount');
 
             $billers = $this->getTotalEmployees($warehouse_id);
             $remaining_stock = $this->totalQuantity($warehouse_id);
@@ -544,32 +549,25 @@ class HomeController extends Controller
     {
         $start_date = Carbon::now()->startOfMonth();
         $end_date = Carbon::now()->endOfMonth();
-
         if (!empty($request->starting_date)) {
             $start_date = Carbon::parse($request->starting_date)->startOfDay();
         }
         if (!empty($request->ending_date)) {
             $end_date = Carbon::parse($request->ending_date)->endOfDay();
         }
-
         $warehouse_id = $request->warehouse_id;
         $category_id = $request->category_id; // pass this from frontend
-
         $total = Expense::join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
             ->leftJoin('warehouses', 'expenses.warehouse_id', '=', 'warehouses.id')
             ->selectRaw('
             expense_categories.name as category_name,
             COALESCE(SUM(expenses.amount), 0) as total_amount
-        ')
-            ->whereBetween('expenses.created_at', [$start_date, $end_date])
+        ')->whereBetween('expenses.created_at', [$start_date, $end_date])
             ->when($warehouse_id, function ($query, $warehouse_id) {
                 return $query->where('expenses.warehouse_id', $warehouse_id);
-            })
-            ->when($category_id, function ($query, $category_id) {
+            })->when($category_id, function ($query, $category_id) {
                 return $query->where('expenses.expense_category_id', $category_id);
-            })
-            ->groupBy('expense_categories.id', 'expense_categories.name')
-            ->first();
+            })->groupBy('expense_categories.id', 'expense_categories.name')->first();
 
         // In case no rows matched
         if (!$total) {
