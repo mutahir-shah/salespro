@@ -372,8 +372,19 @@ class HomeController extends Controller
                     $q->where('warehouse_id', $warehouse_id);
                 })->sum('amount');
 
+            $start_month = Carbon::parse($start_date)->format('Y-m');
+            $end_month = Carbon::parse($end_date)->format('Y-m');
 
-            $expense = $expense + $paid_commission;
+            $payroll_amount = Payroll::whereBetween('month', [$start_month, $end_month])
+                ->when(!empty($warehouse_id) && $warehouse_id != 0, function ($query) use ($warehouse_id) {
+                    $query->whereHas('employee', function ($query) use ($warehouse_id) {
+                        $query->where('warehouse_id', $warehouse_id);
+                    });
+                })->sum('amount');
+
+
+
+            $expense = $expense + $paid_commission + $payroll_amount;
 
 
             $income = Income::whereBetween('created_at', [$start_date, $end_date])
@@ -381,11 +392,7 @@ class HomeController extends Controller
                     $q->where('warehouse_id', $warehouse_id);
                 })->sum('amount');
 
-            //$payroll_amount = Payroll::whereBetween('created_at', [Carbon::parse($start_date)->startOfDay(), Carbon::parse($end_date)->endOfDay()])->sum('amount');
-            $start_month = Carbon::parse($start_date)->format('Y-m');
-            $end_month = Carbon::parse($end_date)->format('Y-m');
 
-            $payroll_amount = Payroll::whereBetween('month', [$start_month, $end_month])->sum('amount');
 
             $billers = $this->getTotalEmployees($warehouse_id);
             $remaining_stock = $this->totalQuantity($warehouse_id);

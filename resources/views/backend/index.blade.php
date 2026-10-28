@@ -1399,6 +1399,7 @@ $(function() {
         $.get('dashboard-filter/' + start_date + '/' + end_date + '/' + warehouse_id, function(data) {
             dashboardFilter(data);
         });
+        singleCategoryWiseExpenses(start_date, end_date, warehouse_id);
     }
  
 
