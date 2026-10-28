@@ -890,7 +890,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('db.Name') }}</th>
+                                    <th>{{ __('Name') }}</th>
                                     <th>{{ __('db.grand total') }}</th>
                                 </tr>
                             </thead>
@@ -920,7 +920,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>{{ __('db.Name') }}</th>
+                                    <th>{{ __('Name') }}</th>
                                     <th>{{ __('db.Quantity') }}</th>
                                 </tr>
                             </thead>
@@ -940,7 +940,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4>{{ __('db.Expense by Category') . ' ' . date('Y') }}</h4>
+                        <h4>{{ __('Expense by Category') . ' ' . date('Y') }}</h4>
                         <div class="right-column">
                             <div class="badge badge-danger">{{ __('db.top') }}</div>
                         </div>
