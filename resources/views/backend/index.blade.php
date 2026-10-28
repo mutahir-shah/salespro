@@ -876,6 +876,66 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
                 </div>
             </div>
 
+            {{-- Monthly Commission Table --}}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4>{{ __('db.Best Biller') . ' ' . date('F Y') . ' (' . __('db.Price') . ')' }}</h4>
+                        <div class="right-column">
+                            <div class="badge badge-primary">{{ __('db.top') }} 5</div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>{{ __('db.Name') }}</th>
+                                    <th>{{ __('db.grand total') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthly-commission-tbody">
+                                <tr>
+                                    <td colspan="3" class="text-center">
+                                        <i class="fa fa-spinner fa-spin"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Monthly Quantity Table --}}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4>{{ __('db.Best Biller') . ' ' . date('F Y') . ' (' . __('db.Quantity') . ')' }}</h4>
+                        <div class="right-column">
+                            <div class="badge badge-success">{{ __('db.top') }}</div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>{{ __('db.Name') }}</th>
+                                    <th>{{ __('db.Quantity') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthly-quantity-tbody">
+                                <tr>
+                                    <td colspan="3" class="text-center">
+                                        <i class="fa fa-spinner fa-spin"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
 
             <div class="col-md-6">
                 <div class="card">
@@ -1122,6 +1182,46 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
 
 
 
+    const MONTHLY_REPORT_URL = '{{ route("dashboard.biller-reports-monthly") }}';
+
+    function loadBillerReportsMonthly(params) {
+        const spinner = '<tr><td colspan="3" class="text-center"><i class="fa fa-spinner fa-spin"></i></td></tr>';
+        $('#monthly-commission-tbody, #monthly-quantity-tbody').html(spinner);
+
+        $.ajax({
+            url: MONTHLY_REPORT_URL,
+            method: 'GET',
+            data: params,
+            success: function(res) {
+                renderMonthlyCommission(res.commission);
+                renderMonthlyQuantity(res.quantity);
+            },
+            error: function() {
+                const err = '<tr><td colspan="3" class="text-center text-danger">Failed to load data.</td></tr>';
+                $('#monthly-commission-tbody, #monthly-quantity-tbody').html(err);
+            }
+        });
+    }
+
+    function renderMonthlyCommission(rows) {
+        if (!rows.length) {
+            $('#monthly-commission-tbody').html('<tr><td colspan="3" class="text-center text-muted">No data</td></tr>');
+            return;
+        }
+        const html = rows.map((r, i) => `<tr><td>${i + 1}</td><td>${r.name}</td><td><strong>RS ${r.total_commission}</strong></td></tr>`).join('');
+        $('#monthly-commission-tbody').html(html);
+    }
+
+    function renderMonthlyQuantity(rows) {
+        if (!rows.length) {
+            $('#monthly-quantity-tbody').html('<tr><td colspan="3" class="text-center text-muted">No data</td></tr>');
+            return;
+        }
+        const html = rows.map((r, i) => `<tr><td>${i + 1}</td><td>${r.name}</td><td><strong>${r.total_items}</strong></td></tr>`).join('');
+        $('#monthly-quantity-tbody').html(html);
+    }
+
+
     const EXPENSE_URL = '{{ route("dashboard.expense-report") }}';
 
     function loadExpenseReport(params) {
@@ -1176,6 +1276,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
         _token: '{{ csrf_token() }}',
     };
     loadBillerReports(params);
+    loadBillerReportsMonthly(params);
 
     loadExpenseReport(params);
 
@@ -1266,6 +1367,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
             _token: '{{ csrf_token() }}',
         };
         loadBillerReports(params);
+        loadBillerReportsMonthly(params);
 
     });
 
@@ -1287,6 +1389,7 @@ $color_rgba = 'rgba(52, 73, 94, 0.8)';
             _token: '{{ csrf_token() }}',
         };
         loadBillerReports(params);
+        loadBillerReportsMonthly(params);
 
     });
 

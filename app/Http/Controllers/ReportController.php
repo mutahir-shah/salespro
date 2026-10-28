@@ -6080,6 +6080,53 @@ class ReportController extends Controller
         ]);
     }
 
+    public function billerReportsMonthly(Request $request)
+    {
+        $warehouseId = $request->warehouse_id;
+        $from        = $request->from ?? date('Y-m-01');
+        $to          = $request->to   ?? date('Y-m-t');
+
+        $base = BillerCommission::with('biller')
+            ->when(
+                $warehouseId,
+                fn($q) =>
+                $q->whereHas(
+                    'sale',
+                    fn($s) =>
+                    $s->where('warehouse_id', $warehouseId)
+                )
+            )
+            ->whereDate('calculated_at', '>=', $from)
+            ->whereDate('calculated_at', '<=', $to);
+
+        $byCommission = (clone $base)
+            ->select('biller_id', DB::raw('SUM(commission_amount) as total_commission'))
+            ->groupBy('biller_id')
+            ->orderByDesc('total_commission')
+            ->limit(50)
+            ->get()
+            ->map(fn($r) => [
+                'name'             => $r->biller->name ?? '—',
+                'total_commission' => number_format($r->total_commission, 2),
+            ]);
+
+        $byQuantity = (clone $base)
+            ->select('biller_id', DB::raw('SUM(total_items) as total_items'))
+            ->groupBy('biller_id')
+            ->orderByDesc('total_items')
+            ->limit(50)
+            ->get()
+            ->map(fn($r) => [
+                'name'        => $r->biller->name ?? '—',
+                'total_items' => $r->total_items,
+            ]);
+
+        return response()->json([
+            'commission' => $byCommission,
+            'quantity'   => $byQuantity,
+        ]);
+    }
+
 
     public function expenseReport(Request $request)
     {

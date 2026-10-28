@@ -593,6 +593,7 @@ Route::group(['middleware' => ['common', 'auth', 'active']], function () {
             Route::post('/report_new/sale/process-return',  'processReturn')->name('report.process-return');
 
             Route::get('/dashboard/biller-reports','billerReports')->name('dashboard.biller-reports');
+            Route::get('/dashboard/biller-reports-monthly','billerReportsMonthly')->name('dashboard.biller-reports-monthly');
 
             Route::get('/dashboard/expense-report', 'expenseReport')->name('dashboard.expense-report');
 
