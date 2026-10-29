@@ -1071,37 +1071,25 @@ $('button[name="update_btn"]').on("click", function() {
         return;
     }
 
-    if (isNaN(edit_qty) || edit_qty === '') {
+    if (isNaN(edit_qty) || $('input[name="edit_qty"]').val() === '') {
         $('input[name="edit_qty"]').val(1);
         edit_qty = 1;
         alert("Quantity must be a number.");
+        return;
     }
 
     if(edit_qty <= 0) {
         $('input[name="edit_qty"]').val(1);
         edit_qty = 1;
         alert("Quantity must be greater than 0.");
+        return;
     }
 
-    var product_type = $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val();
-    var max_qty = parseFloat($('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.qty').attr('max'));
-
-    if (without_stock == 'no' && !isNaN(max_qty) && (product_type.trim() == 'standard' || product_type.trim() == 'combo')) {
-        var operator = unit_operator[rowindex].split(',');
-        var operation_value = unit_operation_value[rowindex].split(',');
-        var total_qty = edit_qty;
-
-        if (operator[0] == '*') {
-            total_qty = edit_qty * parseFloat(operation_value[0]);
-        } else if (operator[0] == '/') {
-            total_qty = edit_qty / parseFloat(operation_value[0]);
-        }
-
-        if (total_qty > max_qty) {
-            alert('Quantity exceeds stock quantity!');
-            edit_qty = max_qty;
-            $('input[name="edit_qty"]').val(edit_qty);
-        }
+    var max_qty = getMaxQtyForSelectedUnit();
+    if (without_stock == 'no' && !isNaN(max_qty) && edit_qty > max_qty) {
+        $('input[name="edit_qty"]').val(max_qty);
+        alert("Quantity cannot exceed available stock (" + max_qty + ").");
+        return;
     }
 
     var tax_rate_all = <?php echo json_encode($tax_rate_all) ?>;
@@ -1109,7 +1097,8 @@ $('button[name="update_btn"]').on("click", function() {
     tax_name[rowindex]  = $('select[name="edit_tax_rate"] option:selected').text();
 
     product_discount[rowindex] = $('input[name="edit_discount"]').val();
-    if(product_type == 'standard'){
+    var product_type = $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val() || '';
+    if(product_type.trim() == 'standard'){
         
         row_unit_operator= $('#edit_unit select').find(':selected').data('operator');
         row_unit_operation_value = $('#edit_unit select').find(':selected').data('operation-value');
@@ -1578,6 +1567,27 @@ function populatePriceOption() {
     $('.selectpicker').selectpicker('refresh');
 }
 
+function getMaxQtyForSelectedUnit() {
+    var max_qty = parseFloat($('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.qty').attr('max'));
+    if (isNaN(max_qty)) {
+        return NaN;
+    }
+    var product_type = $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.product_type').val() || '';
+    if (product_type.trim() == 'standard' && $('#edit_unit').is(':visible')) {
+        var op = $('select[name="edit_unit"] option:selected').data('operator') || '*';
+        var op_val = parseFloat($('select[name="edit_unit"] option:selected').data('operation-value'));
+        if (isNaN(op_val) || op_val <= 0) {
+            op_val = 1;
+        }
+        if (op == '*') {
+            return max_qty / op_val;
+        } else if (op == '/') {
+            return max_qty * op_val;
+        }
+    }
+    return max_qty;
+}
+
 function edit(){
     $(".imei-section").remove();
     if(is_imei[rowindex]) {
@@ -1652,7 +1662,58 @@ function edit(){
     }
     $('input[name="edit_unit_price"]').val(row_product_price.toFixed({{$general_setting->decimal}}));
     $('.selectpicker').selectpicker('refresh');
+
+    var max_allowed = getMaxQtyForSelectedUnit();
+    if (!isNaN(max_allowed) && without_stock == 'no') {
+        $('input[name="edit_qty"]').attr('max', max_allowed);
+    } else {
+        $('input[name="edit_qty"]').removeAttr('max');
+    }
 }
+
+// Unit change in edit modal updates max qty restriction
+$('select[name="edit_unit"]').on('change', function() {
+    var max_allowed = getMaxQtyForSelectedUnit();
+    if (!isNaN(max_allowed) && without_stock == 'no') {
+        $('input[name="edit_qty"]').attr('max', max_allowed);
+        var current_val = parseFloat($('input[name="edit_qty"]').val());
+        if (!isNaN(current_val) && current_val > max_allowed) {
+            $('input[name="edit_qty"]').val(max_allowed);
+            alert("Quantity cannot exceed available stock (" + max_allowed + ").");
+        }
+    } else {
+        $('input[name="edit_qty"]').removeAttr('max');
+    }
+});
+
+// Focusout on edit_qty in modal
+$('#editModal').on('focusout', 'input[name="edit_qty"]', function () {
+    let $input = $(this);
+    let value = $.trim($input.val());
+    let max = getMaxQtyForSelectedUnit();
+
+    if (value === "" || isNaN(value)) {
+        $input.val(1);
+        alert("Quantity must be a number.");
+        return;
+    }
+
+    value = parseFloat(value);
+
+    if (value <= 0) {
+        $input.val(1);
+        alert("Quantity must be greater than 0.");
+        return;
+    }
+
+    if (!isNaN(max) && value > max && without_stock == 'no') {
+        $input.val(max);
+        alert("Quantity cannot exceed available stock (" + max + ").");
+        return;
+    }
+
+    $input.val(value);
+});
 
 //Delete imei
 $(document).on("click", "table#imei-table tbody .imei-del", function() {
